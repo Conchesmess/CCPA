@@ -31,6 +31,18 @@ admins = ["stephen.wright@ousd.org"]
 # OAuth2 client setup
 client = WebApplicationClient(secrets['GOOGLE_CLIENT_ID'])
 
+@app.before_request
+def before_request():
+
+    flash("before")
+
+    # this checks if the user requests http and if they did it changes it to https
+    if not request.is_secure:
+        url = request.url.replace("http://", "https://", 1)
+        code = 301
+        return redirect(url, code=code)
+
+
 # When a route is decorated with @login_required and fails this code is run
 # https://flask-login.readthedocs.io/en/latest/#flask_login.LoginManager.unauthorized_handler
 @login_manager.unauthorized_handler
