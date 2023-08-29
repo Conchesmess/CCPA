@@ -329,7 +329,6 @@ def getStudSubs(gclassid,courseWorkId="-"):
     pageToken=None
     counter=1
     while True:
-
         try:
             studSubs = classroom_service.courses().courseWork().studentSubmissions().list(
                 courseId=gclassid,
@@ -352,19 +351,27 @@ def getStudSubs(gclassid,courseWorkId="-"):
             break
     
     subsLength = len(studSubsAll)
+    subids = []
+    storedSubs = StudentSubmission.objects(gclassroom=gClassroom)
+    for sub in storedSubs:
+        subids.append(sub.studsubid)
     for i,sub in enumerate(studSubsAll):
-        newSub = StudentSubmission(
-            stugid = sub['userId'],
-            gclassroom = gClassroom,
-            studsubid = sub['id'],
-            studsubdict = sub,
-            lastupdate = dt.datetime.utcnow()
-        )
-        notSaved = 0
-        try:
-            newSub.save()
-        except mongoengine.errors.NotUniqueError:
-            pass
+        if sub['id'] not in subids:
+            newSub = StudentSubmission(
+                stugid = sub['userId'],
+                gclassroom = gClassroom,
+                studsubid = sub['id'],
+                studsubdict = sub,
+                lastupdate = dt.datetime.utcnow()
+            )
+            notSaved = 0
+            try:
+                newSub.save()
+                print(f"{i}/{subsLength}")
+            except mongoengine.errors.NotUniqueError:
+                print(f"{i}/{subsLength}: This student submission is a duplicate")
+            else:
+                print(f"{i}/{subsLength}: error happened when I tried to save this student submision")
 
 
     dictfordf = {}
@@ -381,13 +388,11 @@ def getStudSubs(gclassid,courseWorkId="-"):
 @app.route('/getstudsubs/<gclassid>/<courseWorkId>')
 @app.route('/getstudsubs/<gclassid>')
 def getstudsubs(gclassid,courseWorkId="-"):
-
     courseWork = getCourseWork(gclassid)
     if courseWork == "refresh":
         return redirect(url_for('authorize'))
     elif courseWork == False:
         return redirect(url_for('checkin'))
-
     studSubsAll = getStudSubs(gclassid,courseWorkId)
     if studSubsAll == "refresh":
         return redirect(url_for('authorize'))

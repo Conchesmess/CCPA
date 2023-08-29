@@ -34,8 +34,6 @@ client = WebApplicationClient(secrets['GOOGLE_CLIENT_ID'])
 @app.before_request
 def before_request():
 
-    flash("before")
-
     # this checks if the user requests http and if they did it changes it to https
     if not request.is_secure:
         url = request.url.replace("http://", "https://", 1)

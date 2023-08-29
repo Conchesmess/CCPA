@@ -473,6 +473,7 @@ class GoogleClassroom(Document):
     courseworkupdate = DateTimeField()
     # TODO move this to CourseWork class
     studsubsdict = DictField()
+    studsubsupdate = DateTimeField()
     gclassid = StringField(unique=True)
     teacher = ReferenceField('User')
     # This is a list of possible cohorts for this class
