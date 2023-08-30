@@ -158,6 +158,7 @@ def phstr2int(phstr):
                 
 # This tells the app what to do if the user requests the home either via '/home' or just'/'
 @app.route('/home')
+@app.route('/index')
 @app.route('/')
 def index():
     #get the curent requesting this page but include error handling because the user might not be logged in
