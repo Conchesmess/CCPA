@@ -8,7 +8,10 @@
 # anothr possible email scope if we want to manage a Label for the user
 # 'https://www.googleapis.com/auth/gmail.labels'
 
-scopes_ousd = ['https://www.googleapis.com/auth/userinfo.email',
+scopes_ousd = [
+    'email',
+    'profile',
+    'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
     'openid',
     'https://www.googleapis.com/auth/gmail.send',
@@ -16,8 +19,8 @@ scopes_ousd = ['https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/classroom.rosters.readonly',
     'https://www.googleapis.com/auth/classroom.profile.emails',
     'https://www.googleapis.com/auth/classroom.profile.photos',
-    'https://www.googleapis.com/auth/classroom.coursework.students.readonly',
-    'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+    'https://www.googleapis.com/auth/classroom.student-submissions.students.readonly',
+    'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
     'https://www.googleapis.com/auth/classroom.guardianlinks.students',
     'https://www.googleapis.com/auth/classroom.guardianlinks.me.readonly',
     'https://www.googleapis.com/auth/classroom.topics.readonly']

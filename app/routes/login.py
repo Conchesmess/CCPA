@@ -79,6 +79,7 @@ def callback():
     flow.redirect_uri = url_for('callback', _external=True)
     print(4)
     authorization_response = request.url
+    print(authorization_response)
     print(5)
     # Use authorisation code to request credentials from Google
     flow.fetch_token(authorization_response=authorization_response)
