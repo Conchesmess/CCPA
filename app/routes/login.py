@@ -76,19 +76,25 @@ def callback():
     authorization_response = request.url
 
     # TODO It breaks here on Google Cloud Run
-    print("Before Print Token")
+    print(1)
     flow.fetch_token(authorization_response=authorization_response)
-    print("after print token")
-    
+    print(2)
+
     credentials = flow.credentials
+    print(3)
     session['credentials'] = credentials_to_dict(credentials)
+    print(4)
     oauth2_client = googleapiclient.discovery.build('oauth2','v2',credentials=credentials)
+    print(5)
     userinfo_response = oauth2_client.userinfo().get().execute()
+    print(6)
     session['gdata'] = userinfo_response
+    print(7)
 
     if userinfo_response['hd'] != "ousd.org":
         flash("You must have an ousd.org email account to access this site.")
         return redirect(url_for("index"))
+    print(8)
 
     if userinfo_response['verified_email']:
         gid = userinfo_response['id']
@@ -100,6 +106,8 @@ def callback():
     else:
         flash("User email not available or not verified by Google.")
         return redirect(url_for('index'))
+
+    print(9)
     
     # Get user from DB or create new user
     try:
@@ -140,7 +148,7 @@ def callback():
         session['role'] = "Teacher"
         if current_user.role != "Teacher":
             current_user.update(role = "Teacher")
-
+    print(10)
     # Send user back to homepage
     return redirect(url_for("index"))
 
