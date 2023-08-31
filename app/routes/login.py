@@ -70,39 +70,26 @@ def login():
 
 @app.route("/login/callback")
 def callback():
-    print(1)
     session['code'] = request.args.get("code")
-    # Receive an authorisation code from google
-    print(2)
     flow = google_auth_oauthlib.flow.Flow.from_client_config(client_config=GOOGLE_CLIENT_CONFIG, scopes=scopes_ousd)
-    print(3)
     flow.redirect_uri = url_for('callback', _external=True)
-    print(4)
     authorization_response = request.url
-    print(authorization_response)
-    print(5)
-    # Use authorisation code to request credentials from Google
+
+    # TODO It breaks here on Google Cloud Run
+    print("Before Print Token")
     flow.fetch_token(authorization_response=authorization_response)
-    print(6)
+    print("after print token")
+    
     credentials = flow.credentials
-    print(7)
     session['credentials'] = credentials_to_dict(credentials)
-    print(8)
-    # Use the credentials to obtain user information and save it to the session
     oauth2_client = googleapiclient.discovery.build('oauth2','v2',credentials=credentials)
-    print(9)
     userinfo_response = oauth2_client.userinfo().get().execute()
-    print(10)
     session['gdata'] = userinfo_response
-    # Return to main page
-    print(11)
+
     if userinfo_response['hd'] != "ousd.org":
         flash("You must have an ousd.org email account to access this site.")
         return redirect(url_for("index"))
-    print(3)
-    # We want to make sure their email is verified.
-    # The user authenticated with Google, authorized our
-    # app, and now we've verified their email through Google!
+
     if userinfo_response['verified_email']:
         gid = userinfo_response['id']
         gmail = userinfo_response["email"]
@@ -113,10 +100,6 @@ def callback():
     else:
         flash("User email not available or not verified by Google.")
         return redirect(url_for('index'))
-    print(4)
-    # people_service = googleapiclient.discovery.build('people', 'v1', credentials=credentials)
-    # data = people_service.people().get(resourceName='people/me', personFields='names,emailAddresses,photos').execute()
-    # session['gdata'] = data
     
     # Get user from DB or create new user
     try:
@@ -159,7 +142,6 @@ def callback():
             current_user.update(role = "Teacher")
 
     # Send user back to homepage
-    print(5)
     return redirect(url_for("index"))
 
 @app.route("/logout")
