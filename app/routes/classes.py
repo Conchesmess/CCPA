@@ -1,7 +1,7 @@
 from app.routes.coursecat import course
-#import matplotlib
-#matplotlib.use('Agg')
-#import matplotlib.pyplot as plt 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt 
 from app import app
 from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string
@@ -223,7 +223,6 @@ def ontimeperc(gclassid):
 
     subsDF = subsDF.drop(columns='id')
 
-    #subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late', 'draftGrade', 'assignedGrade']]
     subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
 
     dictfordf = {}
@@ -262,7 +261,7 @@ def ontimeperc(gclassid):
     stuList = stuList.values.tolist()
 
     # mmerge table code
-    mmerge='<table><tr><th>ID</th><th>StudentName</th><th>StudentEmail</th><th>Emails</th><th>NumMissing</th></tr>'
+    mmerge='<table class="table"><tr><th>StudentName</th><th>StudentEmail</th><th>Emails</th><th>NumMissing</th></tr>'
     for stu in stuList:
         mmerge+='<tr>'
         emails=""
@@ -274,7 +273,7 @@ def ontimeperc(gclassid):
         except:
             if len(email)>1:
                 flash( f"couldn't find {email} in our records")
-        mmerge+=f"<td>{stu.aeriesid}</td><td>{stu.fname} {stu.lname}</td><td>{email}</td>"
+        mmerge+=f"<td>{stu.fname} {stu.lname}</td><td>{email}</td>"
         emails+=f"{email}"
 
         if stu.aadultemail:
@@ -309,11 +308,93 @@ def ontimeperc(gclassid):
     plt.clf()
   
     displayDFHTML = Markup(pd.DataFrame.to_html(gbDF))
-    #displayDFHTML = Markup(pd.DataFrame.to_html(courseworkDF))
-    #stusDFHTML = Markup(pd.DataFrame.to_html(stusDF))
-    #subsDFHTML = Markup(pd.DataFrame.to_html(subsDF))
 
-    return render_template('studsubs.html',gClassroom=gClassroom,parents=parents,displayDFHTML=displayDFHTML,median=median,mean=mean)
+    ### Assignment list with their state: Turned-in, Graded, etc
+
+    assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
+    assesDF = assesDF.rename(columns={'id':'courseWorkId'})
+    assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
+    assesDF = assesDF[['courseWorkId','title']].copy()    
+
+    subsDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
+    subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+    subsDF['state'] = subsDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+    subsDF.reset_index(inplace=True)
+    subsDF = pd.pivot_table(data=subsDF,index='courseWorkId',columns="state",values='id',aggfunc='count')
+    subsDF = subsDF.fillna("-")
+
+    subsDF = pd.merge(subsDF, 
+                   assesDF, 
+                   on ='courseWorkId', 
+                   how ='left')
+
+    subsDF['courseWorkId'] = subsDF['title']
+    subsDF.drop('title',axis=1,inplace=True)
+    subsDF = subsDF.rename(columns={'courseWorkId':'Title'})
+    subsDF = subsDF.sort_values(by=['Title'])
+    subsDFHTML = subsDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:80px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_uuid('trans')\
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    subsDFHTML = Markup(subsDFHTML)
+
+    ### assignments with number of times turned in
+
+    # these 4 lines were run above and are assesDF is currently the state descibed by these founr lines
+    # assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
+    # assesDF = assesDF.rename(columns={'id':'courseWorkId'})
+    # assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
+    # assesDF = assesDF[['courseWorkId','title']].copy()    
+
+    subsDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
+    subsDF = subsDF[['courseWorkId','submissionHistory','userId','id']].copy()
+
+    subsDF = pd.merge(subsDF, 
+                   assesDF, 
+                   on ='courseWorkId', 
+                   how ='left')
+
+    def countIters(row):
+        c = 0
+        try:
+            for item in row:
+                try:
+                    if item['stateHistory']['state'] == 'RETURNED':
+                        c = c+1
+                except:
+                    pass
+        except:
+            pass
+
+        return c
+
+    subsDF['iterations'] = subsDF['submissionHistory'].apply(lambda row: countIters(row))
+    subsDF = subsDF.drop(['submissionHistory'], axis=1)
+    subsDF = pd.pivot_table(data=subsDF,index='title',columns="iterations",values='id',aggfunc='count')
+    subsDF = subsDF.reset_index()
+    subsDF = subsDF.fillna("-")
+
+    subItersDFHTML = subsDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:80px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_uuid('trans')\
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    subItersDFHTML = Markup(subItersDFHTML)
+
+    return render_template('studsubs.html',gClassroom=gClassroom,parents=parents,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
 
 def getStudSubs(gclassid,courseWorkId="-"):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
@@ -349,30 +430,8 @@ def getStudSubs(gclassid,courseWorkId="-"):
         counter=counter+1
         if not pageToken:
             break
-    
+    # how many StudSubs were retreived from Google
     subsLength = len(studSubsAll)
-    subids = []
-    storedSubs = StudentSubmission.objects(gclassroom=gClassroom)
-    for sub in storedSubs:
-        subids.append(sub.studsubid)
-    for i,sub in enumerate(studSubsAll):
-        if sub['id'] not in subids:
-            newSub = StudentSubmission(
-                stugid = sub['userId'],
-                gclassroom = gClassroom,
-                studsubid = sub['id'],
-                studsubdict = sub,
-                lastupdate = dt.datetime.utcnow()
-            )
-            notSaved = 0
-            try:
-                newSub.save()
-                print(f"{i}/{subsLength}")
-            except mongoengine.errors.NotUniqueError:
-                print(f"{i}/{subsLength}: This student submission is a duplicate")
-            else:
-                print(f"{i}/{subsLength}: error happened when I tried to save this student submision")
-
 
     dictfordf = {}
     for row in studSubsAll:

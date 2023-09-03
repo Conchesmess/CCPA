@@ -4,7 +4,17 @@
 <div class="container">
 
 <h1 class="display-3">{{gClassroom.gclassdict['name']}}</h1>
-Last <a href="/getstudsubs/{{gClassroom.gclassid}}">Update</a> of data: {{gClassroom.studsubsdict['lastUpdate']}} <br> <br>
+Last <a href="/getstudsubs/{{gClassroom.gclassid}}">Update</a> of student submisions: {{gClassroom.studsubsdict['lastUpdate']}}
+<br> <a href=/gclass/assignments/{{gClassroom.gclassid}}>Update assignments</a>
+
+<h1 class="display-4">How many iterations of each assignment</h1>
+{{subItersDFHTML}}
+
+<h1 class="display-4">How many of each state for each assignment</h1>
+{{subsDFHTML}}
+<br> <br>
+<h1 class="display-3">On Time Percentages</h1>
+
 <div class="row">
    <div class="col">
       <div class="row">

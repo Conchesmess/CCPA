@@ -11,8 +11,7 @@ from .credentials import GOOGLE_CLIENT_CONFIG
 from .scopes import scopes_ousd
 from .users import credentials_to_dict
 from flask_login import current_user
-
-#from .roster import getCourseWork
+import pandas as pd
 
 # this function exists to update or create active google classrooms for the current user
 # Teacher or student
@@ -116,6 +115,7 @@ def gClassAssignments(gclassid):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
     asses = CourseWork.objects(gclassroom=gClassroom)
     asses = sorted(asses, key = lambda i: (i.courseworkdict['title']))
+
     return render_template('sbg/assignments.html', gClass=gClassroom, asses = asses)
 
 @app.route('/assignment/<assid>', methods=['GET', 'POST'])
