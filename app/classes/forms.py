@@ -3,11 +3,11 @@ from typing import Text
 from flask.app import Flask
 from flask_wtf import FlaskForm
 from mongoengine.fields import IntField
-from wtforms.fields.html5 import URLField, DateField, DateTimeField, EmailField
+#from wtforms.fields.html5 import URLField, DateField, DateTimeField, EmailField
 #from wtforms.widgets.core import Select
 from wtforms_components import TimeField
 from wtforms.validators import URL, NumberRange, Email, Optional, InputRequired, ValidationError
-from wtforms import widgets, SelectMultipleField, StringField, SubmitField, validators, TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField
+from wtforms import URLField, DateField, DateTimeField, EmailField, widgets, SelectMultipleField, StringField, SubmitField, validators, TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField
 import datetime as d
 from zoneinfo import ZoneInfo
 
