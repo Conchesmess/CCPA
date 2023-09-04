@@ -310,6 +310,7 @@ def ontimeperc(gclassid):
     displayDFHTML = Markup(pd.DataFrame.to_html(gbDF))
 
     ### Assignment list with their state: Turned-in, Graded, etc
+    ### TODO state by student. I think I don't need the assesDF.
 
     assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
     assesDF = assesDF.rename(columns={'id':'courseWorkId'})
@@ -394,7 +395,48 @@ def ontimeperc(gclassid):
         .to_html()
     subItersDFHTML = Markup(subItersDFHTML)
 
-    return render_template('studsubs.html',gClassroom=gClassroom,parents=parents,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
+    ### Sub State by student
+
+    subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
+    subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+    subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+    subsStuDF.reset_index(inplace=True)
+    subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
+    subsStuDF = subsStuDF.fillna("-")
+
+    rosterDF = pd.DataFrame.from_dict(gClassroom.grosterTemp, orient="columns")
+    def nameFromDict(row):
+        try:
+            fullName = row['name']['fullName']
+            lenName = len(fullName)
+            stop = lenName - 10
+            return fullName[:stop+1]
+        except:
+            pass
+    rosterDF['name'] = rosterDF['profile'].apply(lambda row: nameFromDict(row))
+    rosterDF = rosterDF.drop(['profile','courseId'], axis=1)
+    subsStuDF = pd.merge(subsStuDF, 
+                rosterDF, 
+                on ='userId', 
+                how ='left')
+    subsStuDF['userId'] = subsStuDF['name']
+    subsStuDF.drop(['name'],axis=1,inplace=True)
+    subsStuDF=subsStuDF.sort_values(by=['UNATTEMPTED'], ascending=False)
+
+    subsStuDFHTML = subsStuDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:80px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_uuid('trans')\
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    subsStuDFHTML = Markup(subsStuDFHTML)
+
+    return render_template('studsubs.html',gClassroom=gClassroom,parents=parents,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
 
 def getStudSubs(gclassid,courseWorkId="-"):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)

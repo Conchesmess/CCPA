@@ -156,7 +156,7 @@ def standardNew():
         standardNew.save()
         return redirect(url_for('standardlist'))
     if session['role'].lower() == 'teacher':
-        currTeacher = User.objects.get(gid = session['gid'])
+        currTeacher = User.objects.get(gid = current_user.gid)
     myGClasses = GoogleClassroom.objects(teacher=currTeacher)
     gClassChoices = []
     for gClass in myGClasses:
@@ -176,7 +176,7 @@ def standardedit(standardid):
             )
         return redirect(url_for('standardlist'))
     if session['role'].lower() == 'teacher':
-        currTeacher = User.objects.get(gid = session['gid'])
+        currTeacher = User.objects.get(gid = current_user.gid)
     myGClasses = GoogleClassroom.objects(teacher=currTeacher)
     gClassChoices = []
     for gClass in myGClasses:
