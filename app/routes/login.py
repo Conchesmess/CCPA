@@ -40,6 +40,30 @@ def before_request():
         code = 301
         return redirect(url, code=code)
 
+    # Create a list of all the paths that do not need authorization or are part of authorizing
+    # so that each path this is *not* in this list requires an authorization check.
+    # If you have urls that you want your user to be able to see without logging in add them here.
+    # TODO create a decorator or something for this
+    # TODO could just prefix the url with "/stu/" for studentpaths
+    unauthPaths = ['/','/home','/authorize','/login','/oauth2callback','/static','/logout','/revoke','/msgreply','/msgstatus']   
+    studentPaths = ['/ontimeperc','/gclass','/transcript','/project','/myprojects','/getgclasses','/comp/','/compborrow','/student','/breaks','/classdash','/assignments','/help','/breakstart','/postgrad','/cc','/plan','/profile','/editprofile','/addadult','/editadult','/deleteadult','/sendstudentemail','/checkin','/deletecheckin','/editgclass','/deletegclass','/gclasses','/missingassignmentsstu'] 
+    # this is some tricky code designed to send the user to the page they requested even if they have to first go through
+    # a authorization process.
+    try: 
+        session['return_URL']
+    except:
+        session['return_URL'] = '/'
+
+    # find the first path argument in the URL
+    basePath = request.path
+    basePath = basePath.split('/')
+    basePath = '/'+basePath[1]
+
+    if basePath not in unauthPaths:
+        if current_user.role.lower() == "student" and basePath not in studentPaths:
+            flash("Students are not authorized to see that page.")
+            return redirect(url_for("checkin"))
+
 
 # When a route is decorated with @login_required and fails this code is run
 # https://flask-login.readthedocs.io/en/latest/#flask_login.LoginManager.unauthorized_handler

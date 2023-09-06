@@ -14,13 +14,14 @@
         <tr>
             <td nowrap>
               <img width="25" src="/static/edit.png">Edit <br>
-              
+              <img width="25" src="/static/delete.png">Delete <br>
+              <img width="25" src="/static/task.png">View Assignments<br>                
+
               {% if not session.role.lower() == 'student' %}
-                <img width="25" src="/static/delete.png">Delete <br>
                 <img width="25" src="/static/roster.png">Roster<br>
-                <img width="25" src="/static/task.png">View Assignments<br>                
                 <img width="25" src="/static/checkin.png">Checkins
               {% endif %}
+
             </td>
             {% if session.role.lower() == 'student' %}
             <td>Work</td>
@@ -50,20 +51,14 @@
               <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="View Roster" href="/roster/{{enrollment.gclassroom.gclassdict.id}}">
                 <img width="25" src="/static/roster.png">
               </a>
-              <!-- <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="# of Missing Assignments" href="/studsubs/{{enrollment.gclassroom.gclassdict.id}}">
-                <img width="25" src="/static/missing.png">
-              </a>
-              <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="Missing Assignments" href="/missingclass/{{enrollment.gclassroom.gclassdict.id}}">
-                <img width="25" src="/static/missing.png">
-              </a> -->
-              <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="View Assignments" href="/gclass/assignments/{{enrollment.gclassroom.gclassdict.id}}">
-                <img width="25" src="/static/task.png">
-              </a>
               <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="View CheckIns" href="/checkinsfor/{{enrollment.gclassroom.gclassdict.id}}">
                 <img width="25" src="/static/checkin.png">
               </a>
               <a href="/project/dashboard/{{enrollment.gclassroom.id}}">P</a>
               {% endif %}
+              <a class="waitMsg" data-toggle="tooltip" data-placement="top" title="View Assignments" href="/gclass/assignments/{{enrollment.gclassroom.gclassdict.id}}">
+                <img width="25" src="/static/task.png">
+              </a>
             </td>
             {% if session['role'].lower() == 'student' %}
             <td>Coming Soon

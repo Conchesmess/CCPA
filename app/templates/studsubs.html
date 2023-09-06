@@ -4,16 +4,17 @@
 <div class="container">
 
 <h1 class="display-3">{{gClassroom.gclassdict['name']}}</h1>
+{% if current_user.role.lower() == "teacher" %}
 Last <a href="/getstudsubs/{{gClassroom.gclassid}}">Update</a> of student submisions: {{gClassroom.studsubsdict['lastUpdate']}}
 <br> <a href=/gclass/assignments/{{gClassroom.gclassid}}>Update assignments</a>
+{% endif %}
 
 <h1 class="display-4">How many iterations of each assignment</h1>
 {{subItersDFHTML}}
 
 <h1 class="display-4">How many of each state for each assignment</h1>
 {{subsDFHTML}}
-<h1 class="display-4">How many of each state for each student</h1>
-{{subsStuDFHTML}}
+
 <h1 class="display-3">On Time Percentages</h1>
 
 <div class="row">
@@ -31,38 +32,17 @@ Last <a href="/getstudsubs/{{gClassroom.gclassid}}">Update</a> of student submis
       <img class="img-fluid" src="/static/{{gClassroom.gclassid}}.png">
       <small>If you don't see an image here, refresh the screen and it should show up.</small>
    </div>
+
 {% if current_user.role == "Teacher" %}
    <div class="col">
       {{displayDFHTML}}
    </div>   
 </div>
-{% if parents %}
-<script type="text/javascript">
-   function copyToClipboard(elementId) {
-      // Create a "hidden" input
-      var aux = document.createElement("input");
-      // Assign it the value of the specified element
-      aux.setAttribute("value", document.getElementById(elementId).innerHTML);
-      // Append it to the body
-      document.body.appendChild(aux);
-      // Highlight its content
-      aux.select();
-      // Copy the highlighted text
-      document.execCommand("copy");
-      // Remove it from the body
-      document.body.removeChild(aux);
-   }
-</script>
-   <br><br>
-   <button onclick="copyToClipboard('mmerge')">Copy table to paste in Excel</button> <br>
-   You have to highlight and copy manually to paste in to Google Sheets
-   <div id="mmerge">
-      {{parents}}
-   </div>
-   <br><br>
+
+<h1 class="display-4">How many of each state for each student</h1>
+{{subsStuDFHTML}}
 {% endif %}
-</div>
-{% endif %}
+
 
 
 

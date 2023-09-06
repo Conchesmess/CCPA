@@ -421,14 +421,6 @@ class Group(Document):
     name = StringField()
     desc = StringField()
     students = ListField(ReferenceField('User'))
-    
-class StudentSubmission(Document):
-    #student = ReferenceField('User', required=True)
-    stugid = StringField(required=True)
-    gclassroom = ReferenceField('GoogleClassroom', required=True)
-    studsubid = StringField(unique=True, required=True)
-    studsubdict = DictField(required=True)
-    lastupdate = DateTimeField(required=True)
 
 # a join table between GoogleClassroom and User
 class GEnrollment(Document):
@@ -442,6 +434,8 @@ class GEnrollment(Document):
     missinglink = StringField()
     sortCohort = StringField(default='~')
     submissionsupdate = DateTimeField()
+    mysubmissions = DictField()
+    myassignments = DictField()
 
 class Standard(Document):
     name = StringField(required=True)

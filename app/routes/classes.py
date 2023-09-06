@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from app import app
 from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string
-from app.classes.data import GEnrollment, StudentSubmission, User, GoogleClassroom
+from app.classes.data import GEnrollment, User, GoogleClassroom
 from app.classes.forms import AddToCohortForm, GClassForm
 import mongoengine.errors
 import google.oauth2.credentials
@@ -260,36 +260,36 @@ def ontimeperc(gclassid):
     stuList = gbDF.reset_index(level=0)
     stuList = stuList.values.tolist()
 
-    # mmerge table code
-    mmerge='<table class="table"><tr><th>StudentName</th><th>StudentEmail</th><th>Emails</th><th>NumMissing</th></tr>'
-    for stu in stuList:
-        mmerge+='<tr>'
-        emails=""
-        email=stu[0].strip()
-        missing = stu[2]
+    # # mmerge table code
+    # mmerge='<table class="table"><tr><th>StudentName</th><th>StudentEmail</th><th>Emails</th><th>NumMissing</th></tr>'
+    # for stu in stuList:
+    #     mmerge+='<tr>'
+    #     emails=""
+    #     email=stu[0].strip()
+    #     missing = stu[2]
         
-        try:
-            stu = User.objects.get(oemail=email)
-        except:
-            if len(email)>1:
-                flash( f"couldn't find {email} in our records")
-        mmerge+=f"<td>{stu.fname} {stu.lname}</td><td>{email}</td>"
-        emails+=f"{email}"
+    #     try:
+    #         stu = User.objects.get(oemail=email)
+    #     except:
+    #         if len(email)>1:
+    #             flash( f"couldn't find {email} in our records")
+    #     mmerge+=f"<td>{stu.fname} {stu.lname}</td><td>{email}</td>"
+    #     emails+=f"{email}"
 
-        if stu.aadultemail:
-            emails+=f", {stu.aadultemail};"
+    #     if stu.aadultemail:
+    #         emails+=f", {stu.aadultemail};"
 
-        for adult in stu.adults:
-            if adult.email:
-                if stu.aadultemail and adult.email != stu.aadultemail:
-                    emails+=f", {adult.email};"
-                elif not stu.aadultemail:
-                    emails+=f", {adult.email};"
+    #     for adult in stu.adults:
+    #         if adult.email:
+    #             if stu.aadultemail and adult.email != stu.aadultemail:
+    #                 emails+=f", {adult.email};"
+    #             elif not stu.aadultemail:
+    #                 emails+=f", {adult.email};"
 
-        mmerge+=f"<td>{emails}</td><td>{missing}</td>"
-        mmerge+='</tr>'
-    mmerge+="</table>"
-    parents=Markup(render_template_string(mmerge))
+    #     mmerge+=f"<td>{emails}</td><td>{missing}</td>"
+    #     mmerge+='</tr>'
+    # mmerge+="</table>"
+    # parents=Markup(render_template_string(mmerge))
 
 
     #plotting boxplot 
@@ -314,12 +314,34 @@ def ontimeperc(gclassid):
 
     assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
     assesDF = assesDF.rename(columns={'id':'courseWorkId'})
+    assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
+    assesDDDF = assesDDDF.fillna('-')
     assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
-    assesDF = assesDF[['courseWorkId','title']].copy()    
+    assesDF = assesDF[['courseWorkId','title']].copy()
+
 
     subsDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
-    subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
     subsDF['state'] = subsDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+    assesDDDF = assesDDDF[['courseWorkId','dueDate']]
+
+    subsDF = pd.merge(subsDF, 
+                   assesDDDF, 
+                   on ='courseWorkId', 
+                   how ='left')
+
+    def checkDueDate(cell):
+        if cell == "-":
+            return "FUTURE"
+        else:
+            dateString = f"{cell['month']}/{cell['day']}/{cell['year']}"
+            dateObj = dt.datetime.strptime(dateString, '%m/%d/%Y')
+            if dt.datetime.today() < dateObj:
+                return "FUTURE"
+
+    subsDF['state'] = subsDF.apply(lambda row: "FUTURE" if checkDueDate(row['dueDate']) == "FUTURE" else row['state'], axis=1)
+    subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+
+
     subsDF.reset_index(inplace=True)
     subsDF = pd.pivot_table(data=subsDF,index='courseWorkId',columns="state",values='id',aggfunc='count')
     subsDF = subsDF.fillna("-")
@@ -329,7 +351,10 @@ def ontimeperc(gclassid):
                    on ='courseWorkId', 
                    how ='left')
 
+
+    
     subsDF['courseWorkId'] = subsDF['title']
+
     subsDF.drop('title',axis=1,inplace=True)
     subsDF = subsDF.rename(columns={'courseWorkId':'Title'})
     subsDF = subsDF.sort_values(by=['Title'])
@@ -348,11 +373,13 @@ def ontimeperc(gclassid):
 
     ### assignments with number of times turned in
 
-    # these 4 lines were run above and are assesDF is currently the state descibed by these founr lines
+    ### These lines are refernce, there were run above.
     # assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
     # assesDF = assesDF.rename(columns={'id':'courseWorkId'})
+    # assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
+    # assesDDDF = assesDDDF.fillna('-')
     # assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
-    # assesDF = assesDF[['courseWorkId','title']].copy()    
+    # assesDF = assesDF[['courseWorkId','title']].copy() 
 
     subsDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
     subsDF = subsDF[['courseWorkId','submissionHistory','userId','id']].copy()
@@ -398,8 +425,18 @@ def ontimeperc(gclassid):
     ### Sub State by student
 
     subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
-    subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+    print(subsStuDF.columns)
+    print(assesDDDF.columns)
+
+    subsStuDF = pd.merge(subsStuDF, 
+                assesDDDF, 
+                on ='courseWorkId', 
+                how ='left')
+
     subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+
+    subsStuDF['state'] = subsStuDF.apply(lambda row: "FUTURE" if checkDueDate(row['dueDate']) == "FUTURE" else row['state'], axis=1)
+    subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
     subsStuDF.reset_index(inplace=True)
     subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
     subsStuDF = subsStuDF.fillna("-")
@@ -421,7 +458,7 @@ def ontimeperc(gclassid):
                 how ='left')
     subsStuDF['userId'] = subsStuDF['name']
     subsStuDF.drop(['name'],axis=1,inplace=True)
-    subsStuDF=subsStuDF.sort_values(by=['UNATTEMPTED'], ascending=False)
+    #subsStuDF=subsStuDF.sort_values(by=['UNATTEMPTED'], ascending=False)
 
     subsStuDFHTML = subsStuDF.style\
         .format(precision=0)\
@@ -436,7 +473,7 @@ def ontimeperc(gclassid):
         .to_html()
     subsStuDFHTML = Markup(subsStuDFHTML)
 
-    return render_template('studsubs.html',gClassroom=gClassroom,parents=parents,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
+    return render_template('studsubs.html',gClassroom=gClassroom,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
 
 def getStudSubs(gclassid,courseWorkId="-"):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
