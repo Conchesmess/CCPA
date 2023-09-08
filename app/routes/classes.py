@@ -223,6 +223,7 @@ def ontimeperc(gclassid):
 
     subsDF = subsDF.drop(columns='id')
 
+    # TODO add a link to student's page in gclassroom
     subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
 
     dictfordf = {}
@@ -310,8 +311,6 @@ def ontimeperc(gclassid):
     displayDFHTML = Markup(pd.DataFrame.to_html(gbDF))
 
     ### Assignment list with their state: Turned-in, Graded, etc
-    ### TODO state by student. I think I don't need the assesDF.
-
     assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
     assesDF = assesDF.rename(columns={'id':'courseWorkId'})
     assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
@@ -331,14 +330,14 @@ def ontimeperc(gclassid):
 
     def checkDueDate(cell):
         if cell == "-":
-            return "FUTURE"
+            return "NOT DUE"
         else:
             dateString = f"{cell['month']}/{cell['day']}/{cell['year']}"
             dateObj = dt.datetime.strptime(dateString, '%m/%d/%Y')
             if dt.datetime.today() < dateObj:
-                return "FUTURE"
+                return "NOT DUE"
 
-    subsDF['state'] = subsDF.apply(lambda row: "FUTURE" if checkDueDate(row['dueDate']) == "FUTURE" else row['state'], axis=1)
+    subsDF['state'] = subsDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
     subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
 
 
@@ -350,8 +349,6 @@ def ontimeperc(gclassid):
                    assesDF, 
                    on ='courseWorkId', 
                    how ='left')
-
-
     
     subsDF['courseWorkId'] = subsDF['title']
 
@@ -424,9 +421,22 @@ def ontimeperc(gclassid):
 
     ### Sub State by student
 
+    # TODO add link to student's page in GClassroom
     subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
     print(subsStuDF.columns)
-    print(assesDDDF.columns)
+    def makeStuURL(url):
+        url = url.replace('/a/', '/sp/')
+        url = url.replace('/submissions/by-status/and-sort-last-name/student/','/zzz/')
+        endBeg = url.find('/sp/')+3
+        begEnd = url.find('/zzz/')+4
+        url = "<a target='_blank' href='" + url[:endBeg] + url[begEnd:] + "/all'" +">link</a>"
+        print(url)
+        return url
+
+    subsStuDF['url'] = subsStuDF.apply(lambda row: makeStuURL(row['alternateLink']),axis=1)
+    subLinkDF = subsStuDF[['userId','url']].copy()
+
+    subLinkDF = subLinkDF.drop_duplicates(subset='url')
 
     subsStuDF = pd.merge(subsStuDF, 
                 assesDDDF, 
@@ -435,11 +445,16 @@ def ontimeperc(gclassid):
 
     subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
 
-    subsStuDF['state'] = subsStuDF.apply(lambda row: "FUTURE" if checkDueDate(row['dueDate']) == "FUTURE" else row['state'], axis=1)
+    subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
     subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
     subsStuDF.reset_index(inplace=True)
+
     subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
-    subsStuDF = subsStuDF.fillna("-")
+
+    subsStuDF = pd.merge(subsStuDF, 
+            subLinkDF, 
+            on ='userId', 
+            how ='left')
 
     rosterDF = pd.DataFrame.from_dict(gClassroom.grosterTemp, orient="columns")
     def nameFromDict(row):
@@ -458,7 +473,10 @@ def ontimeperc(gclassid):
                 how ='left')
     subsStuDF['userId'] = subsStuDF['name']
     subsStuDF.drop(['name'],axis=1,inplace=True)
-    #subsStuDF=subsStuDF.sort_values(by=['UNATTEMPTED'], ascending=False)
+    url = subsStuDF.pop("url")
+    subsStuDF.insert(1, url.name, url)   
+    subsStuDF=subsStuDF.sort_values(by='GRADED',ascending=True, na_position = 'first')
+    subsStuDF.fillna("-", inplace=True)
 
     subsStuDFHTML = subsStuDF.style\
         .format(precision=0)\
