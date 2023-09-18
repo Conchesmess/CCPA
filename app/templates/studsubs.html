@@ -5,8 +5,8 @@
 
 <h1 class="display-3">{{gClassroom.gclassdict['name']}}</h1>
 {% if current_user.role.lower() == "teacher" %}
-Last <a href="/getstudsubs/{{gClassroom.gclassid}}">Update</a> of student submisions: {{gClassroom.studsubsdict['lastUpdate']}}
-<br> <a href=/gclass/assignments/{{gClassroom.gclassid}}>Update assignments</a>
+Last <a href="/getstudsubs/{{gClassroom.gclassid}}?{{request.environ.PATH_INFO}}">Update</a> of student submisions: 
+{{moment(gClassroom.studsubsdict['lastUpdate']).calendar()}}
 {% endif %}
 
 <h1 class="display-4">How many iterations of each assignment</h1>

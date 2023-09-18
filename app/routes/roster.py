@@ -424,62 +424,7 @@ def getcw(gclassid):
     if result == "refresh":
         return redirect(url_for('authorize'))
 
-    return redirect(url_for('checkin'))
-
-
-# @app.route('/getcoursework/<gclassid>/<stage>/<index>')
-# @app.route('/getcoursework/<gclassid>/<stage>')
-# @app.route('/getcoursework/<gclassid>')
-# def getcw(gclassid,stage=0, index=0):
-#     stage=int(stage)
-#     index=int(index)
-#     if stage == 0:
-#         stage = 1
-#         flash("Retrieveing ALL assignments from Google Classroom.")
-#         url=f'/getcoursework/{gclassid}/{stage}'
-#         return render_template("loading.html",url=url)
-#     elif stage == 1:
-#         result = getCourseWork(gclassid)
-#         courseworkdict = result
-#         gClassroom = GoogleClassroom.objects.get(gclassid = gclassid)
-#         gClassroom.update(courseworkdict=courseworkdict)
-#         if result == "refresh":
-#             return redirect(url_for('authorize'))
-#         stage=2
-#         flash("Saving assignments to database.")
-#         url=f'/getcoursework/{gclassid}/{stage}'
-#         return render_template("loading.html",nextIndex=0,url=url)
-#     elif stage == 2:
-#         gClassroom = GoogleClassroom.objects.get(gclassid = gclassid)
-#         numAsses = len(gClassroom.courseworkdict['courseWork'])
-#         # How many loops to make before sending to loading page
-#         numIterations = 4
-#         for gAss in gClassroom.courseworkdict['courseWork'][index:index+numIterations]:
-#             index=index+1
-#             # TODO save assignment to gcoursework document
-#             try:
-#                 gAss['topic']
-#             except:
-#                 gAss['topic'] = None
-#             newCourseWork = CourseWork(
-#                 courseworkdict = gAss,
-#                 courseworkid = gAss['id'],
-#                 gclassroom = gClassroom,
-#                 topic = gAss['topic']
-#             )
-#             try:
-#                 newCourseWork.save()
-#             except mongoengine.errors.NotUniqueError:
-#                 flash(f"{gAss['title']} already exists. Updating.")
-#                 editCourseWork = CourseWork.objects.get(courseworkid = gAss['id'])
-#                 editCourseWork.update(
-#                     courseworkdict = gAss,
-#                     topic = gAss['topic']
-#                 )
-#             if index == numAsses-1:
-#                 flash("All assignments are saved.")
-#                 return redirect(url_for('gClassAssignments',gclassid=gclassid))
-#         return render_template("loading.html", nextIndex=index, total = numAsses,url=f'/getcoursework/{gclassid}/{stage}/{index}')
+    return redirect(url_for('gClassAssignments',gclassid=gclassid))
 
 
 @app.route('/listmissing/<gclassid>/<index>')

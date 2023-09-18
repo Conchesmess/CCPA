@@ -3,7 +3,8 @@
 {% block body %}
 <!-- Available variables: asses, gClass -->
     <h1>Assignments for <a href="/gclass/{{gClass.gclassid}}">{{gClass.gclassdict.name}}</a></h1>
-    {% if current_user.role.lower() == "teacher" %}<a href="/getcoursework/{{gClass.gclassid}}">Update Assignments</a> <br>{% endif %}
+    {% if current_user.role.lower() == "teacher" %}<a href="/getstudsubs/{{gClass.gclassid}}?{{request.environ.PATH_INFO}}">Update Assignments</a> <br>{% endif %}
+
     <a href="/ontimeperc/{{gClass.gclassid}}">Stats</a> <br>
     
     <table class="table">

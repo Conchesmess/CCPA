@@ -4,7 +4,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
 from app import app
 from .users import credentials_to_dict
-from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string
+from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string, request
 from app.classes.data import GEnrollment, User, GoogleClassroom
 from app.classes.forms import AddToCohortForm, GClassForm
 import mongoengine.errors
@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 from bson.objectid import ObjectId
 from flask_login import current_user
+import requests
 
 @app.route('/addtocohort', methods=['GET', 'POST'])
 def addtocohort():
@@ -27,7 +28,6 @@ def addtocohort():
             ids = form.aeriesIds.data.replace(" ", "")
             ids = form.aeriesIds.data.replace("\n", "")
             ids = form.aeriesIds.data.replace("\r", "")
-            #ids = ids.strip(",")
             ids = ids.split(",")
             for id in ids:
                 try:
@@ -223,7 +223,6 @@ def ontimeperc(gclassid):
 
     subsDF = subsDF.drop(columns='id')
 
-    # TODO add a link to student's page in gclassroom
     subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
 
     dictfordf = {}
@@ -261,37 +260,6 @@ def ontimeperc(gclassid):
     stuList = gbDF.reset_index(level=0)
     stuList = stuList.values.tolist()
 
-    # # mmerge table code
-    # mmerge='<table class="table"><tr><th>StudentName</th><th>StudentEmail</th><th>Emails</th><th>NumMissing</th></tr>'
-    # for stu in stuList:
-    #     mmerge+='<tr>'
-    #     emails=""
-    #     email=stu[0].strip()
-    #     missing = stu[2]
-        
-    #     try:
-    #         stu = User.objects.get(oemail=email)
-    #     except:
-    #         if len(email)>1:
-    #             flash( f"couldn't find {email} in our records")
-    #     mmerge+=f"<td>{stu.fname} {stu.lname}</td><td>{email}</td>"
-    #     emails+=f"{email}"
-
-    #     if stu.aadultemail:
-    #         emails+=f", {stu.aadultemail};"
-
-    #     for adult in stu.adults:
-    #         if adult.email:
-    #             if stu.aadultemail and adult.email != stu.aadultemail:
-    #                 emails+=f", {adult.email};"
-    #             elif not stu.aadultemail:
-    #                 emails+=f", {adult.email};"
-
-    #     mmerge+=f"<td>{emails}</td><td>{missing}</td>"
-    #     mmerge+='</tr>'
-    # mmerge+="</table>"
-    # parents=Markup(render_template_string(mmerge))
-
 
     #plotting boxplot 
     #plt.boxplot([x for x in gbDF['On Time %']],labels=[x for x in gbDF.index], showmeans=True) 
@@ -315,6 +283,7 @@ def ontimeperc(gclassid):
     assesDF = assesDF.rename(columns={'id':'courseWorkId'})
     assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
     assesDDDF = assesDDDF.fillna('-')
+    assesDF['alternateLink'] = assesDF.apply(lambda row: row['alternateLink'].replace('details','submissions/by-status/and-sort-name/all'),axis=1)
     assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
     assesDF = assesDF[['courseWorkId','title']].copy()
 
@@ -358,14 +327,16 @@ def ontimeperc(gclassid):
     subsDFHTML = subsDF.style\
         .format(precision=0)\
         .set_table_styles([
-            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:80px'},\
-            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+            {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:100px'},\
+            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
         .set_table_attributes('class="table table-sm"')  \
-        .set_uuid('trans')\
         .set_sticky(axis="columns",levels=0)\
         .hide(axis='index')\
         .to_html()
+        # the command below makes the header transparent
+        # .set_uuid('trans')\
+
     subsDFHTML = Markup(subsDFHTML)
 
     ### assignments with number of times turned in
@@ -410,10 +381,9 @@ def ontimeperc(gclassid):
         .format(precision=0)\
         .set_table_styles([
             {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:80px'},\
-            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+            {'selector': 'thead','props': 'height:100px'},\
+            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
         .set_table_attributes('class="table table-sm"')  \
-        .set_uuid('trans')\
         .set_sticky(axis="columns",levels=0)\
         .hide(axis='index')\
         .to_html()
@@ -421,77 +391,81 @@ def ontimeperc(gclassid):
 
     ### Sub State by student
 
-    # TODO add link to student's page in GClassroom
-    subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
-    print(subsStuDF.columns)
-    def makeStuURL(url):
-        url = url.replace('/a/', '/sp/')
-        url = url.replace('/submissions/by-status/and-sort-last-name/student/','/zzz/')
-        endBeg = url.find('/sp/')+3
-        begEnd = url.find('/zzz/')+4
-        url = "<a target='_blank' href='" + url[:endBeg] + url[begEnd:] + "/all'" +">link</a>"
-        print(url)
-        return url
+    if current_user.role.lower() == "teacher":
 
-    subsStuDF['url'] = subsStuDF.apply(lambda row: makeStuURL(row['alternateLink']),axis=1)
-    subLinkDF = subsStuDF[['userId','url']].copy()
+        subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
+        print(subsStuDF.columns)
+        def makeStuURL(url):
+            url = url.replace('/a/', '/sp/')
+            url = url.replace('/submissions/by-status/and-sort-last-name/student/','/zzz/')
+            endBeg = url.find('/sp/')+3
+            begEnd = url.find('/zzz/')+4
+            url = "<a target='_blank' href='" + url[:endBeg] + url[begEnd:] + "/all'" +">link</a>"
+            print(url)
+            return url
 
-    subLinkDF = subLinkDF.drop_duplicates(subset='url')
+        subsStuDF['url'] = subsStuDF.apply(lambda row: makeStuURL(row['alternateLink']),axis=1)
+        subLinkDF = subsStuDF[['userId','url']].copy()
 
-    subsStuDF = pd.merge(subsStuDF, 
-                assesDDDF, 
-                on ='courseWorkId', 
-                how ='left')
+        subLinkDF = subLinkDF.drop_duplicates(subset='url')
 
-    subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+        subsStuDF = pd.merge(subsStuDF, 
+                    assesDDDF, 
+                    on ='courseWorkId', 
+                    how ='left')
 
-    subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
-    subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
-    subsStuDF.reset_index(inplace=True)
+        subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
 
-    subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
+        subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
+        subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+        subsStuDF.reset_index(inplace=True)
 
-    subsStuDF = pd.merge(subsStuDF, 
-            subLinkDF, 
-            on ='userId', 
-            how ='left')
+        subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
 
-    rosterDF = pd.DataFrame.from_dict(gClassroom.grosterTemp, orient="columns")
-    def nameFromDict(row):
-        try:
-            fullName = row['name']['fullName']
-            lenName = len(fullName)
-            stop = lenName - 10
-            return fullName[:stop+1]
-        except:
-            pass
-    rosterDF['name'] = rosterDF['profile'].apply(lambda row: nameFromDict(row))
-    rosterDF = rosterDF.drop(['profile','courseId'], axis=1)
-    subsStuDF = pd.merge(subsStuDF, 
-                rosterDF, 
+        subsStuDF = pd.merge(subsStuDF, 
+                subLinkDF, 
                 on ='userId', 
                 how ='left')
-    subsStuDF['userId'] = subsStuDF['name']
-    subsStuDF.drop(['name'],axis=1,inplace=True)
-    url = subsStuDF.pop("url")
-    subsStuDF.insert(1, url.name, url)   
-    subsStuDF=subsStuDF.sort_values(by='GRADED',ascending=True, na_position = 'first')
-    subsStuDF.fillna("-", inplace=True)
 
-    subsStuDFHTML = subsStuDF.style\
-        .format(precision=0)\
-        .set_table_styles([
-            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:80px'},\
-            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
-        .set_table_attributes('class="table table-sm"')  \
-        .set_uuid('trans')\
-        .set_sticky(axis="columns",levels=0)\
-        .hide(axis='index')\
-        .to_html()
-    subsStuDFHTML = Markup(subsStuDFHTML)
+        rosterDF = pd.DataFrame.from_dict(gClassroom.grosterTemp, orient="columns")
+        def nameFromDict(row):
+            try:
+                fullName = row['name']['fullName']
+                lenName = len(fullName)
+                stop = lenName - 10
+                return fullName[:stop+1]
+            except:
+                pass
+        rosterDF['name'] = rosterDF['profile'].apply(lambda row: nameFromDict(row))
+        rosterDF = rosterDF.drop(['profile','courseId'], axis=1)
+        subsStuDF = pd.merge(subsStuDF, 
+                    rosterDF, 
+                    on ='userId', 
+                    how ='left')
+        subsStuDF['userId'] = subsStuDF['name']
+        subsStuDF.drop(['name'],axis=1,inplace=True)
+        url = subsStuDF.pop("url")
+        subsStuDF.insert(1, url.name, url)   
+        subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
+        subsStuDF.fillna("-", inplace=True)
 
-    return render_template('studsubs.html',gClassroom=gClassroom,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
+        subsStuDFHTML = subsStuDF.style\
+            .format(precision=0)\
+            .set_table_styles([
+                {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+                {'selector': 'thead','props': 'height:100px'},\
+                {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
+            .set_table_attributes('class="table table-sm"')  \
+            .set_sticky(axis="columns",levels=0)\
+            .hide(axis='index')\
+            .to_html()
+        subsStuDFHTML = Markup(subsStuDFHTML)
+    if current_user.role.lower()=="teacher":
+        return render_template('studsubs.html',gClassroom=gClassroom,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
+    else:
+        return render_template('studsubs.html',gClassroom=gClassroom,subItersDFHTML=subItersDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
+
+
 
 def getStudSubs(gclassid,courseWorkId="-"):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
@@ -544,6 +518,7 @@ def getStudSubs(gclassid,courseWorkId="-"):
 @app.route('/getstudsubs/<gclassid>/<courseWorkId>')
 @app.route('/getstudsubs/<gclassid>')
 def getstudsubs(gclassid,courseWorkId="-"):
+    url = request.environ['QUERY_STRING']
     courseWork = getCourseWork(gclassid)
     if courseWork == "refresh":
         return redirect(url_for('authorize'))
@@ -553,7 +528,7 @@ def getstudsubs(gclassid,courseWorkId="-"):
     if studSubsAll == "refresh":
         return redirect(url_for('authorize'))
 
-    return redirect(url_for('ontimeperc',gclassid=gclassid))
+    return redirect(url)
 
 ## Replicated in sbg.py as gclasslist
 # this function exists to update the stored values for one or more google classrooms
