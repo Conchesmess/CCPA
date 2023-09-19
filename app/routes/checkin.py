@@ -306,7 +306,6 @@ def checkinsfor(gclassid,sndrmdr=0):
     notcheckedingids = [rostergid for rostergid in rostergids if str(rostergid) not in checkingids]
 
     if sndrmdr == "1":
-        print("send reminder")
         txtGroupAdhoc(notcheckedingids,f"Please checkin to {gclassname}.")
 
     notcheckedstus = []
