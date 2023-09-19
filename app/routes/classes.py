@@ -394,14 +394,12 @@ def ontimeperc(gclassid):
     if current_user.role.lower() == "teacher":
 
         subsStuDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
-        print(subsStuDF.columns)
         def makeStuURL(url):
             url = url.replace('/a/', '/sp/')
             url = url.replace('/submissions/by-status/and-sort-last-name/student/','/zzz/')
             endBeg = url.find('/sp/')+3
             begEnd = url.find('/zzz/')+4
             url = "<a target='_blank' href='" + url[:endBeg] + url[begEnd:] + "/all'" +">link</a>"
-            print(url)
             return url
 
         subsStuDF['url'] = subsStuDF.apply(lambda row: makeStuURL(row['alternateLink']),axis=1)
