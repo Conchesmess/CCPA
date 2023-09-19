@@ -42,10 +42,9 @@
     <em><u>To mark students as here, click the checkbox and hit submit.</u></em><br>
         {% if stuForm %}
             <form method=post>
-                {{ stuForm.hidden_tag() }} 
                 <div class="row">
                     {% for student in stuForm.student %}
-                        <div class="col-md-6 col-lg-4 col-xl-3">{{loop.index}}: {{ student }} {{ student.label }}</div>
+                        <div class="col-lg-4 col-sm-6">{{ student }} {{ student.label }}</div>
                     {% endfor %}
                 </div>
                 <span class="loadingModal">{{ stuForm.submitStuForm() }}</span>

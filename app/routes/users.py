@@ -178,38 +178,24 @@ def index():
 
 #get the profile page for a designated or the logged in user. Can use either gid or aeriesid.
 #TODO change this to GID instead of AeriesId so Teacher profiles can be accessed
-@app.route('/profile/<aeriesid>', methods=['GET', 'POST'])
+@app.route('/profile/<uid>', methods=['GET', 'POST'])
 @app.route('/profile', methods=['GET', 'POST'])
-def profile(aeriesid=None):
+def profile(uid=None):
 
-    if aeriesid == 'None':
-        aeriesid = None 
+    if uid == 'None':
+        uid = None 
 
-    if current_user.role.lower() != "teacher":
-        targetUser = User.objects.get(id = current_user.id)
+    if current_user.role.lower() == "student":
         groups=None
-        if aeriesid and aeriesid != targetUser.gid:
+        if str(current_user.id) != uid:
             flash('You can only view your own profile.')
             return redirect(url_for('profile'))
 
-    elif aeriesid and len(aeriesid) < 7:
-        try:
-            targetUser = User.objects.get(aeriesid=aeriesid)
-        except:
-            flash(f"Aeries ID {aeriesid} is not in the database, displaying your profile instead. Contact Steve Wright if you feel this is an error (stephen.wright@ousd.org).")
-            targetUser=User.objects.get(gid=session['gid'])
-
-    elif aeriesid and len(aeriesid) > 6:
-        try:
-            targetUser = User.objects.get(gid=aeriesid)
-        except:
-            flash(f"The Google ID {aeriesid} is not in the database, displaying your profile instead. Contact Steve Wright if you feel this is an error (stephen.wright@ousd.org).")
-            targetUser=User.objects.get(gid=current_user.gid)
     else:
         try:
-            targetUser=User.objects.get(gid=current_user.gid)
+            targetUser=User.objects.get(id=uid)
         except:
-            flash("You are not in the database of users which doesn't make sense cause you're already looged in. Sorry this shouldn't ever happen. (stephen.wright@ousd.org).")
+            flash("This user does not exist in the database. contact stephen.wright@ousd.org if this is an error.")
             return redirect('/')
 
     if targetUser.role.lower() == "student":

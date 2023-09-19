@@ -213,7 +213,7 @@ class ListQForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class SortOrderCohortForm(FlaskForm):
-    sortOrderCohort = SelectField("Sort Value:",validate_choice=False)
+    sortOrderCohort = SelectField("Sort Value:",choices=[],validate_choice=False)
     gid = HiddenField()
     gmail = HiddenField()
     gclassid = HiddenField()

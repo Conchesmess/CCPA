@@ -48,7 +48,10 @@ def addtocohort():
             emails = form.emails.data.replace(" ", "")
             emails = emails.strip(",")
             emails = emails.split(",")
+
             for email in emails:
+                email = email.replace("\r","")
+                email = email.replace("\n","")
                 try:
                     student = User.objects.get(oemail=email)
                 except mongoengine.errors.DoesNotExist:
