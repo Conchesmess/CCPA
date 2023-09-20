@@ -18,6 +18,7 @@ import numpy as np
 from bson.objectid import ObjectId
 from flask_login import current_user
 import requests
+from datetime import datetime as dt
 
 @app.route('/addtocohort', methods=['GET', 'POST'])
 def addtocohort():
@@ -76,7 +77,6 @@ def addtocohort():
         form.gclassmongoid.choices.append((enrollment.gclassroom.gclassdict['id'],enrollment.gclassroom.gclassdict['name']))
     return render_template('classes/addtocohortform.html', form=form)
     
-
 @app.route('/addgclass/<gmail>/<gclassid>')
 def addgclass(gmail,gclassid):
 
@@ -131,7 +131,6 @@ def getstudentwork(gclassid):
     classroom_service = googleapiclient.discovery.build('classroom', 'v1', credentials=credentials)
     studSubsAll = []
     pageToken=None
-    counter=1
     while True:
         try:
             studSubs = classroom_service.courses().courseWork().studentSubmissions().list(
@@ -148,45 +147,50 @@ def getstudentwork(gclassid):
 
         studSubsAll.extend(studSubs['studentSubmissions'])
         pageToken = studSubs.get('nextPageToken')
-        counter=counter+1
         if not pageToken:
             break
     studSubsDict = {}
-    studSubsDict['mySubmissions'] = studSubsAll
-    currUser = current_user
-    currUser.gclasses.filter(gclassid = gclassid).update(
-        submissions = studSubsDict,
-        submissionsupdate = dt.datetime.utcnow()
-    )
-    currUser.save()
+    studSubsDict['submissions'] = studSubsAll
+    gclass = GoogleClassroom.objects.get(gclassid=gclassid)
+    enrollment = GEnrollment.objects(owner=current_user,gclassroom=gclass)
+    enrollment.update(
+        mysubmissions = studSubsDict
+        )
 
+    try:
+        myCourseWork = classroom_service.courses().courseWork().list(
+            courseId=gclassid
+            ).execute()
+    except RefreshError:
+        flash('When trying to retrieve your assignments I had to reauthorize your Google credentials.')
+        return redirect('/authorize')
+    except Exception as error:
+        flash(f"unknown error while retrieving assignments: {error}")
+
+    courseWorkDict = {}
+    courseWorkDict = myCourseWork
+    enrollment.update(
+        myassignments = courseWorkDict
+    )
+    return
     return redirect(url_for('checkin'))
 
-@app.route('/student/mywork')
-def mywork():
+@app.route('/student/mywork/<gclassid>')
+def mywork(gclassid):
+
+    getstudentwork(gclassid)
+
     currUser = current_user
+    if currUser.role.lower() != "student":
+        flash("this link is only for students.")
+        return redirect(url_for('checkin'))
+    gclass = GoogleClassroom.objects.get(gclassid=gclassid)
+    enrollment = GEnrollment.objects.get(owner=current_user,gclassroom=gclass)
 
-    myClasses = currUser.gclasses.filter(status = 'Active')
-    myWorkList= []
-    courseWorkAll = []
-    classList = []
-    for myClass in myClasses:
-        myWorkList = myWorkList + myClass.submissions['mySubmissions']
-        if not myClass.gclassroom.courseworkdict or myClass.gclassroom.courseworkupdate - dt.timedelta(1) > dt.datetime.utcnow():
-            courseWork = getCourseWork(myClass.gclassid)
-            if courseWork == "refresh":
-                return redirect(url_for('authorize'))
-        else:
-            courseWork = myClass.gclassroom.courseworkdict
-
-        thisClass = {'className':myClass.gclassroom.gclassdict['name'],'courseId':myClass.gclassroom.gclassdict['id']}
-        classList.append(thisClass)
-        courseWorkAll = courseWorkAll + courseWork['courseWork']
-        
-    myWorkDF = pd.DataFrame(myWorkList)
-    courseWorkDF = pd.DataFrame(courseWorkAll)
-    courseWorkDF.rename(columns={"id": "courseWorkId"}, inplace=True)
-    classListDF = pd.DataFrame(classList)
+    myWorkDF = pd.DataFrame(enrollment.mysubmissions['submissions'])
+    courseWorkDF = pd.DataFrame(enrollment.myassignments['courseWork'])
+    courseWorkDF.rename(columns={"id": "courseWorkId",'alternateLink':'Assignment Link'}, inplace=True)
+    #courseWorkDF = courseWorkDF.drop(['materials','state','creationTime','updateTime','workType','submissionModificationMode','creatorUserId','courseId'],axis=1)
 
     #merge in all the assignments
     myWorkDF = pd.merge(courseWorkDF, 
@@ -194,18 +198,42 @@ def mywork():
                     on ='courseWorkId', 
                     how ='inner')
 
-    myWorkDF.rename(columns={"courseId_x": "courseId"}, inplace=True)
+    myWorkDF.rename(columns={"courseId_x": "courseId","state_y":"status","alternateLink":"My Work"}, inplace=True)
 
-    #merge in all the assignments
-    myWorkDF = pd.merge(classListDF, 
-                    myWorkDF, 
-                    on ='courseId', 
-                    how ='inner')
+    myWorkDF.drop(['description','materials','state_x','creationTime_x','creationTime_y','updateTime_x','updateTime_y','workType','submissionModificationMode','creatorUserId','topicId','dueTime','courseId_y','userId','courseWorkType','assignmentSubmission','courseId','courseWorkId','id'],axis=1,inplace=True)
 
 
-    myWorkDF.drop(['materials','state_x','creationTime_x','updateTime_x','workType','submissionModificationMode','creatorUserId','topicId','dueTime','multipleChoiceQuestion','courseId_y','userId','courseWorkType','assignmentSubmission','shortAnswerSubmission','multipleChoiceSubmission'],1,inplace=True)
+    myWorkDF['Assignment Link'] = myWorkDF.apply(lambda row: f"<a href='{row['Assignment Link']}'>link</a>",axis=1)
 
-    displayDFHTML = Markup(myWorkDF.to_html(escape=False))
+    def dueDate(dateDict):
+        try:
+            return dt.strptime(f"{dueDict['month']}/{dueDict['day']}/{dueDict['year']}",'%m/%d/%Y')
+        except:
+            return dateDict
+    myWorkDF['dueDate'] = myWorkDF.apply(lambda row: dueDate(row['dueDate']),axis=1)
+
+    def gradeCat(dict):
+        try:
+            pass
+        except:
+            pass
+    myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}",axis=1)
+    myWorkDF['My Work'] = myWorkDF.apply(lambda row: f"<a href='{row['My Work']}'>link</a>",axis=1)
+    myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
+    myWorkDF['assignedGrade'] = myWorkDF.apply(lambda row: f"{int(row['assignedGrade'])}/{row['maxPoints']}" if row['assignedGrade'] > 0 else row['assignedGrade'],axis=1)
+    myWorkDF.fillna("",inplace=True)
+
+    displayDFHTML = myWorkDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:100px'},\
+            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    displayDFHTML = Markup(displayDFHTML)
     
     return render_template('mywork.html',displayDFHTML=displayDFHTML)
 
@@ -465,8 +493,6 @@ def ontimeperc(gclassid):
         return render_template('studsubs.html',gClassroom=gClassroom,subsStuDFHTML=subsStuDFHTML,subItersDFHTML=subItersDFHTML,displayDFHTML=displayDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
     else:
         return render_template('studsubs.html',gClassroom=gClassroom,subItersDFHTML=subItersDFHTML,median=median,mean=mean,subsDFHTML=subsDFHTML)
-
-
 
 def getStudSubs(gclassid,courseWorkId="-"):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)

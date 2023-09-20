@@ -187,9 +187,11 @@ def profile(uid=None):
 
     if current_user.role.lower() == "student":
         groups=None
-        if str(current_user.id) != uid:
+        if uid and current_user.id != uid:
             flash('You can only view your own profile.')
             return redirect(url_for('profile'))
+        else:
+            targetUser = current_user
 
     else:
         try:

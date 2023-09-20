@@ -445,6 +445,7 @@ class Standard(Document):
         'ordering': ['+name']
     }
 
+# depricated
 class CourseWork(Document):
     gclassroom = ReferenceField('GoogleClassroom', required=True)
     courseworkid = StringField(unique=True, sparse=True, required=True)
@@ -454,7 +455,6 @@ class CourseWork(Document):
     standards = ListField(ReferenceField('Standard'))
     topic = StringField()
 
-# courseworkdict values: https://developers.google.com/classroom/reference/rest/v1/courses.courseWork
 
 class GoogleClassroom(Document):
     #temp
@@ -464,6 +464,7 @@ class GoogleClassroom(Document):
     gteacherdict = DictField()
     gclassdict = DictField()
     courseworkdict = DictField()
+    # courseworkdict values: https://developers.google.com/classroom/reference/rest/v1/courses.courseWork
     courseworkupdate = DateTimeField()
     # TODO move this to CourseWork class
     studsubsdict = DictField()
