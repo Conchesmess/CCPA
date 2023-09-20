@@ -205,19 +205,8 @@ def mywork(gclassid):
 
     myWorkDF['Assignment Link'] = myWorkDF.apply(lambda row: f"<a href='{row['Assignment Link']}'>link</a>",axis=1)
 
-    def dueDate(dateDict):
-        try:
-            return dt.strptime(f"{dueDict['month']}/{dueDict['day']}/{dueDict['year']}",'%m/%d/%Y')
-        except:
-            return dateDict
-    myWorkDF['dueDate'] = myWorkDF.apply(lambda row: dueDate(row['dueDate']),axis=1)
-
-    def gradeCat(dict):
-        try:
-            pass
-        except:
-            pass
-    myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}",axis=1)
+    myWorkDF['dueDate'] = myWorkDF.apply(lambda row: dt.strptime(f"{row['dueDate']['month']}/{row['dueDate']['day']}/{row['dueDate']['year']}",'%m/%d/%Y') if pd.notna(row['dueDate']) else row['dueDate'],axis=1)
+    myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}" if pd.notna(row['gradeCategory']) else row['gradeCategory'],axis=1)
     myWorkDF['My Work'] = myWorkDF.apply(lambda row: f"<a href='{row['My Work']}'>link</a>",axis=1)
     myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
     myWorkDF['assignedGrade'] = myWorkDF.apply(lambda row: f"{int(row['assignedGrade'])}/{row['maxPoints']}" if row['assignedGrade'] > 0 else row['assignedGrade'],axis=1)
