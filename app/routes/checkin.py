@@ -65,35 +65,15 @@ def classdash(gclassid):
 
     if gClassroom['courseworkdict'] and gClassroom['courseworkdict']['courseWork']:
         for ass in gClassroom['courseworkdict']['courseWork']:
-            #Check to see if there is a number in the front of the title
-            for i,letter in enumerate(ass['title']):
-                if letter != ".":
-                    try:
-                        int(letter)
-                    except:
-                        break
-
-            if i == 0:
-                sortValue = 0
-                strCount = strCount + 1
-            else:
-                sortValue = float(ass['title'][0:i])
-                numCount = numCount + 1
-
-            choice = (sortValue,ass['title'])
-            assigns_choices.append(choice)
-    if strCount > numCount:
-        assigns_choices = []
-        for ass in gClassroom['courseworkdict']['courseWork']:
             choice = (ass['title'],ass['title'])
             assigns_choices.append(choice)
-    else:
         assigns_choices = sorted(assigns_choices, key = lambda i: (i[0]), reverse=True)
 
     assigns_choices.insert(0, ('other','other'))
     assigns_choices.insert(0, ('','-----'))
 
     form.assigns.choices = assigns_choices
+    print(form.assigns.choices)
 
     if form.validate_on_submit():
 
