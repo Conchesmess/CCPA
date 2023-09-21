@@ -198,16 +198,16 @@ def mywork(gclassid):
                     on ='courseWorkId', 
                     how ='inner')
 
-    myWorkDF.rename(columns={"courseId_x": "courseId","state_y":"status","alternateLink":"My Work"}, inplace=True)
+    myWorkDF.rename(columns={"courseId_x": "courseId","state_y":"status"}, inplace=True)
 
-    myWorkDF.drop(['description','materials','state_x','creationTime_x','creationTime_y','updateTime_x','updateTime_y','workType','submissionModificationMode','creatorUserId','topicId','dueTime','courseId_y','userId','courseWorkType','assignmentSubmission','courseId','courseWorkId','id'],axis=1,inplace=True)
+    myWorkDF.drop(['description','alternateLink','materials','state_x','creationTime_x','creationTime_y','updateTime_x','updateTime_y','workType','submissionModificationMode','creatorUserId','topicId','dueTime','courseId_y','userId','courseWorkType','assignmentSubmission','courseId','courseWorkId','id'],axis=1,inplace=True)
 
 
     myWorkDF['Assignment Link'] = myWorkDF.apply(lambda row: f"<a href='{row['Assignment Link']}'>link</a>",axis=1)
 
     myWorkDF['dueDate'] = myWorkDF.apply(lambda row: dt.strptime(f"{row['dueDate']['month']}/{row['dueDate']['day']}/{row['dueDate']['year']}",'%m/%d/%Y') if pd.notna(row['dueDate']) else row['dueDate'],axis=1)
+    myWorkDF['dueDate'] = myWorkDF['dueDate'].dt.strftime('%m/%d/%Y')
     myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}" if pd.notna(row['gradeCategory']) else row['gradeCategory'],axis=1)
-    myWorkDF['My Work'] = myWorkDF.apply(lambda row: f"<a href='{row['My Work']}'>link</a>",axis=1)
     myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
     myWorkDF['assignedGrade'] = myWorkDF.apply(lambda row: f"{int(row['assignedGrade'])}/{row['maxPoints']}" if row['assignedGrade'] > 0 else row['assignedGrade'],axis=1)
     myWorkDF.fillna("",inplace=True)
