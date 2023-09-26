@@ -209,10 +209,31 @@ def mywork(gclassid):
     myWorkDF['dueDate'] = myWorkDF['dueDate'].dt.strftime('%m/%d/%Y')
     myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}" if pd.notna(row['gradeCategory']) else row['gradeCategory'],axis=1)
     myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
-    myWorkDF['assignedGrade'] = myWorkDF.apply(lambda row: f"{int(row['assignedGrade'])}/{row['maxPoints']}" if row['assignedGrade'] > 0 else row['assignedGrade'],axis=1)
+    myWorkDF['perc'] = myWorkDF.apply(lambda row: row['assignedGrade']/row['maxPoints'],axis=1)
+    myWorkDF['perc'] = myWorkDF.apply(lambda row: 0 if row['late'] and pd.isna(row['assignedGrade']) else row['perc'],axis=1)
     myWorkDF.fillna("",inplace=True)
 
+    def b_color(val):
+        """
+        Takes a scalar and returns a string with
+        the css property `'color: green'` for positive
+        strings, black otherwise.
+        """
+        try:
+            if val == 1:
+                color = 'green'
+            elif val >= 0.75:
+                color = 'yellow'
+            else:
+                color = 'red'
+        except:
+            color = "white"
+
+        return f'background-color: {color}'
+    
+    
     displayDFHTML = myWorkDF.style\
+        .applymap(b_color, subset=['perc'])\
         .format(precision=0)\
         .set_table_styles([
             {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
@@ -322,8 +343,8 @@ def ontimeperc(gclassid):
             return "NOT DUE"
         else:
             dateString = f"{cell['month']}/{cell['day']}/{cell['year']}"
-            dateObj = dt.datetime.strptime(dateString, '%m/%d/%Y')
-            if dt.datetime.today() < dateObj:
+            dateObj = dt.strptime(dateString, '%m/%d/%Y')
+            if dt.today() < dateObj:
                 return "NOT DUE"
 
     subsDF['state'] = subsDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
@@ -524,7 +545,7 @@ def getStudSubs(gclassid,courseWorkId="-"):
     for row in studSubsAll:
         dictfordf[row['id']] = row
 
-    studSubsAll = {'lastUpdate':dt.datetime.utcnow(),'studsubs':dictfordf}
+    studSubsAll = {'lastUpdate':dt.utcnow(),'studsubs':dictfordf}
     gClassroom.update(
         studsubsdict = studSubsAll
     )
