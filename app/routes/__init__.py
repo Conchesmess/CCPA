@@ -21,4 +21,5 @@ from .sandbox import *
 from .misc import *
 from .project import *
 from .transcript import *
+from .static import *
 #from .zscripts import *

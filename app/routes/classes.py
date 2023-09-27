@@ -214,11 +214,7 @@ def mywork(gclassid):
     myWorkDF.fillna("",inplace=True)
 
     def b_color(val):
-        """
-        Takes a scalar and returns a string with
-        the css property `'color: green'` for positive
-        strings, black otherwise.
-        """
+        
         try:
             if val == 1:
                 color = 'green'
