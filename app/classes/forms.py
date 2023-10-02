@@ -11,6 +11,19 @@ from wtforms import URLField, DateField, DateTimeField, EmailField, widgets, Sel
 import datetime as d
 from zoneinfo import ZoneInfo
 
+class Internship(FlaskForm):
+    site_name = StringField(validators=[InputRequired()])
+    contact_fame = StringField()
+    contact_lname = StringField()
+    contact_email = EmailField(validators=[Email()])
+    street = StringField()
+    city = StringField()
+    state = StringField()
+    zipcode = StringField()
+    ph_area_code = IntField(validators=[(NumberRange(min=111, max=999, message="three digit area code."))])
+    ph_prefix = IntField()
+    ph_sufix = IntField()
+
 class AddToCohortForm(FlaskForm):
     emails = TextAreaField()
     aeriesIds = TextAreaField()
@@ -125,7 +138,8 @@ class UserForm(FlaskForm):
     birthdate = DateField()
     personalemail = EmailField('Personal Email',validators=[(validators.Optional()),(Email())])
     mobile = StringField()
-    ustreet = TextAreaField()
+    ustreet = StringField()
+    ustreet2 = StringField()
     ucity = StringField()
     ustate = StringField()
     uzipcode = IntegerField(validators=[(validators.Optional()),(NumberRange(min=10000, max=99999, message="Must be a 5 digit number."))])
@@ -205,10 +219,11 @@ class CohortForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class ListQForm(FlaskForm):
-    cohort = MultiCheckboxField("Cohort: ", choices=[])
+    #cohort = MultiCheckboxField("Cohort: ", choices=[])
     grade = MultiCheckboxField("Grade: ", choices=[])
     gender = MultiCheckboxField("Gender: ", choices=[])
-    ethnicity = MultiCheckboxField("Ethnicity: ", choices=[])
+    advisor = SelectField("Advisor: ", choices=[])
+    #ethnicity = MultiCheckboxField("Ethnicity: ", choices=[])
     results = SelectField("Results", choices=[('list','list'),('map','map')])
     submit = SubmitField("Submit")
 

@@ -22,12 +22,12 @@
 
     <div class="row">
 
-        <div class="col text-nowrap">
+        <!-- <div class="col text-nowrap">
             <h3>Ethnicities</h3>
             {% for eth in form.ethnicity %}
                 {{eth}} {{eth.label}} <br>
             {% endfor %}
-        </div>
+        </div> -->
 
         <div class="col text-nowrap">
         <h3>Grades</h3>
@@ -35,15 +35,18 @@
                 {{grade}} {{grade.label}}
         {% endfor %}
         
-        <h3>Genders</h3>
+        <!-- <h3>Genders</h3>
         {% for gender in form.gender %}
                 {{gender}} {{gender.label}}
-        {% endfor %}
+        {% endfor %} -->
 
-        <h3>Cohorts</h3>
+        <h3>Advisor</h3>
+        {{form.advisor}}<br> <br>
+
+        <!-- <h3>Cohorts</h3>
         {% for cohort in form.cohort %}
             {{cohort}} {{cohort.label}} <br>
-        {% endfor %}
+        {% endfor %} -->
         Display results: {{form.results()}} <br>
         {{form.submit()}}
         </div>
@@ -60,30 +63,29 @@
 <h1>Total students {{total}}</h1>
 <table class="table">
     <tr>
-        <th>ID</th><th>name</th><th>Email</th><th>cohort</th><th>ethnicity</th><th>grade</th><th>gender</th>
-        <th>Postgrad</th>
+        <th>ID</th><th>name</th><th>grade</th><th>Address</th><th>lat/lon</th><th>Siblings</th>
     </tr>
 {% if users %}
 {% for user in users | sort(attribute="alname,afname") %}
     <tr>
         <td>{{user.aeriesid}}</td>
         <td><a href="/profile/{{user.aeriesid}}">{{user.fname}} {{user.lname}}</a></td>
-        {% if user.grade > 12 and user.personalemail %}
-            <td>{{user.personalemail}}</td>
-        {% else %}
-            <td>{{user.oemail}}</td>
-        {% endif %}
-        <td>{{user.cohort}}</td>
-        <td>{{user.aethnicity}}</td>
+
         <td>{{user.grade}}</td>
-        <td>{{user.agender}}</td>
-        {% if user.postgrads %}
-            <td>PG:
-                {% for pg in user.postgrads %}
-                    {{pg.org}}
-                {% endfor %}
-            </td>
-        {% endif %}
+        <td>
+            {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%} {{user.astreet}}{%endif%} <br>
+            {{user.acity}}, {{user.astate}}  {{user.azipcode}}
+        </td>
+        <td>
+            {{user.lat}}/{{user.lon}}
+        </td>
+        <td>
+            {% for sib in user.siblings %}
+            {% if sib != user %}
+                {{sib.advisor}}: {{sib.fname}} {{sib.lname}} {{sib.grade}} <br>
+            {% endif %}
+            {% endfor %}
+        </td>
     </tr>
 {% endfor %}
 {% endif %}

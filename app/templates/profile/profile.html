@@ -69,8 +69,8 @@
                 <div class="card-body">
                     <h5 class="card-title">
                         Preferred Info 
-                        {% if request.view_args['aeriesid'] %}
-                            <a href="/editprofile/{{request.view_args['aeriesid']}}">
+                        {% if currUser.aeriesid %}
+                            <a href="/editprofile/{{currUser.aeriesid}}">
                         {% else %}
                             <a href="/editprofile">
                         {% endif %}
@@ -105,6 +105,7 @@
                         <b>Address:</b> <br>
                         <span class="ms-2">
                             {% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
+                            {% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
                         </span>
                         <span class="ms-2">
                             {% if currUser.ucity %}{{currUser.ucity}}{% endif %} 

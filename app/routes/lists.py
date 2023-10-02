@@ -16,17 +16,17 @@ def listq():
 
     form = ListQForm()
 
-    ethnicities = User.objects().distinct(field="aethnicity")
-    ethlist = []
-    for ethnicity in ethnicities:
-        if len(ethnicity) > 0:
-            ethlist.append((ethnicity,ethnicity))
+    # ethnicities = User.objects().distinct(field="aethnicity")
+    # ethlist = []
+    # for ethnicity in ethnicities:
+    #     if len(ethnicity) > 0:
+    #         ethlist.append((ethnicity,ethnicity))
 
-    cohorts = User.objects().distinct(field="cohort")
-    cohortslist = []
-    for cohort in cohorts:
-        if len(cohort) > 0:
-            cohortslist.append((cohort,cohort))
+    # cohorts = User.objects().distinct(field="cohort")
+    # cohortslist = []
+    # for cohort in cohorts:
+    #     if len(cohort) > 0:
+    #         cohortslist.append((cohort,cohort))
 
     grades = User.objects().distinct(field="grade")
     gradeslist = []
@@ -40,33 +40,52 @@ def listq():
         if len(gender) > 0:
             genderslist.append((gender,gender))
 
-    form.cohort.choices = cohortslist
+    advisors = User.objects().distinct(field="advisor")
+    advisorslist = []
+    for adv in advisors:
+        if len(adv) > 0:
+            advisorslist.append((adv,adv))
+    advisorslist.insert(0,('','-----'))
+
+
+    # form.cohort.choices = cohortslist
     form.grade.choices = gradeslist
-    form.ethnicity.choices = ethlist
+    # form.ethnicity.choices = ethlist
     form.gender.choices = genderslist
-
+    form.advisor.choices = advisorslist
     if form.validate_on_submit():
-        if len(form.cohort.data) > 0:
-            cohortquery="("
-            for i,cohort in enumerate(form.cohort.data):
-                cohortquery = cohortquery + f"Q(cohort='{cohort}')"
-                if i < len(form.cohort.data) - 1:
-                    cohortquery = cohortquery + ' | '
-                else:
-                    cohortquery = cohortquery + ' ) '
-        else:
-            cohortquery = '(Q(role__iexact = "student"))'
+        # if len(form.cohort.data) > 0:
+        #     cohortquery="("
+        #     for i,cohort in enumerate(form.cohort.data):
+        #         cohortquery = cohortquery + f"Q(cohort='{cohort}')"
+        #         if i < len(form.cohort.data) - 1:
+        #             cohortquery = cohortquery + ' | '
+        #         else:
+        #             cohortquery = cohortquery + ' ) '
+        # else:
+        #     cohortquery = '(Q(role__iexact = "student"))'
 
-        if len(form.ethnicity.data) > 0:
-            ethnicityquery="("
-            for i,ethnicity in enumerate(form.ethnicity.data):
-                ethnicityquery = ethnicityquery + f"Q(aethnicity='{ethnicity}')"
-                if i < len(form.ethnicity.data) - 1:
-                    ethnicityquery = ethnicityquery + ' | '
-                else:
-                    ethnicityquery = ethnicityquery + ' ) '
-        else:
-            ethnicityquery = '(Q(role__iexact = "student"))'
+        # if len(form.ethnicity.data) > 0:
+        #     ethnicityquery="("
+        #     for i,ethnicity in enumerate(form.ethnicity.data):
+        #         ethnicityquery = ethnicityquery + f"Q(aethnicity='{ethnicity}')"
+        #         if i < len(form.ethnicity.data) - 1:
+        #             ethnicityquery = ethnicityquery + ' | '
+        #         else:
+        #             ethnicityquery = ethnicityquery + ' ) '
+        # else:
+        #     ethnicityquery = '(Q(role__iexact = "student"))'
+
+        # if len(form.advisor.data) > 0:
+        #     advisorquery="("
+        #     for i,advisor in enumerate(form.advisor.data):
+        #         advisorquery = advisorquery + f"Q(advisor='{advisor}')"
+        #         if i < len(form.advisor.data) - 1:
+        #             advisorquery = advisorquery + ' | '
+        #         else:
+        #             advisorquery = advisorquery + ' ) '
+        # else:
+        #     advisorquery = '(Q(oemail__exists = True))'
 
         if len(form.grade.data) > 0:
             gradequery="("
@@ -77,7 +96,7 @@ def listq():
                 else:
                     gradequery = gradequery + ' ) '
         else:
-            gradequery = '(Q(role__iexact = "student"))'
+            gradequery = '(Q(oemail__exists = True))'
 
         if len(form.gender.data) > 0:
             genderquery="("
@@ -88,9 +107,20 @@ def listq():
                 else:
                     genderquery = genderquery + ' ) '
         else:
-            genderquery = '(Q(role__iexact = "student"))'
+            genderquery = '(Q(oemail__exists = True))'
 
-        users = User.objects(eval(ethnicityquery) & eval(cohortquery) & eval(gradequery) & eval(genderquery))
+        if len(form.advisor.data) > 0:
+            advisorquery = (Q(advisor = form.advisor.data))
+        else:
+            advisorquery = Q(oemail__exists = True)
+
+        users = User.objects(eval(gradequery) & eval(genderquery) & advisorquery)
+        #users = User.objects(eval(ethnicityquery) & eval(cohortquery) & eval(gradequery) & eval(genderquery))
+        for user in users:
+            siblings = User.objects(afamkey = user.afamkey)
+            if len(siblings) > 0:
+                user.siblings = siblings
+
         if form.results.data == "map":
             return render_template('usermap.html',users=users)
         else:

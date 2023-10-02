@@ -114,6 +114,7 @@
                 {% if currUser.uethnicityother %}<b>Ethnicity (non-OUSD Description):</b> {{currUser.uethnicityother}}<br>{% endif %} 
                 <b>Address: </b> <br>
                 &nbsp;&nbsp;&nbsp;{% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
+                &nbsp;&nbsp;&nbsp;{% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
                 &nbsp;&nbsp;&nbsp;{% if currUser.ucity %}{{currUser.ucity}}{% endif %} 
                                     {% if currUser.ustate %}{{currUser.ustate}}{% endif %}  
                                     {% if currUser.uzipcode %}{{currUser.uzipcode}}{% endif %}

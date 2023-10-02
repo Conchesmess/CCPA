@@ -9,7 +9,7 @@
 <script type="text/javascript">
     // The first parameter are the coordinates of the center of the map
     // The second parameter is the zoom level
-    var map = L.map('map').setView([37.8323039, -122.2575883], 13);
+    var map = L.map('map').setView([37.7614735,-122.1942649], 13);
     
     // {s}, {z}, {x} and {y} are placeholders for map tiles
     // {x} and {y} are the x/y of where you are on the map
@@ -28,10 +28,10 @@
     
     {% for user in users %}
         {% if user.lat and user.lon %}
-            L.marker(['{{user.lat}}', '{{user.lon}}']).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {{user.astreet}} {{user.azipcode}} <br> {{user.cohort}}'</strong>")
+            L.marker(['{{user.lat}}', '{{user.lon}}']).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%}{{user.astreet}}{%endif%} <br> {{user.azipcode}}'</strong>");
         {% endif %}
     {% endfor %}
-    L.marker([37.8323039, -122.2575883]).addTo(map).bindPopup("<strong>CCPA</strong>").openPopup();
+    L.marker([37.7614735,-122.1942649]).addTo(map).bindPopup("<strong>CCPA</strong>").openPopup();
 
 
 </script>

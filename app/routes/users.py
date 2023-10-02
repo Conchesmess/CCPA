@@ -66,16 +66,19 @@ def userModified(editUser):
     try:
         r = r.json()
     except:
+        flash('could not get lat/lon')
         pass
     else:
         if len(r) != 0:
             editUser.lat = float(r[0]['lat'])
             editUser.lon = float(r[0]['lon'])
             flash('Updated lat/lon')
-
-    flash('User edited.')
+        else:
+            flash('empty lat/lon. Street address may need to be split onto two lines.')
 
     editUser.save()
+
+    return editUser
 
 # Function to strip non-numbers from mobile text 
 def phstr2int(phstr):
@@ -178,16 +181,16 @@ def index():
 
 #get the profile page for a designated or the logged in user. Can use either gid or aeriesid.
 #TODO change this to GID instead of AeriesId so Teacher profiles can be accessed
-@app.route('/profile/<uid>', methods=['GET', 'POST'])
+@app.route('/profile/<aeriesid>', methods=['GET', 'POST'])
 @app.route('/profile', methods=['GET', 'POST'])
-def profile(uid=None):
+def profile(aeriesid=None):
 
-    if uid == 'None':
-        uid = None 
+    if aeriesid == 'None':
+        aeriesid = None 
 
     if current_user.role.lower() == "student":
         groups=None
-        if uid and current_user.id != uid:
+        if aid and current_user.aeriesid != aeriesid:
             flash('You can only view your own profile.')
             return redirect(url_for('profile'))
         else:
@@ -195,7 +198,7 @@ def profile(uid=None):
 
     else:
         try:
-            targetUser=User.objects.get(id=uid)
+            targetUser=User.objects.get(aeriesid=aeriesid)
         except:
             flash("This user does not exist in the database. contact stephen.wright@ousd.org if this is an error.")
             return redirect('/')
@@ -265,7 +268,7 @@ def editprofile(aeriesid=None):
     if session['role'].lower() != 'student' and aeriesid:
         editUser = User.objects.get(aeriesid=aeriesid)
     else:
-        editUser = User.objects.get(gid=session['gid'])
+        editUser = User.objects.get(oemail=session['gid'])
 
     # first see if the form was posted and then reformat the phone numbers
     if request.method == 'POST':
@@ -300,6 +303,7 @@ def editprofile(aeriesid=None):
             ulname = form.lname.data,
             pronouns = form.pronouns.data,
             ustreet = form.ustreet.data,
+            ustreet2 = form.ustreet2.data,
             ucity = form.ucity.data,
             ustate = form.ustate.data,
             uzipcode = form.uzipcode.data,
@@ -312,10 +316,12 @@ def editprofile(aeriesid=None):
             linkedin = form.linkedin.data,
             shirtsize = form.shirtsize.data
         )
-        # Record edit datetime to user record
-        userModified(editUser)
 
         editUser.reload()
+
+        # Record edit datetime to user record
+        editUser = userModified(editUser)
+
 
         if form.image.data:
             editUser.image.delete()
@@ -356,6 +362,9 @@ def editprofile(aeriesid=None):
         form.ustreet.data = editUser.ustreet
     else:
         form.ustreet.data = editUser.astreet
+
+    if editUser.ustreet2:
+        form.ustreet2.data = editUser.ustreet2
 
     if editUser.ustate:
         form.ustate.data = editUser.ustate

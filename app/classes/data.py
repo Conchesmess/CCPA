@@ -1,11 +1,26 @@
 
 #from typing_extensions import Required
 from ast import List
-from mongoengine import Document, EmbeddedDocumentListField, DictField, FloatField, ObjectIdField, EmailField, BooleanField, URLField, DateField, FileField, StringField, IntField, ReferenceField, EmbeddedDocument, DateTimeField, ListField, URLField, CASCADE
+from mongoengine import Document, EmbeddedDocumentListField, DictField, FloatField, ObjectIdField, EmailField
+from mongoengine import BooleanField, URLField, DateField, FileField, StringField, IntField, ReferenceField, EmbeddedDocument
+from mongoengine import DateTimeField, ListField, URLField, CASCADE
 #from flask_mongoengine import Document
 from flask_login import UserMixin
 from bson.objectid import ObjectId
 import datetime as d
+
+class Internship(Document):
+    site_name = StringField()
+    contact_fame = StringField()
+    contact_lname = StringField()
+    contact_email = EmailField()
+    street = StringField()
+    city = StringField()
+    state = StringField()
+    zipcode = IntField()
+    ph_area_code = IntField()
+    ph_prefix = IntField()
+    ph_sufix = IntField()
 
 class Adult(EmbeddedDocument):
     preferredcontact = BooleanField()
@@ -168,6 +183,7 @@ class User(UserMixin, Document):
     oemail = StringField(unique=True, required=True)
     aphone = StringField()
     aeriesid = IntField(sparse=True, unique=True, required=False)
+    afamkey = IntField()
     gid = StringField(sparse=True, unique=True, required=False)
     role = StringField()    # staff, teacher, student
     astreet = StringField()
@@ -176,6 +192,7 @@ class User(UserMixin, Document):
     azipcode = IntField()
     gpa = IntField()
     cohort = StringField() #academy or house name
+    advisor = StringField()
     gclassguardians = DictField(default={})
     gclassguardianinvites = DictField(default={})
     gprofile_pic = URLField()
@@ -196,6 +213,7 @@ class User(UserMixin, Document):
     altemail = EmailField()
     mobile = IntField()
     ustreet = StringField()
+    ustreet2 = StringField()
     ucity = StringField()
     ustate = StringField()
     uzipcode = IntField()

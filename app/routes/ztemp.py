@@ -5,6 +5,109 @@ from app.classes.data import CheckIn, User,Help
 from mongoengine import Q
 import requests
 import time
+import pandas as pd
+
+@app.route('/advlist')
+def advlist():
+    users = User.objects().order_by('advisor')
+    for user in users:
+        print(user.advisor,user.fname,user.lname)
+
+    return render_template("index.html")
+
+
+@app.route('/setrole')
+def setrole():
+    users = User.objects()
+    nums = len(users)
+    
+    for i,user in enumerate(users):
+        print(f"{i}/{nums}")
+        if user.oemail[:2] == "s_":
+            user.update(
+                role="student"
+            )
+        else:
+            user.update(
+                role="teacher"
+            )
+
+    return render_template("index.html")
+
+
+@app.route("/addadvisors")
+def addadvisors():
+    advsDF = pd.read_csv('./app/static/csv/advisors.csv', quotechar='"')
+    advsDict = advsDF.to_dict('index')
+    num = len(advsDict)
+    for i,adv in enumerate(advsDict):
+        adv = advsDict[adv]
+        try:
+            stu = User.objects.get(aeriesid = adv['aeriesid'])
+        except:
+            flash(f"Stu with id {adv['aeriesid']} does not exist")
+        else:
+            stu.update(
+                advisor = str(adv['advisor'])
+            )
+        print(f"{i}/{num}")
+    return render_template("index.html")
+
+
+@app.route("/importusers")
+def importusers():
+    stusDF = pd.read_csv('./app/static/csv/CCPAAllStus.csv', quotechar='"')
+    stusDict = stusDF.to_dict('index')
+    num = len(stusDict)
+    for i,row in enumerate(stusDict):
+        row = stusDict[row]
+        print(f"{i}/{num}")
+        try:
+            stu = User.objects.get(oemail = row['oemail'])
+        except:
+            stu = User(
+                oemail = row['oemail'],
+                aeriesid = row['aeriesid'],
+                afname = row['afname'],
+                alname = row['alname'],
+                fname = row['afname'],
+                lname = row['alname'],
+                aphone = str(row['aphone']),
+                aadults = row['aadults'],
+                aadultemail = str(row['aadultemail']),
+                aadult1phone = str(row['aadult1phone']),
+                aadult2phone = str(row['aadult2phone']),
+                astreet = row['astreet'],
+                acity = row['acity'],
+                astate = row['astate'],
+                azipcode = row['azipcode'],
+                agender = row['agender'],
+                afamkey = row['afamkey'],
+                grade = row['agrade']
+            )
+            stu.save()
+        else:
+            stu.update(
+                aeriesid = row['aeriesid'],
+                afname = row['afname'],
+                alname = row['alname'],
+                fname = row['afname'],
+                lname = row['alname'],
+                aphone = str(row['aphone']),
+                aadults = row['aadults'],
+                aadultemail = str(row['aadultemail']),
+                aadult1phone = str(row['aadult1phone']),
+                aadult2phone = str(row['aadult2phone']),
+                astreet = row['astreet'],
+                acity = row['acity'],
+                astate = row['astate'],
+                azipcode = row['azipcode'],
+                agender = row['agender'],
+                afamkey = row['afamkey'],
+                grade = row['agrade']
+            )
+    
+    return render_template("index.html")
 
 # @app.route("/fixcheckins")
 # def fixcheckins():
@@ -20,49 +123,50 @@ import time
 #     return
 
 
-# @app.route('/addlatlon')
-# def addlatlon():
+@app.route('/addlatlon')
+def addlatlon():
 
-#     query = Q(astreet__exists=True) & Q(acity__exists=True) & Q(astate__exists=True) & Q(azipcode__exists=True) & Q(lat__exists=False) & Q(lon__exists=False)
+    query = Q(astreet__exists=True) & Q(acity__exists=True) & Q(astate__exists=True) & Q(azipcode__exists=True) & Q(lat__exists=False) & Q(lon__exists=False)
 
-#     users = User.objects(query)
-#     total = len(users)
-#     for i,user in enumerate(users):
+    users = User.objects(query)
+    total = len(users)
+    for i,user in enumerate(users):
 
-#         if user.ustreet:
-#             street = user.ustreet
-#         else:
-#             street = user.astreet
+        if user.ustreet:
+            street = user.ustreet
+        else:
+            street = user.astreet
 
-#         if user.ucity:
-#             city = user.ucity
-#         else:
-#             city = user.acity
+        if user.ucity:
+            city = user.ucity
+        else:
+            city = user.acity
 
-#         if user.ustate:
-#             state = user.ustate
-#         else:
-#             state = user.astate
+        if user.ustate:
+            state = user.ustate
+        else:
+            state = user.astate
 
-#         if user.uzipcode:
-#             zipcode = user.uzipcode
-#         else:
-#             zipcode = user.azipcode
+        if user.uzipcode:
+            zipcode = user.uzipcode
+        else:
+            zipcode = user.azipcode
 
-#         url = f"https://nominatim.openstreetmap.org/search?street={street}&city={city}&state={state}&postalcode={zipcode}&format=json&addressdetails=1&email=stephen.wright@ousd.org"
-#         r = requests.get(url)
-#         try:
-#             r = r.json()
-#         except:
-#             pass
-#         else:
-#             if len(r) != 0:
-#                 user.lat = float(r[0]['lat'])
-#                 user.lon = float(r[0]['lon'])
-#                 user.save()
-#                 print(f"{i}/{total}: {user.lat} {user.lon}")
-#                 time.sleep(2)
-#     return render_template("index.html")
+        url = f"https://nominatim.openstreetmap.org/search?street={street}&city={city}&state={state}&postalcode={zipcode}&format=json&addressdetails=1&email=stephen.wright@ousd.org"
+        r = requests.get(url)
+        try:
+            r = r.json()
+        except:
+            print(f"{i}/{total}: failed for {user.fname} {user.lname}")
+            pass
+        else:
+            if len(r) != 0:
+                user.lat = float(r[0]['lat'])
+                user.lon = float(r[0]['lon'])
+                user.save()
+                print(f"{i}/{total}: {user.lat} {user.lon}")
+                time.sleep(2)
+    return render_template("index.html")
 
 # @app.route('/deleteopenhelps')
 # def deleteopenhelps():
