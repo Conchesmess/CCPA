@@ -3,7 +3,8 @@
 {% block body %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0-beta.1/leaflet.css" />
 
-<div id="map" style="height: 600px;"></div>
+<div id="map" style="height: 800px;"></div>
+Red Icons have siblings
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0-beta.1/leaflet.js"></script>
 <script type="text/javascript">
@@ -24,11 +25,37 @@
     // Now add the layer onto the map
     map.addLayer(layer);
 
+    const redIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    const blueIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
     // It even opens up a popup when you click it!
     
     {% for user in users %}
         {% if user.lat and user.lon %}
-            L.marker(['{{user.lat}}', '{{user.lon}}']).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%}{{user.astreet}}{%endif%} <br> {{user.azipcode}}'</strong>");
+            if ('{{user.siblings|length}}' > 1) {
+                thisIcon = redIcon;
+            } 
+            else {
+                thisIcon = blueIcon
+            }
+            L.marker(['{{user.lat}}', '{{user.lon}}'],{icon: thisIcon}).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%}{{user.astreet}}{%endif%}, {{user.azipcode}}{% if user.siblings|length > 1 %}<br>Siblings:{% for sib in user.siblings%}{%if sib!=user%}<br> {{sib.fname}} {{sib.lname}} (advisor: {{sib.advisor}}){%endif%}{%endfor%}{% endif %}'</strong>");
         {% endif %}
     {% endfor %}
     L.marker([37.7614735,-122.1942649]).addTo(map).bindPopup("<strong>CCPA</strong>").openPopup();
