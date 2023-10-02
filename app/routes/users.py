@@ -190,7 +190,7 @@ def profile(aeriesid=None):
 
     if current_user.role.lower() == "student":
         groups=None
-        if aid and current_user.aeriesid != aeriesid:
+        if aeriesid and current_user.aeriesid != aeriesid:
             flash('You can only view your own profile.')
             return redirect(url_for('profile'))
         else:
