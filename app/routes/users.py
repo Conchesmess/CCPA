@@ -268,7 +268,7 @@ def editprofile(aeriesid=None):
     if session['role'].lower() != 'student' and aeriesid:
         editUser = User.objects.get(aeriesid=aeriesid)
     else:
-        editUser = User.objects.get(oemail=session['gid'])
+        editUser = User.objects.get(oemail=current_user['oemail'])
 
     # first see if the form was posted and then reformat the phone numbers
     if request.method == 'POST':

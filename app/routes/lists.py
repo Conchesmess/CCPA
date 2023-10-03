@@ -11,8 +11,10 @@ from .users import formatphone
 import datetime as dt
 from flask_login import current_user
 
+@app.route('/listq/<nomap>', methods=['GET', 'POST'])
 @app.route('/listq', methods=['GET', 'POST'])
-def listq():
+
+def listq(nomap=0):
 
     form = ListQForm()
 

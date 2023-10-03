@@ -7,6 +7,14 @@ import requests
 import time
 import pandas as pd
 
+@app.route('/nolatlon')
+def fixapt():
+    users = User.objects(lat=None, ustreet__exists = True)
+    total = len(users)
+    for i,user in enumerate(users):
+        print(f"{i}/{total} {user.ustreet} {user.ustreet2}")
+    return render_template('index.html')
+
 @app.route('/advlist')
 def advlist():
     users = User.objects().order_by('advisor')
