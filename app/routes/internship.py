@@ -1,17 +1,19 @@
 from app import app
 from flask import render_template, redirect, flash, url_for
-from app.classes.data import Internship, User
+from app.classes.data import Internship, User, Internshp_Timesheet, Internship_Timesheet_Day
 from app.classes.forms import InternshipForm, TextAreaForm
 from datetime import datetime as dt
 from flask_login import current_user
 import phonenumbers
 import requests
+from mongoengine.errors import NotUniqueError
 
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
 
     form = TextAreaForm()
     iship = Internship.objects.get(pk=intID)
+    timesheets = Internshp_Timesheet.objects(internship=iship)
     if form.validate_on_submit():
         emails = form.csv.data.split(',')
 
@@ -26,9 +28,9 @@ def internship(intID):
                     iship.save()
         form.csv.data = ""
 
-    return render_template('internship/internship.html',internship=iship, form=form)
+    return render_template('internship/internship.html',internship=iship, form=form, timesheets=timesheets)
 
-@app.route('/unenrollstu/<stuID>/<intID>')
+@app.route('/internship/unenrollstu/<stuID>/<intID>')
 def unenrollstu(stuID,intID):
     stu = User.objects.get(pk=stuID)
     iship = Internship.objects.get(pk=intID)
@@ -37,12 +39,12 @@ def unenrollstu(stuID,intID):
     )
     return redirect(url_for('internship',intID=intID))
 
-@app.route('/internships')
+@app.route('/internship/list')
 def internships():
     internships = Internship.objects()
     return render_template('internship/internships.html',internships=internships)
 
-@app.route('/internshipmap')
+@app.route('/internship/map')
 def internshipmap():
     internships=Internship.objects()
     return render_template('internship/internshipmap.html',internships=internships)
@@ -89,7 +91,7 @@ def int_lat_lon(internship):
             else:
                 flash('Could not get lat/lon for mapping.')
 
-@app.route('/newinternship', methods=['GET', 'POST'])
+@app.route('/internship/new', methods=['GET', 'POST'])
 def new_internship():
 
     form = InternshipForm()
@@ -138,7 +140,7 @@ def new_internship():
 
     return render_template('internship/internshipform.html',form=form)
 
-@app.route('/editinternship/<intID>', methods=['GET', 'POST'])
+@app.route('/internship/edit/<intID>', methods=['GET', 'POST'])
 def edit_internship(intID):
     form = InternshipForm()
     editInt = Internship.objects.get(pk=intID)
@@ -187,12 +189,12 @@ def edit_internship(intID):
     form.contact_fname.data = editInt.contact_fname
     form.contact_lname.data = editInt.contact_lname
     form.contact_email.data = editInt.contact_email
+    form.ccpa_staff.data = editInt.ccpa_staff.oemail
     if editInt.contact_phone:
         form.contact_phone_areacode.data = editInt.contact_phone[:3]
         form.contact_phone_prefix.data = editInt.contact_phone[3:6]
         form.contact_phone_suffix.data = editInt.contact_phone[6:]
     form.notes.data = editInt.notes
-
     if editInt.phone:
         form.phone_areacode.data = editInt.phone[:3]
         form.phone_prefix.data = editInt.phone[3:6]
@@ -203,3 +205,19 @@ def edit_internship(intID):
     form.zipcode.data = editInt.zipcode
 
     return render_template('internship/internshipform.html',form=form)
+
+@app.route('/internship/newtimesheet/<intID>')
+def newtimesheet(intID):
+    iship = Internship.objects.get(pk=intID)
+
+    newTS = Internshp_Timesheet(
+        internship = iship,
+        intern = current_user
+        )
+
+    try:
+        newTS.save()
+    except NotUniqueError:
+        flash("You already have a timesheet!")
+
+    return redirect(url_for('internship',intID=intID))

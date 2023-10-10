@@ -5,10 +5,10 @@
 <div class="container">
 
 <h1 class="display-1">{{internship.site_name}}</h1>
-<a href="/editinternship/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
+<a href="/internship/edit/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
 <a href="/deleteinternship/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
 {% if current_user in internship.ccpa_students %}
-<a href="#">New Timesheet</a>
+    <a href="/internship/newtimesheet/{{internship.id}}">New Timesheet</a>
 {% endif %}
 <br>
 <br>
@@ -41,10 +41,19 @@
 <hr>
 <b>Students Currently Enrolled:</b> <br>
 {% for stu in internship.ccpa_students %}
-    <a href="/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
+    <a href="/internship/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
     {{stu.fname}} {{stu.lname}} <br>
 {% endfor %}
 <br>
+
+<p><b>Timesheets</b></p>
+{% for tsheet in timesheets %}
+
+    {{moment(tsheet.createdate).calendar()}} {{tsheet.intern.fname}} {{tsheet.intern.lname}} <br>
+
+{% endfor %}
+<br>
+
 <hr>
 {% for field in form.errors %}
     {% for error in form.errors[field] %}

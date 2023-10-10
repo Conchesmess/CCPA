@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+        <h1>Internship Edit</h1>
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="form-group">
+            <form method=post>
+                {{ form.hidden_tag() }}
+                <p>Site Name: {{ form.site_name(class="form-control")}}</p>
+
+                <p>CCPA Staff Contact Email Address: {{ form.ccpa_staff(class="form-control",placeholder="ccpa.staff@ousd.org") }}</p>
+                <p><b>Site Information</b></p>
+                <p>Street: {{ form.street(class="form-control")}}</p>
+                <p>Apt or Office # (optional): {{ form.street2(class="form-control")}}</p>
+                <div class="row">
+                    <div class="col">
+                        City: {{ form.city(class="form-control")}}
+                    </div>
+                    <div class="col-1">
+                        State: {{ form.state(class="form-control")}}
+                    </div>
+                    <div class="col">
+                        Zipcode: {{ form.zipcode(class="form-control")}}
+                    </div>
+                </div>
+                <p class="pt-3">Phone:</p>
+                <div class="row">
+                    <div class="col-1">
+                        {{ form.phone_areacode(class="form-control",placeholder="510") }}
+                    </div>
+                    <div class="col-1">
+                        {{ form.phone_prefix(class="form-control",placeholder="555") }}
+                    </div>
+                    <div class="col-1">
+                        {{ form.phone_suffix(class="form-control",placeholder="5555") }}
+                    </div>
+                </div>
+                <hr>
+                <p><b>Site Contact Person</b></p>
+                <div class="row">
+                    <div class="col">
+                        <p>{{ form.contact_fname(class="form-control",placeholder="first name")}}
+                    </div>
+                    <div class="col">
+                        {{ form.contact_lname(class="form-control",placeholder="last name")}}
+                    </div>
+                </div>
+                <p>Contact Email: {{ form.contact_email(class="form-control")}}</p>
+                <p>Contact Phone:</p>
+                <div class="row">
+                    <div class="col-1">
+                        {{ form.contact_phone_areacode(class="form-control",placeholder="510") }}
+                    </div>
+                    <div class="col-1">
+                        {{ form.contact_phone_prefix(class="form-control",placeholder="555") }}
+                    </div>
+                    <div class="col-1">
+                        {{ form.contact_phone_suffix(class="form-control",placeholder="5555") }}
+                    </div>
+                </div>                <p>Notes: {{form.notes(class="form-control")}}</p>
+                <p>{{form.submit(class="form-control btn-primary")}}</p>
+            </form>
+        </div>
+    </div>
+{% endblock %}

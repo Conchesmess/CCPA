@@ -6,7 +6,7 @@ from flask import render_template, redirect, session, flash, url_for, Markup
 from app.classes.data import Course, User, GoogleClassroom, GEnrollment, CourseWork
 from app.classes.forms import SimpleForm, SortOrderCohortForm
 from datetime import datetime as dt
-import mongoengine.errors
+from mongoengine.errors import NotUniqueError
 import google.oauth2.credentials
 import googleapiclient.discovery
 from google.auth.exceptions import RefreshError

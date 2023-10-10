@@ -37,7 +37,7 @@ class InternshipForm(FlaskForm):
     street = StringField()
     street2 = StringField()
     city = StringField()
-    state = StringField()
+    state = StringField(default="CA")
     zipcode = StringField()
     phone_areacode = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
     phone_prefix = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
