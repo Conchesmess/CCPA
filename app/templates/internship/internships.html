@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<table class="table">
+    <tr><th></th><th>Site</th><th>CCPA Contact</th><th>Street</th><th>Site Contact</th></tr>
+    {% for int in internships %}
+    <tr>
+        <td>
+            <a href="/deleteinternship/{{int.id}}"><img width="20" src="/static/delete.png"></a>
+            <a href="/editinternship/{{int.id}}"><img width="20" src="/static/edit.png"></a>
+        </td>
+        <td>
+            <a href="/internship/{{int.id}}">{{int.site_name}}</a>
+        </td>
+        <td>
+            {{int.ccpa_staff.fname}} {{int.ccpa_staff.lname}}
+        </td>
+        <td>
+            {{int.street}} 
+            {% if int.street2 %} <br>{{int.street2}} {% endif %}
+        </td>
+        <td>
+            {{int.contact_fname}} {{int.contact_lname}} 
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

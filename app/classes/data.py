@@ -1,26 +1,42 @@
 
-#from typing_extensions import Required
 from ast import List
 from mongoengine import Document, EmbeddedDocumentListField, DictField, FloatField, ObjectIdField, EmailField
 from mongoengine import BooleanField, URLField, DateField, FileField, StringField, IntField, ReferenceField, EmbeddedDocument
 from mongoengine import DateTimeField, ListField, URLField, CASCADE
-#from flask_mongoengine import Document
 from flask_login import UserMixin
 from bson.objectid import ObjectId
 import datetime as d
+import phonenumbers
+
+class Internship_Timesheet_Day(EmbeddedDocument):
+    start_time = DateTimeField()
+    end_time = DateTimeField()
+
+
+class Internshp_Timesheet(Document):
+    student = ReferenceField('User')
+    Internship = ReferenceField('Internship')
+    day = EmbeddedDocumentListField('Internship_Timesheet_Day')
+
 
 class Internship(Document):
     site_name = StringField()
-    contact_fame = StringField()
+    ccpa_staff = ReferenceField('User')
+    ccpa_students = ListField(ReferenceField('User'))
+    contact_fname = StringField()
     contact_lname = StringField()
-    contact_email = EmailField()
+    contact_email = StringField()
+    contact_phone = StringField()
+    phone = StringField()
     street = StringField()
+    street2 = StringField()
     city = StringField()
     state = StringField()
-    zipcode = IntField()
-    ph_area_code = IntField()
-    ph_prefix = IntField()
-    ph_sufix = IntField()
+    zipcode = StringField()
+    lat = FloatField()
+    lon = FloatField()
+    notes = StringField()
+
 
 class Adult(EmbeddedDocument):
     preferredcontact = BooleanField()

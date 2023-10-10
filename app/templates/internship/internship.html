@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<h1 class="display-1">{{internship.site_name}}</h1>
+<a href="/editinternship/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
+<a href="/deleteinternship/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
+{% if current_user in internship.ccpa_students %}
+<a href="#">New Timesheet</a>
+{% endif %}
+<br>
+<br>
+<p><b>CCPA Staff Contact:</b> {{internship.ccpa_staff.fname}} {{internship.ccpa_staff.lname}}</p>
+<b>Site Information</b> <br>
+{% if internship.phone %}
+    ({{internship.phone[:3]}}) {{internship.phone[3:6]}}-{{internship.phone[6:]}} <br>
+{% endif %}
+{{internship.street}} 
+{% if internship.street2 %}
+<br>{{internship.street2}} 
+{% endif %}
+<br>
+{{internship.city}}, {{internship.state}}  {{internship.zipcode}} 
+{% if internship.lat %}
+<br>{{internship.lat}}/{{internship.lon}} 
+{% endif %}
+<br>
+<hr>
+
+<b>Site Contact</b> <br>
+{{internship.contact_fname}} {{internship.contact_lname}} <br>
+{{internship.contact_email}} <br>
+{% if internship.contact_phone %}
+    ({{internship.contact_phone[:3]}}) {{internship.contact_phone[3:6]}}-{{internship.contact_phone[6:]}} <br>
+{% endif %}
+<hr>
+<b>Notes:</b> <br>
+{{internship.notes}}
+<hr>
+<b>Students Currently Enrolled:</b> <br>
+{% for stu in internship.ccpa_students %}
+    <a href="/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
+    {{stu.fname}} {{stu.lname}} <br>
+{% endfor %}
+<br>
+<hr>
+{% for field in form.errors %}
+    {% for error in form.errors[field] %}
+        <div class="alert alert-error">
+            <strong>Error!</strong>{{field}}: {{error}}
+        </div>
+    {% endfor %}
+{% endfor %}
+<b>Add Students</b>
+<form method=post>
+{{ form.hidden_tag() }}
+Type a comma seperated list of one or more student email addresses to add them to this internship. <br>
+{{ form.csv(cols="80",rows="8") }} <br>
+{{form.submit()}}
+</form>
+
+</div>
+{% endblock %}

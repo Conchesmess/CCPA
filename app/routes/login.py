@@ -7,7 +7,7 @@ from flask_login import (
     current_user,
     login_required,
     login_user,
-    logout_user,
+    logout_user
 )
 import requests
 from app.classes.data import User
@@ -20,7 +20,6 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow                
 import googleapiclient.discovery   
 from oauthlib.oauth2 import WebApplicationClient
-
 
 
 #get all the credentials for google

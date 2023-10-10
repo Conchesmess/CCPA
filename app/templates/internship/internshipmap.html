@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0-beta.1/leaflet.css" />
+
+<div id="map" style="height: 800px;"></div>
+Red Icons have siblings
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.8.0-beta.1/leaflet.js"></script>
+<script type="text/javascript">
+    // The first parameter are the coordinates of the center of the map
+    // The second parameter is the zoom level
+    var map = L.map('map').setView([37.7614735,-122.1942649], 13);
+    
+    // {s}, {z}, {x} and {y} are placeholders for map tiles
+    // {x} and {y} are the x/y of where you are on the map
+    // {z} is the zoom level
+    // {s} is the subdomain of cartodb
+    // 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'
+    // 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+    });
+    
+    // Now add the layer onto the map
+    map.addLayer(layer);
+
+    const redIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    const blueIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    // It even opens up a popup when you click it!
+    
+    {% for iship in internships %}
+        {% if iship.lat and iship.lon %}
+                thisIcon = blueIcon
+            L.marker(['{{iship.lat}}', '{{iship.lon}}'],{icon: thisIcon}).addTo(map).bindPopup("<strong>'<a href='/internship/{{iship.id}}'>{{iship.site_name}}</a> {{iship.street}} <br> {%if iship.street2%}{{iship.street2}}<br>{% endif %}{{iship.city}}, {{iship.state}}  {{iship.zipcode}}</strong>");
+        {% endif %}
+    {% endfor %}
+    L.marker([37.7614735,-122.1942649]).addTo(map).bindPopup("<strong>CCPA</strong>").openPopup();
+
+
+</script>
+
+{% endblock %}

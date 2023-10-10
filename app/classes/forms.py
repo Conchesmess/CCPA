@@ -3,26 +3,47 @@ from typing import Text
 from flask.app import Flask
 from flask_wtf import FlaskForm
 from mongoengine.fields import IntField
-#from wtforms.fields.html5 import URLField, DateField, DateTimeField, EmailField
-#from wtforms.widgets.core import Select
 from wtforms_components import TimeField
-from wtforms.validators import URL, NumberRange, Email, Optional, InputRequired, ValidationError
-from wtforms import URLField, DateField, DateTimeField, EmailField, widgets, SelectMultipleField, StringField, SubmitField, validators, TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField
+from wtforms.validators import Length, URL, NumberRange, Email, Optional, InputRequired, ValidationError
+from wtforms import URLField, DateField, DateTimeField, EmailField, widgets, SelectMultipleField, StringField, SubmitField, validators
+from wtforms import TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField
 import datetime as d
 from zoneinfo import ZoneInfo
+import phonenumbers
 
-class Internship(FlaskForm):
+class TextAreaForm(FlaskForm):
+    csv = TextAreaField()
+    submit = SubmitField()
+
+class TimeSheetForm(FlaskForm):
+    date = DateField(default=d.datetime.now(ZoneInfo('US/Pacific')))
+    start_time_hr = SelectField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
+    start_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
+    start_time_am_pm = SelectField(choices=[('AM','AM'),('PM','PM')])
+    end_time_hr = SelectField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
+    end_time_min = IntegerField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
+    end_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')])
+    submit = SubmitField('Submit')
+
+class InternshipForm(FlaskForm):
     site_name = StringField(validators=[InputRequired()])
-    contact_fame = StringField()
+    ccpa_staff = EmailField(validators=[Optional()])
+    contact_fname = StringField()
     contact_lname = StringField()
-    contact_email = EmailField(validators=[Email()])
+    contact_email = EmailField(validators=[Optional(),Email()])
+    contact_phone_areacode = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
+    contact_phone_prefix = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
+    contact_phone_suffix = StringField(validators=[Optional(),Length(min=4,max=4,message="Must be four characters")])
     street = StringField()
+    street2 = StringField()
     city = StringField()
     state = StringField()
     zipcode = StringField()
-    ph_area_code = IntField(validators=[(NumberRange(min=111, max=999, message="three digit area code."))])
-    ph_prefix = IntField()
-    ph_sufix = IntField()
+    phone_areacode = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
+    phone_prefix = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
+    phone_suffix = StringField(validators=[Optional(),Length(min=4,max=4,message="Must be four characters")])
+    notes = TextAreaField()
+    submit = SubmitField('Submit')
 
 class AddToCohortForm(FlaskForm):
     emails = TextAreaField()

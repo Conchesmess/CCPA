@@ -117,19 +117,6 @@ def importusers():
     
     return render_template("index.html")
 
-# @app.route("/fixcheckins")
-# def fixcheckins():
-#     query = Q(workingon__exists = False) and Q(desc__exists = True)
-#     checkins = CheckIn.objects(query)
-#     length = len(checkins)
-#     for i,checkin in enumerate(checkins):
-#         checkin.update(
-#             workingon = checkin.desc,
-#             unset__desc = 1
-#         )
-#         print(f"{i}/{length}")
-#     return
-
 
 @app.route('/addlatlon')
 def addlatlon():
