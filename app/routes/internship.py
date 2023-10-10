@@ -7,6 +7,7 @@ from flask_login import current_user
 import phonenumbers
 import requests
 from mongoengine.errors import NotUniqueError
+from login import crew, admin
 
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
@@ -32,11 +33,14 @@ def internship(intID):
 
 @app.route('/internship/unenrollstu/<stuID>/<intID>')
 def unenrollstu(stuID,intID):
-    stu = User.objects.get(pk=stuID)
-    iship = Internship.objects.get(pk=intID)
-    iship.update(
-        pull__ccpa_students=stu
-    )
+    if current_user.oemail in admin or current_user.oemail in crew:        
+        stu = User.objects.get(pk=stuID)
+        iship = Internship.objects.get(pk=intID)
+        iship.update(
+            pull__ccpa_students=stu
+        )
+    else:
+        flash("You don't have privleges to do that.")
     return redirect(url_for('internship',intID=intID))
 
 @app.route('/internship/list')
@@ -50,11 +54,15 @@ def internshipmap():
     return render_template('internship/internshipmap.html',internships=internships)
 
 
-@app.route('/deleteinternship/<intID>')
+@app.route('/internship/delete/<intID>')
 def internship_delete(intID):
-    intDelete = Internship.objects.get(pk=intID)
-    flash(f"{intDelete.site_name} deleted.")
-    intDelete.delete()
+    if current_user.oemail in admin or current_user.oemail in crew:        
+        intDelete = Internship.objects.get(pk=intID)
+        flash(f"{intDelete.site_name} deleted.")
+        intDelete.delete()
+    else:
+        flash("You don't have privleges to delete.")
+    
     return redirect(url_for('internships'))
 
 
@@ -94,117 +102,127 @@ def int_lat_lon(internship):
 @app.route('/internship/new', methods=['GET', 'POST'])
 def new_internship():
 
-    form = InternshipForm()
+    if current_user.oemail in admin or current_user.oemail in crew:        
 
-    if form.validate_on_submit():
-        phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
-        if len(phone) > 0:
-            phone = validate_phone(phone)
-            print(type(phone))
-        else:
-            phone = ""
+        form = InternshipForm()
 
-        contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
-        if len(contact_phone) > 0:
-            contact_phone = validate_phone(contact_phone)
-        else:
-            contact_phone = ""
-
-        new_internship = Internship(
-            site_name = form.site_name.data,
-            contact_fname = form.contact_fname.data,
-            contact_lname = form.contact_lname.data,
-            contact_email = form.contact_email.data,
-            contact_phone = contact_phone,
-            notes = form.notes.data,
-            phone = phone,
-            street = form.street.data,
-            city = form.city.data,
-            state = form.state.data,
-            zipcode = form.zipcode.data
-        )
-
-        new_internship.save()
-
-        if form.ccpa_staff.data:
-            try:
-                ccpa_staff = User.objects.get(oemail=form.ccpa_staff.data)
-            except:
-                flash("That staff member does not have an account on this site yet.")
+        if form.validate_on_submit():
+            phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
+            if len(phone) > 0:
+                phone = validate_phone(phone)
+                print(type(phone))
             else:
-                editInt.update(ccpa_staff = ccpa_staff)
+                phone = ""
 
-        int_lat_lon(new_internship)
+            contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
+            if len(contact_phone) > 0:
+                contact_phone = validate_phone(contact_phone)
+            else:
+                contact_phone = ""
 
-        return redirect(url_for('internship',intID=new_internship.id))
+            new_internship = Internship(
+                site_name = form.site_name.data,
+                contact_fname = form.contact_fname.data,
+                contact_lname = form.contact_lname.data,
+                contact_email = form.contact_email.data,
+                contact_phone = contact_phone,
+                notes = form.notes.data,
+                phone = phone,
+                street = form.street.data,
+                city = form.city.data,
+                state = form.state.data,
+                zipcode = form.zipcode.data
+            )
+
+            new_internship.save()
+
+            if form.ccpa_staff.data:
+                try:
+                    ccpa_staff = User.objects.get(oemail=form.ccpa_staff.data)
+                except:
+                    flash("That staff member does not have an account on this site yet.")
+                else:
+                    editInt.update(ccpa_staff = ccpa_staff)
+
+            int_lat_lon(new_internship)
+
+            return redirect(url_for('internship',intID=new_internship.id))
+        
+        else:
+            flash("You can't create internships.")
 
     return render_template('internship/internshipform.html',form=form)
 
 @app.route('/internship/edit/<intID>', methods=['GET', 'POST'])
 def edit_internship(intID):
-    form = InternshipForm()
-    editInt = Internship.objects.get(pk=intID)
-    if form.validate_on_submit():
+    if current_user.oemail in admin or current_user.oemail in crew:        
 
-        phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
-        if len(phone) > 0:
-            phone = validate_phone(phone)
-        else:
-            phone = form.phone.data
+        form = InternshipForm()
+        editInt = Internship.objects.get(pk=intID)
+        if form.validate_on_submit():
 
-        contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
-        if len(contact_phone) > 0:
-            contact_phone = validate_phone(contact_phone)
-        else:
-            contact_phone = form.contact_phone.data
-
-        editInt.update(
-            site_name = form.site_name.data,
-            contact_fname = form.contact_fname.data,
-            contact_lname = form.contact_lname.data,
-            contact_email = form.contact_email.data,
-            contact_phone = contact_phone,
-            notes = form.notes.data,
-            phone = phone,
-            street = form.street.data,
-            city = form.city.data,
-            state = form.state.data,
-            zipcode = form.zipcode.data
-        )
-
-        if form.ccpa_staff.data:
-            try:
-                ccpa_staff = User.objects.get(oemail=form.ccpa_staff.data)
-            except:
-                flash("That staff member does not have an account on this site yet.")
+            phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
+            if len(phone) > 0:
+                phone = validate_phone(phone)
             else:
-                editInt.update(ccpa_staff = ccpa_staff)
+                phone = form.phone.data
 
-        editInt.reload()
-        int_lat_lon(editInt)
+            contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
+            if len(contact_phone) > 0:
+                contact_phone = validate_phone(contact_phone)
+            else:
+                contact_phone = form.contact_phone.data
 
+            editInt.update(
+                site_name = form.site_name.data,
+                contact_fname = form.contact_fname.data,
+                contact_lname = form.contact_lname.data,
+                contact_email = form.contact_email.data,
+                contact_phone = contact_phone,
+                notes = form.notes.data,
+                phone = phone,
+                street = form.street.data,
+                city = form.city.data,
+                state = form.state.data,
+                zipcode = form.zipcode.data
+            )
+
+            if form.ccpa_staff.data:
+                try:
+                    ccpa_staff = User.objects.get(oemail=form.ccpa_staff.data)
+                except:
+                    flash("That staff member does not have an account on this site yet.")
+                else:
+                    editInt.update(ccpa_staff = ccpa_staff)
+
+            editInt.reload()
+            int_lat_lon(editInt)
+
+            return redirect(url_for('internship',intID=editInt.id))
+
+        form.site_name.data =  editInt.site_name
+        form.contact_fname.data = editInt.contact_fname
+        form.contact_lname.data = editInt.contact_lname
+        form.contact_email.data = editInt.contact_email
+        form.ccpa_staff.data = editInt.ccpa_staff.oemail
+        if editInt.contact_phone:
+            form.contact_phone_areacode.data = editInt.contact_phone[:3]
+            form.contact_phone_prefix.data = editInt.contact_phone[3:6]
+            form.contact_phone_suffix.data = editInt.contact_phone[6:]
+        form.notes.data = editInt.notes
+        if editInt.phone:
+            form.phone_areacode.data = editInt.phone[:3]
+            form.phone_prefix.data = editInt.phone[3:6]
+            form.phone_suffix.data = editInt.phone[6:]
+        form.street.data = editInt.street
+        form.city.data = editInt.city
+        form.state.data = editInt.state
+        form.zipcode.data = editInt.zipcode
+
+        return render_template('internship/internshipform.html',form=form)
+    else:
+        flash("You can't edit internships.")
         return redirect(url_for('internship',intID=editInt.id))
-
-    form.site_name.data =  editInt.site_name
-    form.contact_fname.data = editInt.contact_fname
-    form.contact_lname.data = editInt.contact_lname
-    form.contact_email.data = editInt.contact_email
-    form.ccpa_staff.data = editInt.ccpa_staff.oemail
-    if editInt.contact_phone:
-        form.contact_phone_areacode.data = editInt.contact_phone[:3]
-        form.contact_phone_prefix.data = editInt.contact_phone[3:6]
-        form.contact_phone_suffix.data = editInt.contact_phone[6:]
-    form.notes.data = editInt.notes
-    if editInt.phone:
-        form.phone_areacode.data = editInt.phone[:3]
-        form.phone_prefix.data = editInt.phone[3:6]
-        form.phone_suffix.data = editInt.phone[6:]
-    form.street.data = editInt.street
-    form.city.data = editInt.city
-    form.state.data = editInt.state
-    form.zipcode.data = editInt.zipcode
-
-    return render_template('internship/internshipform.html',form=form)
 
 @app.route('/internship/newtimesheet/<intID>')
 def newtimesheet(intID):
