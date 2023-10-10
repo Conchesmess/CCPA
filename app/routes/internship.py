@@ -7,7 +7,7 @@ from flask_login import current_user
 import phonenumbers
 import requests
 from mongoengine.errors import NotUniqueError
-from login import crew, admin
+from .login import crew, admins
 
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
@@ -15,25 +15,29 @@ def internship(intID):
     form = TextAreaForm()
     iship = Internship.objects.get(pk=intID)
     timesheets = Internshp_Timesheet.objects(internship=iship)
-    if form.validate_on_submit():
-        emails = form.csv.data.split(',')
 
-        for email in emails:
-            try:
-                student = User.objects.get(oemail=email.strip())
-            except:
-                flash(f"{email} does not exist in the database")
-            else:
-                if student not in iship.ccpa_students:
-                    iship.ccpa_students.append(student)
-                    iship.save()
-        form.csv.data = ""
+    if form.validate_on_submit():
+        if current_user.oemail in admins or current_user.oemail in crew:
+            emails = form.csv.data.split(',')
+
+            for email in emails:
+                try:
+                    student = User.objects.get(oemail=email.strip())
+                except:
+                    flash(f"{email} does not exist in the database")
+                else:
+                    if student not in iship.ccpa_students:
+                        iship.ccpa_students.append(student)
+                        iship.save()
+            form.csv.data = ""
+        else:
+            flash("You can't enroll students")
 
     return render_template('internship/internship.html',internship=iship, form=form, timesheets=timesheets)
 
 @app.route('/internship/unenrollstu/<stuID>/<intID>')
 def unenrollstu(stuID,intID):
-    if current_user.oemail in admin or current_user.oemail in crew:        
+    if current_user.oemail in admins or current_user.oemail in crew:        
         stu = User.objects.get(pk=stuID)
         iship = Internship.objects.get(pk=intID)
         iship.update(
@@ -56,7 +60,7 @@ def internshipmap():
 
 @app.route('/internship/delete/<intID>')
 def internship_delete(intID):
-    if current_user.oemail in admin or current_user.oemail in crew:        
+    if current_user.oemail in admins or current_user.oemail in crew:        
         intDelete = Internship.objects.get(pk=intID)
         flash(f"{intDelete.site_name} deleted.")
         intDelete.delete()
@@ -102,7 +106,7 @@ def int_lat_lon(internship):
 @app.route('/internship/new', methods=['GET', 'POST'])
 def new_internship():
 
-    if current_user.oemail in admin or current_user.oemail in crew:        
+    if current_user.oemail in admins or current_user.oemail in crew:        
 
         form = InternshipForm()
 
@@ -147,15 +151,16 @@ def new_internship():
             int_lat_lon(new_internship)
 
             return redirect(url_for('internship',intID=new_internship.id))
-        
-        else:
-            flash("You can't create internships.")
 
-    return render_template('internship/internshipform.html',form=form)
+        return render_template('internship/internshipform.html',form=form)
+    else:
+        flash("You can't create internships.")
+        return redirect(url_for('internships'))
+
 
 @app.route('/internship/edit/<intID>', methods=['GET', 'POST'])
 def edit_internship(intID):
-    if current_user.oemail in admin or current_user.oemail in crew:        
+    if current_user.oemail in admins or current_user.oemail in crew:        
 
         form = InternshipForm()
         editInt = Internship.objects.get(pk=intID)
