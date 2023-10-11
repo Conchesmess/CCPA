@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<h1 class="display-5">Timesheet</h1>
+<h3>{{ts.internship.site_name}}</h3>
+<h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
+<table class="table">
+    <tr>
+        <th></th><th>date</th><th>Hours</th><th>Start</th><th>End</th>
+    </tr>
+    {% for day in ts.days | sort(attribute='start_datetime') %}
+    <tr>
+        <td>
+            <a href="/internship/deletetsday/{{ts.id}}/{{day.oid}}"><img width="20" src="/static/delete.png"></a>
+        </td>
+        <td>
+            {{moment(day.start_datetime.date()).format('dddd M/D/YYYY')}}
+        </td>
+        <td>
+            {{day.hrs}}
+        </td>
+        <td>
+            {{day.start_datetime.time()}}
+        </td>
+        <td>
+            {{day.end_datetime.time()}}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+<br>
+
+{% if current_user == ts.intern %}
+    {% for field in form.errors %}
+    {% for error in form.errors[field] %}
+        <div class="alert alert-error">
+            <strong>Error!</strong>{{field}}: {{error}}
+        </div>
+    {% endfor %}
+    {% endfor %}
+    <form method=post>
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-2">
+            Date:
+            {{form.date(class="form-control")}}
+        </div> 
+        <div class="col-1">
+            Start Time:
+            {{form.start_time_hr(class="form-control")}}
+        </div> 
+        <div class="col-1">
+            &nbsp;
+            {{form.start_time_min(class="form-control")}}
+        </div> 
+        <div class="col-1">
+            &nbsp;
+            {{form.start_time_am_pm(class="form-control")}}
+        </div>
+        <div class="col-1">
+            End Time:
+            {{form.end_time_hr(class="form-control")}}
+        </div> 
+        <div class="col-1">
+            &nbsp;
+            {{form.end_time_min(class="form-control")}}
+        </div> 
+        <div class="col-1">
+            &nbsp;
+            {{form.end_time_am_pm(class="form-control")}}
+        </div>
+        <div class="col-1">
+            &nbsp;
+            {{form.submit(class="form-control btn-primary")}}
+        </div>
+    </div>
+
+
+    </form>
+{% endif %}
+
+</div>
+
+{% endblock %}

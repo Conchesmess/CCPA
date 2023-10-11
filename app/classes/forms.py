@@ -17,11 +17,11 @@ class TextAreaForm(FlaskForm):
 
 class TimeSheetForm(FlaskForm):
     date = DateField(default=d.datetime.now(ZoneInfo('US/Pacific')))
-    start_time_hr = SelectField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
+    start_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)])
     start_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
-    start_time_am_pm = SelectField(choices=[('AM','AM'),('PM','PM')])
-    end_time_hr = SelectField(choices=[(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
-    end_time_min = IntegerField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
+    start_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')])
+    end_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)])
+    end_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
     end_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')])
     submit = SubmitField('Submit')
 

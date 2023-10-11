@@ -10,16 +10,15 @@ import phonenumbers
 
 class Internship_Timesheet_Day(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
-    start_time = DateTimeField()
-    end_time = DateTimeField()
+    start_datetime = DateTimeField()
+    end_datetime = DateTimeField()
+    hrs = FloatField()
 
-
-class Internshp_Timesheet(Document):
+class Internship_Timesheet(Document):
     createdate = DateTimeField(default=d.datetime.utcnow)
     intern = ReferenceField('User',unique=True, required=True)
     internship = ReferenceField('Internship', required=True)
-    day = EmbeddedDocumentListField('Internship_Timesheet_Day')
-
+    days = EmbeddedDocumentListField('Internship_Timesheet_Day')
 
 class Internship(Document):
     site_name = StringField()

@@ -1,20 +1,22 @@
 from app import app
 from flask import render_template, redirect, flash, url_for
-from app.classes.data import Internship, User, Internshp_Timesheet, Internship_Timesheet_Day
-from app.classes.forms import InternshipForm, TextAreaForm
+from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day
+from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm
 from datetime import datetime as dt
 from flask_login import current_user
 import phonenumbers
 import requests
 from mongoengine.errors import NotUniqueError
 from .login import crew, admins
+import datetime as dt
+from bson.objectid import ObjectId
 
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
 
     form = TextAreaForm()
     iship = Internship.objects.get(pk=intID)
-    timesheets = Internshp_Timesheet.objects(internship=iship)
+    timesheets = Internship_Timesheet.objects(internship=iship)
 
     if form.validate_on_submit():
         if current_user.oemail in admins or current_user.oemail in crew:
@@ -233,7 +235,7 @@ def edit_internship(intID):
 def newtimesheet(intID):
     iship = Internship.objects.get(pk=intID)
 
-    newTS = Internshp_Timesheet(
+    newTS = Internship_Timesheet(
         internship = iship,
         intern = current_user
         )
@@ -244,3 +246,68 @@ def newtimesheet(intID):
         flash("You already have a timesheet!")
 
     return redirect(url_for('internship',intID=intID))
+
+@app.route('/internship/timesheet/<tsID>', methods=['GET', 'POST'])
+def timesheet(tsID):
+    ts = Internship_Timesheet.objects.get(pk=tsID)
+    form = TimeSheetForm()
+    if form.validate_on_submit() and current_user == ts.intern:
+
+        if form.start_time_am_pm.data.lower() == "pm" and int(form.start_time_hr.data) < 12:
+            start_hr = int(form.start_time_hr.data) + 12
+        else:
+            start_hr = int(form.start_time_hr.data)
+
+        if form.end_time_am_pm.data.lower() == "pm" and int(form.end_time_hr.data) < 12:
+            end_hr = int(form.end_time_hr.data) + 12
+        else:
+            end_hr = int(form.end_time_hr.data)
+
+        start_datetime = dt.datetime(
+            form.date.data.year,
+            form.date.data.month,
+            form.date.data.day,
+            start_hr,
+            int(form.start_time_min.data),
+            0)
+
+        end_datetime = dt.datetime(
+            form.date.data.year,
+            form.date.data.month,
+            form.date.data.day,
+            end_hr,
+            int(form.end_time_min.data),
+            0)
+
+        diff = end_datetime-start_datetime
+
+        hrs = diff.total_seconds()/60/60
+        
+        #TODO
+        #create start and end datetimes from form fields and subtract to get the hrs
+        #Then store them in the embedded doc.
+        ts.days.create(
+            oid = ObjectId(),
+            start_datetime = start_datetime,
+            end_datetime = end_datetime,
+            hrs=hrs
+            )
+        ts.save()
+
+    return render_template("internship/timesheet.html", ts=ts, form=form)
+
+
+@app.route('/internship/deletetsday/<tsID>/<dayOID>')
+def deletetsday(tsID,dayOID):
+    ts = Internship_Timesheet.objects.get(pk=tsID)
+    #get works but the resulting object does not have a delete() method
+    #filter does have a delete method
+    #day = ts.days.get(oid=dayOID)
+    days = ts.days.filter(oid=dayOID)
+    if len(days) == 1:
+        days.delete()
+        ts.save()
+    else:
+        "There are more than one day with that OID.  That shouldn't happen!"
+
+    return redirect(url_for('timesheet',tsID=tsID))
