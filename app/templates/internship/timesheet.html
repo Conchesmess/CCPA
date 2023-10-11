@@ -9,7 +9,7 @@
 <h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
 <table class="table">
     <tr>
-        <th></th><th>date</th><th>Hours</th><th>Start</th><th>End</th>
+        <th></th><th>date</th><th>Hours</th><th>Start</th><th>End</th><th>Create Date</th>
     </tr>
     {% for day in ts.days | sort(attribute='start_datetime') %}
     <tr>
@@ -28,6 +28,9 @@
         <td>
             {{day.end_datetime.time()}}
         </td>
+        <td>
+            {{moment(day.createdate).calendar()}}
+        </td>
     </tr>
     {% endfor %}
 </table>
@@ -35,6 +38,8 @@
 <br>
 
 {% if current_user == ts.intern %}
+<hr class="border border-dark border-3">
+<h3>Add a new day</h3>
     {% for field in form.errors %}
     {% for error in form.errors[field] %}
         <div class="alert alert-error">

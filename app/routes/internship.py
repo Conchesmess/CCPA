@@ -283,16 +283,16 @@ def timesheet(tsID):
 
         hrs = diff.total_seconds()/60/60
         
-        #TODO
-        #create start and end datetimes from form fields and subtract to get the hrs
-        #Then store them in the embedded doc.
-        ts.days.create(
-            oid = ObjectId(),
-            start_datetime = start_datetime,
-            end_datetime = end_datetime,
-            hrs=hrs
-            )
-        ts.save()
+        if hrs <= 0:
+            flash("You can't create a entry with zero or negative time.  Make sure the end time comes AFTER the start time!")
+        else:
+            ts.days.create(
+                oid = ObjectId(),
+                start_datetime = start_datetime,
+                end_datetime = end_datetime,
+                hrs=hrs
+                )
+            ts.save()
 
     return render_template("internship/timesheet.html", ts=ts, form=form)
 
