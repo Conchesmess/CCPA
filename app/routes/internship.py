@@ -11,6 +11,13 @@ from .login import crew, admins
 import datetime as dt
 from bson.objectid import ObjectId
 
+# TODO
+# 1. Hide edit and delete links
+# 2. remove crew list from login.py and use the crew list on the Internship
+# 3. or better yet, install the roles and decorators
+# 4. create a way for the contact to use their registered email address to "sign" a timesheet
+# 5. Make deleting an internship impossible if students are enrolled and timesheets are attached.
+
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
 
