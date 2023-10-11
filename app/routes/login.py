@@ -27,7 +27,7 @@ secrets = getSecrets()
 
 admins = ["stephen.wright@ousd.org"]
 
-crew = ["s_luis.cardenas@ousd.org","s_lorenzo.anthony@ousd.org","s_mehki.williamsmcgriff@ousd.org","s_alis.zuniga@ousd.org","s_adiel.zuniga@ousd.org"]
+crew = ["jerica.coffey@ousd.org","gina.chaulklin@ousd.org","ali.king@ousd.org","s_luis.cardenas@ousd.org","s_lorenzo.anthony@ousd.org","s_mehki.williamsmcgriff@ousd.org","s_alis.zuniga@ousd.org","s_adiel.zuniga@ousd.org"]
 
 # OAuth2 client setup
 client = WebApplicationClient(secrets['GOOGLE_CLIENT_ID'])
