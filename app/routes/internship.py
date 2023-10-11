@@ -69,12 +69,25 @@ def internshipmap():
 
 @app.route('/internship/delete/<intID>')
 def internship_delete(intID):
-    if current_user.oemail in admins or current_user.oemail in crew:        
-        intDelete = Internship.objects.get(pk=intID)
-        flash(f"{intDelete.site_name} deleted.")
-        intDelete.delete()
-    else:
+
+    if current_user.oemail not in admins and current_user.oemail not in crew: 
         flash("You don't have privleges to delete.")
+        return redirect(url_for('internship',intID=intID))
+
+    intDelete = Internship.objects.get(pk=intID)
+
+    if len(intDelete.ccpa_students) > 0:
+        flash("You can't delete an internship while students are enrolled.")
+        return redirect(url_for('internship',intID=intID))
+    else:
+        timesheets = Internship_Timesheet.objects(internship=intDelete)
+        if len(timesheets) > 0:
+            flash("You can't delete an internship that has timesheets.")
+            return redirect(url_for('internship',intID=intID))
+
+    siteName = intDelete.site_name
+    intDelete.delete()
+    flash(f"{siteName} deleted.")
     
     return redirect(url_for('internships'))
 
@@ -83,11 +96,14 @@ def validate_phone(phone):
     phone=f"+1{phone}"
     try:
         p = phonenumbers.parse(phone)
-        if not phonenumbers.is_valid_number(p):
-            return ValueError()
     except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+        print("except",p)
         return ValidationError('Invalid phone number')
     else:
+        if not phonenumbers.is_valid_number(p):
+            flash("number is not valid")
+            print(p)
+            return None
         return str(p.national_number)
 
 def int_lat_lon(internship):
@@ -120,27 +136,24 @@ def new_internship():
         form = InternshipForm()
 
         if form.validate_on_submit():
-            phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
+            phone = f"{form.phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
             if len(phone) > 0:
                 phone = validate_phone(phone)
-                print(type(phone))
             else:
-                phone = ""
+                phone = None
 
             contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
             if len(contact_phone) > 0:
                 contact_phone = validate_phone(contact_phone)
             else:
-                contact_phone = ""
+                contact_phone = None
 
             new_internship = Internship(
                 site_name = form.site_name.data,
                 contact_fname = form.contact_fname.data,
                 contact_lname = form.contact_lname.data,
                 contact_email = form.contact_email.data,
-                contact_phone = contact_phone,
                 notes = form.notes.data,
-                phone = phone,
                 street = form.street.data,
                 city = form.city.data,
                 state = form.state.data,
@@ -149,13 +162,19 @@ def new_internship():
 
             new_internship.save()
 
+            if contact_phone:
+                new_internship.update(contact_phone=contact_phone)            
+                
+            if phone:
+                new_internship.update(phone=phone)
+
             if form.ccpa_staff.data:
                 try:
                     ccpa_staff = User.objects.get(oemail=form.ccpa_staff.data)
                 except:
                     flash("That staff member does not have an account on this site yet.")
                 else:
-                    editInt.update(ccpa_staff = ccpa_staff)
+                    new_internship.update(ccpa_staff = ccpa_staff)
 
             int_lat_lon(new_internship)
 
@@ -175,31 +194,37 @@ def edit_internship(intID):
         editInt = Internship.objects.get(pk=intID)
         if form.validate_on_submit():
 
-            phone = f"{form.contact_phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
+            phone = f"{form.phone_areacode.data}{form.phone_prefix.data}{form.phone_suffix.data}"
             if len(phone) > 0:
                 phone = validate_phone(phone)
             else:
-                phone = form.phone.data
+                phone = None
 
             contact_phone = f"{form.contact_phone_areacode.data}{form.contact_phone_prefix.data}{form.contact_phone_suffix.data}"
             if len(contact_phone) > 0:
                 contact_phone = validate_phone(contact_phone)
             else:
-                contact_phone = form.contact_phone.data
+                contact_phone = None
 
             editInt.update(
                 site_name = form.site_name.data,
                 contact_fname = form.contact_fname.data,
                 contact_lname = form.contact_lname.data,
                 contact_email = form.contact_email.data,
-                contact_phone = contact_phone,
                 notes = form.notes.data,
-                phone = phone,
                 street = form.street.data,
                 city = form.city.data,
                 state = form.state.data,
                 zipcode = form.zipcode.data
             )
+
+            if contact_phone and contact_phone != editInt.contact_phone:
+                flash("updated contact phone")
+                editInt.update(contact_phone=contact_phone)            
+                
+            if phone and phone != editInt.phone:
+                flash("updated site phone")
+                editInt.update(phone=phone)
 
             if form.ccpa_staff.data:
                 try:
