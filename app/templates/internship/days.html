@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<table class="table">
+
+{% for ts in tss %}
+    {% for day in ts.days %}
+        <tr><td>{{moment(day.start_datetime).format('M/D/YYYY h:mm a')}}</td><td>{{moment(day.end_datetime).format('M/D/YYYY h:mm a')}}</td></tr>
+    {% endfor %}
+{% endfor %}
+
+</table>
+</div>
+
+{% endblock %}

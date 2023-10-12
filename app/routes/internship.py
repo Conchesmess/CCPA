@@ -368,3 +368,18 @@ def tsdelete(tsID):
         ts.delete()
         flash("Timesheet Deleted.")
         return redirect(url_for('internship',intID = ts.internship.id))
+
+# @app.route('/alldays')
+# def alldays():
+#     tss = Internship_Timesheet.objects()
+#     for ts in tss:
+#         for day in ts.days:
+#             day.start_datetime +=  dt.timedelta(hours=7)
+#             day.end_datetime +=  dt.timedelta(hours=7)
+#             ts.days.filter(oid=day.oid).update(
+#                 start_datetime=day.start_datetime,
+#                 end_datetime=day.end_datetime
+#             )
+#         ts.save()
+#     tss = Internship_Timesheet.objects()
+#     return render_template('internship/days.html',tss=tss)
