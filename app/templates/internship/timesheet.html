@@ -4,20 +4,24 @@
 
 <div class="container">
 
-<h1 class="display-5">Timesheet</h1>
+<h1 class="display-5">
+    <a href="/internship/tsdelete/{{ts.id}}"><img src="/static/delete.png" width="40"></a>
+    Timesheet
+</h1>
 <h3>{{ts.internship.site_name}}</h3>
 <h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
 <table class="table">
     <tr>
         <th></th><th>date</th><th>Hours</th><th>Start</th><th>End</th><th>Create Date</th>
     </tr>
-    {% for day in ts.days | sort(attribute='start_datetime') %}
+    {#{% for day in ts.days | sort(attribute='start_datetime') %}#}
+    {% for day in ts.days %}
     <tr>
         <td>
             <a href="/internship/deletetsday/{{ts.id}}/{{day.oid}}"><img width="20" src="/static/delete.png"></a>
         </td>
         <td>
-            {{moment(day.start_datetime.date()).format('dddd M/D/YYYY')}}
+            {{moment(day.start_datetime).format('dddd M/D/YYYY')}}
         </td>
         <td>
             {{day.hrs}}

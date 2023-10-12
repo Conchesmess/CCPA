@@ -9,6 +9,7 @@ import requests
 from mongoengine.errors import NotUniqueError
 from .login import crew, admins
 import datetime as dt
+import pytz
 from bson.objectid import ObjectId
 
 # TODO
@@ -303,6 +304,10 @@ def timesheet(tsID):
             int(form.start_time_min.data),
             0)
 
+        start_datetime = pytz.timezone('America/Los_Angeles').localize(start_datetime)
+
+        start_datetime = start_datetime.astimezone(pytz.utc)
+
         end_datetime = dt.datetime(
             form.date.data.year,
             form.date.data.month,
@@ -310,6 +315,8 @@ def timesheet(tsID):
             end_hr,
             int(form.end_time_min.data),
             0)
+
+        end_datetime = pytz.timezone('America/Los_Angeles').localize(end_datetime)
 
         diff = end_datetime-start_datetime
 
@@ -325,6 +332,7 @@ def timesheet(tsID):
                 hrs=hrs
                 )
             ts.save()
+        ts.reload()
 
     return render_template("internship/timesheet.html", ts=ts, form=form)
 
@@ -343,3 +351,14 @@ def deletetsday(tsID,dayOID):
         "There are more than one day with that OID.  That shouldn't happen!"
 
     return redirect(url_for('timesheet',tsID=tsID))
+
+@app.route('/internship/tsdelete/<tsID>')
+def tsdelete(tsID):
+    ts = Internship_Timesheet.objects.get(pk=tsID)
+    if len(ts.days) > 0:
+        flash("You can't delete a timesheet that has data.")
+        return redirect(url_for('internship',intID = ts.internship.id))
+    else:
+        ts.delete()
+        flash("Timesheet Deleted.")
+        return redirect(url_for('internship',intID = ts.internship.id))

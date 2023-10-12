@@ -5,10 +5,12 @@
 <div class="container">
 
 <h1 class="display-1">{{internship.site_name}}</h1>
-<a href="/internship/edit/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
-<a href="/internship/delete/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
+<a data-toggle="tooltip" data-placement="top" title='Edit' href="/internship/edit/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
+<a data-toggle="tooltip" data-placement="top" title='Delete' href="/internship/delete/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
 {% if current_user in internship.ccpa_students %}
-    <a href="/internship/newtimesheet/{{internship.id}}">New Timesheet</a>
+    <a data-toggle="tooltip" data-placement="top" title='New Timesheet' href="/internship/newtimesheet/{{internship.id}}">
+        <img src="/static/timesheet.png" width="40">
+    </a>
 {% endif %}
 
 <div class="row">
