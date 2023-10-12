@@ -332,7 +332,13 @@ def timesheet(tsID):
                 hrs=hrs
                 )
             ts.save()
-        ts.reload()
+
+    totalHrs = 0
+    for day in ts.days:
+        totalHrs += day.hrs
+    ts.update(totalHrs=totalHrs)
+    ts.reload()
+
 
     return render_template("internship/timesheet.html", ts=ts, form=form)
 

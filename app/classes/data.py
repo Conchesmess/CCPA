@@ -20,6 +20,7 @@ class Internship_Timesheet(Document):
     intern = ReferenceField('User',unique=True, required=True)
     internship = ReferenceField('Internship', required=True)
     days = EmbeddedDocumentListField('Internship_Timesheet_Day')
+    totalHrs = FloatField()
 
 class Internship(Document):
     site_name = StringField()
