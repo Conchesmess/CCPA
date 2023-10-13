@@ -14,6 +14,7 @@ class Internship_Timesheet_Day(EmbeddedDocument):
     start_datetime = DateTimeField()
     end_datetime = DateTimeField()
     hrs = FloatField()
+    desc = StringField()
 
 class Internship_Timesheet(Document):
     createdate = DateTimeField(default=d.datetime.utcnow)

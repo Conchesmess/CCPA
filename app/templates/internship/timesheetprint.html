@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<h3 class="display-5">
+    Timesheet for {{ts.intern.fname}} {{ts.intern.lname}}
+</h3>
+<h5>{{ts.internship.site_name}}</h5>
+
+<table class="table">
+    <tr>
+        <th>Date</th><th>Hours</th><th>Start</th><th>End</th>
+    </tr>
+    {#{% for day in ts.days | sort(attribute='start_datetime') %}#}
+    {% for day in ts.days %}
+    <tr>
+        <td>
+            {{moment(day.start_datetime).format('dddd M/D/YYYY')}}
+        </td>
+        <td>
+            {{day.hrs}}
+        </td>
+        <td>
+            {{moment(day.start_datetime).format('h:mm a')}}
+        </td>
+        <td>
+            {{moment(day.end_datetime).format('h:mm a')}}
+        </td>
+    </tr>
+    {% endfor %}
+    <tr><td><td><b>{{ts.totalHrs}}</b><td><td></td></td></td></td></tr>
+</table>
+<br>
+<br>
+
+<div class="row">
+    <div class="col">
+        _______________________________________________ <br>(Print name) 
+    </div>
+    <div class="col">
+        _______________________________________________ <br>(Sign)
+    </div>
+</div>
+
+
+
+
+<script>
+    window.onload = function() { window.print(); }
+</script>
+
+</div>
+
+{% endblock %}

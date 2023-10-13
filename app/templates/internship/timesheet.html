@@ -4,16 +4,25 @@
 
 <div class="container">
 
-<h1 class="display-5">
+<h3 class="display-5">
     <a href="/internship/tsdelete/{{ts.id}}"><img src="/static/delete.png" width="40"></a>
     Timesheet
 </h1>
+<div class="row">
+    <div class="col-11">
+        
+    </div>
+    <div class="col-1">
+        <a class="btn btn-primary btn-sm" role="button" href="/internship/timesheet/{{ts.id}}/print">Print</a>
+    </div>
+
+</div>
 <h3>{{ts.internship.site_name}}</h3>
 <h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
 <h3>Total Hours: {{ts.totalHrs}}</h3>
 <table class="table">
     <tr>
-        <th></th><th>date</th><th>Hours</th><th>Start</th><th>End</th><th>Create Date</th>
+        <th></th><th>Date</th><th>Hours</th><th>Start</th><th>End</th><th>Create Date</th>
     </tr>
     {#{% for day in ts.days | sort(attribute='start_datetime') %}#}
     {% for day in ts.days %}
@@ -37,6 +46,15 @@
             {{moment(day.createdate).calendar()}}
         </td>
     </tr>
+    {% if day.desc %}
+        <tr>
+            <td></td>
+            <td colspan="5">
+                {{day.desc}}
+            </td>
+        </tr>
+
+    {% endif %}
     {% endfor %}
 </table>
 <br>
@@ -86,6 +104,12 @@
         <div class="col-1">
             &nbsp;
             {{form.submit(class="form-control btn-primary")}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col mt-2">
+            What did you do?
+            {{form.desc(class="form-control")}}
         </div>
     </div>
 

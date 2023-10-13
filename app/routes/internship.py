@@ -280,8 +280,9 @@ def newtimesheet(intID):
 
     return redirect(url_for('internship',intID=intID))
 
+@app.route('/internship/timesheet/<tsID>/<p>', methods=['GET', 'POST'])
 @app.route('/internship/timesheet/<tsID>', methods=['GET', 'POST'])
-def timesheet(tsID):
+def timesheet(tsID,p=''):
     ts = Internship_Timesheet.objects.get(pk=tsID)
     form = TimeSheetForm()
     if form.validate_on_submit() and current_user == ts.intern:
@@ -308,6 +309,10 @@ def timesheet(tsID):
 
         start_datetime = start_datetime.astimezone(pytz.utc)
 
+        if start_datetime > dt.datetime.utcnow().astimezone(pytz.utc):
+            flash("You can't add a date that is in the future!")
+            return redirect(url_for('timesheet', tsID = tsID))
+
         end_datetime = dt.datetime(
             form.date.data.year,
             form.date.data.month,
@@ -329,7 +334,8 @@ def timesheet(tsID):
                 oid = ObjectId(),
                 start_datetime = start_datetime,
                 end_datetime = end_datetime,
-                hrs=hrs
+                hrs=hrs,
+                desc=form.desc.data
                 )
             ts.save()
 
@@ -339,16 +345,15 @@ def timesheet(tsID):
     ts.update(totalHrs=totalHrs)
     ts.reload()
 
-
-    return render_template("internship/timesheet.html", ts=ts, form=form)
+    if p == 'print':
+        return render_template("internship/timesheetprint.html", ts=ts)
+    else:
+        return render_template("internship/timesheet.html", ts=ts, form=form)
 
 
 @app.route('/internship/deletetsday/<tsID>/<dayOID>')
 def deletetsday(tsID,dayOID):
     ts = Internship_Timesheet.objects.get(pk=tsID)
-    #get works but the resulting object does not have a delete() method
-    #filter does have a delete method
-    #day = ts.days.get(oid=dayOID)
     days = ts.days.filter(oid=dayOID)
     if len(days) == 1:
         days.delete()
@@ -368,18 +373,3 @@ def tsdelete(tsID):
         ts.delete()
         flash("Timesheet Deleted.")
         return redirect(url_for('internship',intID = ts.internship.id))
-
-# @app.route('/alldays')
-# def alldays():
-#     tss = Internship_Timesheet.objects()
-#     for ts in tss:
-#         for day in ts.days:
-#             day.start_datetime +=  dt.timedelta(hours=7)
-#             day.end_datetime +=  dt.timedelta(hours=7)
-#             ts.days.filter(oid=day.oid).update(
-#                 start_datetime=day.start_datetime,
-#                 end_datetime=day.end_datetime
-#             )
-#         ts.save()
-#     tss = Internship_Timesheet.objects()
-#     return render_template('internship/days.html',tss=tss)

@@ -17,12 +17,13 @@ class TextAreaForm(FlaskForm):
 
 class TimeSheetForm(FlaskForm):
     date = DateField(default=d.datetime.now(ZoneInfo('US/Pacific')))
-    start_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)])
-    start_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
-    start_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')])
-    end_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)])
-    end_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)])
-    end_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')])
+    start_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)],validators=[InputRequired()])
+    start_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)],validators=[InputRequired()])
+    start_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')],validators=[InputRequired()])
+    end_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)],validators=[InputRequired()])
+    end_time_min = SelectField(choices=[(0,"00"),(15,15),(30,30),(45,45)],validators=[InputRequired()])
+    end_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')],validators=[InputRequired()])
+    desc = TextAreaField('What did you do?',validators=[InputRequired()] )
     submit = SubmitField('Submit')
 
 class InternshipForm(FlaskForm):
