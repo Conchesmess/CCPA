@@ -13,8 +13,7 @@
     <tr>
         <th>Date</th><th>Hours</th><th>Start</th><th>End</th>
     </tr>
-    {#{% for day in ts.days | sort(attribute='start_datetime') %}#}
-    {% for day in ts.days %}
+    {% for day in ts.days | sort(attribute='start_datetime') %}
     <tr>
         <td>
             {{moment(day.start_datetime).format('dddd M/D/YYYY')}}
@@ -29,6 +28,14 @@
             {{moment(day.end_datetime).format('h:mm a')}}
         </td>
     </tr>
+    {% if day.desc %}
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <small>{{day.desc}}</small>
+            </td>
+        </tr>
+    {% endif %}
     {% endfor %}
     <tr><td><td><b>{{ts.totalHrs}}</b><td><td></td></td></td></td></tr>
 </table>
