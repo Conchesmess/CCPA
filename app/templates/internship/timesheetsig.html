@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+
+<h3 class="display-5">
+    Timesheet for {{ts.intern.fname}} {{ts.intern.lname}}
+</h3>
+<h5>{{ts.internship.site_name}}</h5>
+
+<table class="table">
+    <tr>
+        <th>Date</th><th>Hours</th><th>Start</th><th>End</th>
+    </tr>
+    {% for day in ts.days | sort(attribute='start_datetime') %}
+    <tr>
+        <td>
+            {{moment(day.start_datetime).format('dddd M/D/YYYY')}}
+        </td>
+        <td>
+            {{day.hrs}}
+        </td>
+        <td>
+            {{moment(day.start_datetime).format('h:mm a')}}
+        </td>
+        <td>
+            {{moment(day.end_datetime).format('h:mm a')}}
+        </td>
+    </tr>
+    {% if day.desc %}
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <small>{{day.desc}}</small>
+            </td>
+        </tr>
+    {% endif %}
+    {% endfor %}
+    <tr><td><td><b>{{ts.totalHrs}}</b><td><td></td></td></td></td></tr>
+</table>
+<br>
+<br>
+
+{% if current_user == ts.intern %}
+
+{% for field in form.errors %}
+    {% for error in form.errors[field] %}
+        <div class="alert alert-error">
+            <strong>Error!</strong>{{field}}: {{error}}
+        </div>
+    {% endfor %}
+{% endfor %}
+<form method=post>
+    {{ form.hidden_tag() }}
+    {{ form.emailOut(class=form-controll) }}
+    {{ form.submit(class=form-controll) }}
+</form>
+
+{% endif %}
+
+
+
+
+<script>
+    window.onload = function() { window.print(); }
+</script>
+
+</div>
+
+{% endblock %}

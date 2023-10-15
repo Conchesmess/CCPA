@@ -15,6 +15,11 @@ class TextAreaForm(FlaskForm):
     csv = TextAreaField()
     submit = SubmitField()
 
+
+class SignatureForm(FlaskForm):
+    emailOut = EmailField(validators=[InputRequired(),Email()])
+
+
 class TimeSheetForm(FlaskForm):
     date = DateField(default=d.datetime.now(ZoneInfo('US/Pacific')))
     start_time_hr = SelectField(choices=[(12,12),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11)],validators=[InputRequired()])
@@ -80,7 +85,6 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = widgets.CheckboxInput()
 
 class StudentWasHereForm(FlaskForm):
-    #student = MultiCheckboxField(choices=[])
     student = MultiCheckboxField('Students:')
     submitStuForm = SubmitField("Submit",id="submitStuForm")
 

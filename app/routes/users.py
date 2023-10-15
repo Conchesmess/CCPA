@@ -181,35 +181,26 @@ def index():
 
 #get the profile page for a designated or the logged in user. Can use either gid or aeriesid.
 #TODO change this to GID instead of AeriesId so Teacher profiles can be accessed
-@app.route('/profile/<aeriesid>', methods=['GET', 'POST'])
+@app.route('/profile/<uid>', methods=['GET', 'POST'])
 @app.route('/profile', methods=['GET', 'POST'])
-def profile(aeriesid=None):
+def profile(uid=None):
 
-    if aeriesid == 'None':
-        aeriesid = None 
+    if not uid:
+        uid = current_user.id
 
     if current_user.role.lower() == "student":
         groups=None
-        if aeriesid and current_user.aeriesid != aeriesid:
-            flash('You can only view your own profile.')
-            return redirect(url_for('profile'))
-        else:
-            targetUser = current_user
-
-    else:
-        try:
-            targetUser=User.objects.get(aeriesid=aeriesid)
-        except:
-            flash("This user does not exist in the database. contact stephen.wright@ousd.org if this is an error.")
-            return redirect('/')
-
-    if targetUser.role.lower() == "student":
-        checkins = CheckIn.objects(student=targetUser).limit(15)
-        #messages = Message.objects(student=targetUser).limit(6)
-        tokens = Token.objects(owner=targetUser)
+        targetUser = current_user
+        checkins = CheckIn.objects(student=current_user).limit(15)
+        tokens = Token.objects(owner=current_user)
     else:
         checkins = None
         tokens = None
+        try:
+            targetUser=User.objects.get(id=uid)
+        except:
+            flash("This user does not exist in the database.")
+            return redirect('/')
 
     form = CohortForm()
 
@@ -257,18 +248,21 @@ def profile(aeriesid=None):
 # out the feedback.py file.
 # This route anables the current user to edit some values in their profile.
 @app.route('/editprofile', methods=['GET', 'POST'])
-@app.route('/editprofile/<aeriesid>', methods=['GET', 'POST'])
-def editprofile(aeriesid=None):
+@app.route('/editprofile/<uid>', methods=['GET', 'POST'])
+def editprofile(uid=None):
+
+    if uid and uid != current_user.id:
+        flash("You can only edit your own profile.")
+        return redirect(url_for('profile'))
+
+
+    uid = current_user.id
+
+    editUser = User.objects.get(pk = uid)
 
     # create a form object from the UserForm Class
     form = UserForm()
-    # get the user object that is going to be edited which will be the current user so we user the 
-    # googleId from the active session to load the right record
 
-    if session['role'].lower() != 'student' and aeriesid:
-        editUser = User.objects.get(aeriesid=aeriesid)
-    else:
-        editUser = User.objects.get(oemail=current_user['oemail'])
 
     # first see if the form was posted and then reformat the phone numbers
     if request.method == 'POST':
@@ -320,7 +314,7 @@ def editprofile(aeriesid=None):
         editUser.reload()
 
         # Record edit datetime to user record
-        editUser = userModified(editUser)
+        # editUser = userModified(editUser)
 
 
         if form.image.data:
@@ -345,7 +339,7 @@ def editprofile(aeriesid=None):
             )
 
         # after the profile is updated, send the user to the profile page
-        return redirect(url_for('profile', aeriesid=aeriesid))
+        return redirect(url_for('profile'))
 
     #if their is an expressed preferred value prefill the form with that otherwise use the one from aeries
     if editUser.ufname:

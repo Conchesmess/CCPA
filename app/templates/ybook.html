@@ -5,7 +5,7 @@
     {% if currUser.image %}
         <img class="img-thumbnail" width="50" src="data:image;base64,{{base64encode(currUser.image.read())}}">
     {% else %}
-        <img class="img-thumbnail" width="50" src="/static/oths.jpg">
+        <img class="img-thumbnail" width="50" src="/static/lion.png">
     {% endif %}
     {{currUser.fname}} {{currUser.lname}} <a href="/editprofile" class="btn btn-info btn-sm" role="button">Edit your Profile</a> 
 </h3>

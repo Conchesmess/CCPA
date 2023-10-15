@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, redirect, flash, url_for
-from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day
-from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm
+from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day, Signature
+from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm, SignatureForm
 from datetime import datetime as dt
 from flask_login import current_user
 import phonenumbers
@@ -17,7 +17,38 @@ from bson.objectid import ObjectId
 # 2. remove crew list from login.py and use the crew list on the Internship
 # 3. or better yet, install the roles and decorators
 # 4. create a way for the contact to use their registered email address to "sign" a timesheet
-# 5. Make deleting an internship impossible if students are enrolled and timesheets are attached.
+
+# this is the route used by the signer
+@app.route('/sig/<sigID>')
+def getsigts(sigID):
+    sig = Signature.objects.get(pk = sigID)
+    pass
+
+@app.route('/sig/new/<tsID>')
+def signew(tsID):
+    form = SignatureForm()
+    ts = Internship_Timesheet.objects.get(pk = tsID)
+
+    if ts.intern != current_user:
+        flash("You can't create a signature request if you are not the intern.")
+        return redirect(url_for('timesheet',tsID=tsID))
+
+    if form.validate_on_submit():
+        Signature(
+            emailOut = form.emailOut.data,
+            intern = current_user,
+            timesheet = ts,
+            status = "New"
+        )
+
+        return redirect(url_for('timesheet'), tsID=tsID)
+
+    return render_template('internship/timesheetsig.html',form=form,ts=ts)
+
+@app.route('/sig/send/<sigID>')
+def sigsend(sigID):
+    pass
+
 
 @app.route('/internship/<intID>', methods=['GET', 'POST'])
 def internship(intID):
@@ -47,12 +78,18 @@ def internship(intID):
 
 @app.route('/internship/unenrollstu/<stuID>/<intID>')
 def unenrollstu(stuID,intID):
-    if current_user.oemail in admins or current_user.oemail in crew:        
+    if current_user.oemail in admins or current_user.oemail in crew:
         stu = User.objects.get(pk=stuID)
         iship = Internship.objects.get(pk=intID)
-        iship.update(
-            pull__ccpa_students=stu
-        )
+        try:
+            ts = Internship_Timesheet.objects.get(intern=stu,internship=iship)
+        except:
+            iship.update(
+                pull__ccpa_students=stu
+            )
+            flash(f"{stu.fname} {stu.lname} was removed from this internship")
+        else:
+            flash(f"{stu.fname} {stu.lname} cannot be removed while they have a timesheet associated with this internship.")
     else:
         flash("You don't have privleges to do that.")
     return redirect(url_for('internship',intID=intID))

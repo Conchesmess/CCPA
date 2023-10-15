@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 import datetime as d
 import phonenumbers
 
+
 class Internship_Timesheet_Day(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
     createdate = DateTimeField(default=d.datetime.utcnow())
@@ -15,6 +16,15 @@ class Internship_Timesheet_Day(EmbeddedDocument):
     end_datetime = DateTimeField()
     hrs = FloatField()
     desc = StringField()
+    confirmed = BooleanField(default=False)
+
+class Signature(Document):
+    emailOut = StringField(required=True)
+    emailIn = StringField(required=True)
+    intern = ReferenceField('User',required=True)
+    timesheet = ReferenceField('Internship_Timesheet',required=True)
+    # new, sent, signed
+    status = StringField(default="new")
 
 class Internship_Timesheet(Document):
     createdate = DateTimeField(default=d.datetime.utcnow)

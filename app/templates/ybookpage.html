@@ -64,7 +64,7 @@
                                     {% if sign.owner.image %}
                                         <img class="img-thumbnail" width="100" src="data:image;base64,{{base64encode(sign.owner.image.read())}}"> 
                                     {% else %}
-                                        <img class="img-thumbnail" width="100" src="/static/oths.jpg">
+                                        <img class="img-thumbnail" width="100" src="/static/lion.png">
                                     {% endif %}
                                 </td>
                                 <td>
@@ -93,7 +93,7 @@
                                     {% if sign.owner.image %}
                                         <img class="img-thumbnail" width="100" src="data:image;base64,{{base64encode(sign.owner.image.read())}}"> 
                                     {% else %}
-                                        <img class="img-thumbnail" width="100" src="/static/oths.jpg">
+                                        <img class="img-thumbnail" width="100" src="/static/lion.png">
                                     {% endif %}
                                 </td>
                                 {% if page.owner.id|string == session.currUserId|string or sign.owner.id|string == session.currUserId|string %}
