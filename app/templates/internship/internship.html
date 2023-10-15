@@ -44,10 +44,7 @@
 <b>Students Currently Enrolled:</b> <br>
 {% for stu in internship.ccpa_students %}
     <a href="/internship/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
-    <a href="/profile/{{stu.id}}">{{stu.fname}} {{stu.lname}}</a> 
-    {% if stu.mobile and current_user in internship.ccpa_students %}
-        {{formatphone(stu.mobile)}}
-    {% endif %}
+    <a     {% if stu.mobile and current_user in internship.ccpa_students %} data-toggle="tooltip" data-placement="top" title="{{formatphone(stu.mobile)}}"{% endif %} href="/profile/{{stu.id}}">{{stu.fname}} {{stu.lname}}</a> 
     <br>
 {% endfor %}
 <a data-bs-toggle="collapse" href="#collapseEnrollForm" aria-expanded="false" aria-controls="collapseEnrollForm">
