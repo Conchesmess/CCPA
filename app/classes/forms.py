@@ -15,10 +15,15 @@ class TextAreaForm(FlaskForm):
     csv = TextAreaField()
     submit = SubmitField()
 
+class InternshipStakeholderForm(FlaskForm):
+    title = StringField(validators=[InputRequired()])
+    name = StringField(validators=[InputRequired()])
+    story = TextAreaField(validators=[InputRequired()])
+    stakeholderSubmit = SubmitField('Submit')
+
 
 class SignatureForm(FlaskForm):
     emailOut = EmailField(validators=[InputRequired(),Email()])
-
 
 class TimeSheetForm(FlaskForm):
     date = DateField(default=d.datetime.now(ZoneInfo('US/Pacific')))
@@ -49,6 +54,7 @@ class InternshipForm(FlaskForm):
     phone_prefix = StringField(validators=[Optional(),Length(min=3,max=3,message="Must be three characters")])
     phone_suffix = StringField(validators=[Optional(),Length(min=4,max=4,message="Must be four characters")])
     notes = TextAreaField()
+    image = FileField("Image: ")
     submit = SubmitField('Submit')
 
 class AddToCohortForm(FlaskForm):

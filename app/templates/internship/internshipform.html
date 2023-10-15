@@ -11,11 +11,19 @@
             {% endfor %}
         {% endfor %}
 
-        <form method=post>
+        <form method=post enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <p>Site Name: {{ form.site_name(class="form-control")}}</p>
             <p>CCPA Staff Contact Email Address: {{ form.ccpa_staff(class="form-control",placeholder="ccpa.staff@ousd.org") }}</p>
             <p class="text-light bg-dark ps-2 mt-3"><b>Site Information</b></p>
+            <p>
+            {% if iship.image %}
+                <img class="img-thumbnail" width="100" src="data:image;base64,{{base64encode(iship.image.read())}}"> <br>
+            {% else %}
+                <img class="img-thumbnail" width = "100" src="/static/lion.png">
+            {% endif %}
+            </p>
+            <p>Image: {{ form.image(class="form-control")}}</p>
             <p>Street: {{ form.street(class="form-control")}}</p>
             <p>Apt or Office # (optional): {{ form.street2(class="form-control")}}</p>
             <div class="row">

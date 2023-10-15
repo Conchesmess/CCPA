@@ -3,7 +3,11 @@
 {% block body %}
 
 <table class="table">
-    <tr><th></th><th>Site</th><th>CCPA Contact</th><th>Street</th><th>Site Contact</th></tr>
+    <tr>
+        <th>
+            <a href="/internship/new" class="btn btn-primary btn-sm" role="button">New</a>
+        </th>
+        <th>Site</th><th>CCPA Contact</th><th>Street</th><th>Site Contact</th></tr>
     {% for int in internships %}
     <tr>
         <td>

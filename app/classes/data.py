@@ -33,6 +33,12 @@ class Internship_Timesheet(Document):
     days = EmbeddedDocumentListField('Internship_Timesheet_Day')
     totalHrs = FloatField()
 
+class InternshipStakeholder(EmbeddedDocument):
+    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
+    title = StringField()
+    name = StringField()
+    story = StringField()
+
 class Internship(Document):
     site_name = StringField()
     ccpa_staff = ReferenceField('User')
@@ -50,6 +56,8 @@ class Internship(Document):
     lat = FloatField()
     lon = FloatField()
     notes = StringField()
+    image = FileField()
+    stakeholders = EmbeddedDocumentListField('InternshipStakeholder')
 
 
 class Adult(EmbeddedDocument):
