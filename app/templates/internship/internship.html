@@ -18,7 +18,7 @@
 
     <hr>
     <div class="row">
-        <div class="col-4">
+        <div class="col-lg-12 col-xl-4">
             {% if internship.image %}
                 <img class="img-fluid" src="data:image;base64,{{base64encode(internship.image.read())}}"> <br>
             {% endif %}
@@ -46,7 +46,7 @@
                 ({{internship.contact_phone[:3]}}) {{internship.contact_phone[3:6]}}-{{internship.contact_phone[6:]}} <br>
             {% endif %}        
         </div>
-        <div class="col">
+        <div class="col-lg-12 col-xl-8">
             <b>
                 Students Currently Enrolled:
                 <a data-toggle="tooltip" data-placement="top" title="If you are enrolled in this internship you can mouse over a student to see their mobile number. Edit you profile page to have your number show up here.To enroll new students click the expand icon right after the last enrolled student.
@@ -79,7 +79,7 @@
                 <form method=post>
                 {{ form.hidden_tag() }}
                 Type a comma seperated list of one or more student email addresses to add them to this internship. <br>
-                {{ form.csv(cols="60",rows="8") }} <br>
+                {{ form.csv(class="form-control", cols="60",rows="4") }} <br>
                 {{form.submit()}}
                 </form>
             </div>
@@ -95,8 +95,21 @@
             {% for tsheet in timesheets %}
                 <a href="/internship/timesheet/{{tsheet.id}}">{{tsheet.intern.fname}} {{tsheet.intern.lname}}</a> <br>
             {% endfor %}
-            <br>
             <hr>
+            <p>
+                <b>Impact</b>
+                <a data-bs-toggle="collapse" href="#collapseImpactForm" aria-expanded="false" aria-controls="collapseImpactForm">
+                    <img src="/static/new.png" width="20">
+                </a>
+            </p>
+            <p>
+                <i>Coming Soon... This is where students will record how this organization describes its impact using 
+                specific data, describing how that data is collectd and describing what that data can tell about 
+                the organization's impact on it's community.</i> 
+            </p>
+        </div>
+        <div class="col-lg-12 col-xl-12">
+            <br><hr>
             <p>
                 <b>Activities</b>
                 <a data-bs-toggle="collapse" href="#collapseActivityForm" aria-expanded="false" aria-controls="collapseActivityForm">
@@ -131,7 +144,7 @@
                     <p>{{activityForm.activitySubmit(class="form-control")}}</p>
                 </form>
             </div>
-
+        </div>
     </div>
     <hr class="border border-dark border-3">
     <p>
