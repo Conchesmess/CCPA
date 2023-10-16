@@ -39,6 +39,11 @@ class InternshipStakeholder(EmbeddedDocument):
     name = StringField()
     story = StringField()
 
+class InternshipActivity(EmbeddedDocument):
+    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
+    title = StringField()
+    desc = StringField()
+
 class Internship(Document):
     site_name = StringField()
     ccpa_staff = ReferenceField('User')
@@ -58,6 +63,10 @@ class Internship(Document):
     notes = StringField()
     image = FileField()
     stakeholders = EmbeddedDocumentListField('InternshipStakeholder')
+    vision = StringField()
+    mission = StringField()
+    activities = EmbeddedDocumentListField('InternshipActivity')
+
 
 
 class Adult(EmbeddedDocument):

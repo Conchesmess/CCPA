@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, redirect, flash, url_for
-from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day, Signature, InternshipStakeholder
-from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm, SignatureForm, InternshipStakeholderForm
+from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day, Signature, InternshipStakeholder, InternshipActivity
+from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm, SignatureForm, InternshipStakeholderForm, InternshipActivityForm
 from datetime import datetime as dt
 from flask_login import current_user
 import phonenumbers
@@ -57,6 +57,7 @@ def internship(intID):
     iship = Internship.objects.get(pk=intID)
     timesheets = Internship_Timesheet.objects(internship=iship)
     stakeholderForm = InternshipStakeholderForm()
+    activityForm = InternshipActivityForm()
 
     if form.submit.data and form.validate_on_submit():
         if current_user.oemail in admins or current_user.oemail in crew:
@@ -76,15 +77,35 @@ def internship(intID):
             flash("You can't enroll students")
 
     if stakeholderForm.stakeholderSubmit.data and stakeholderForm.validate_on_submit():
-            iship.stakeholders.create(
-                oid = ObjectId(),
-                title = stakeholderForm.title.data,
-                name = stakeholderForm.name.data,
-                story = stakeholderForm.story.data,
-                )
-            iship.save()
+        iship.stakeholders.create(
+            oid = ObjectId(),
+            title = stakeholderForm.title.data,
+            name = stakeholderForm.name.data,
+            story = stakeholderForm.story.data,
+            )
+        iship.save()
 
-    return render_template('internship/internship.html',internship=iship, form=form, stakeholderForm=stakeholderForm, timesheets=timesheets)
+    if activityForm.activitySubmit.data and activityForm.validate_on_submit():
+        iship.activities.create(
+            oid = ObjectId(),
+            title = activityForm.title.data,
+            desc = activityForm.desc.data
+            )
+        iship.save()
+
+    return render_template('internship/internship.html',internship=iship, form=form, stakeholderForm=stakeholderForm, activityForm=activityForm, timesheets=timesheets)
+
+@app.route('/internship/deleteactivity/<ishipID>/<actOID>')
+def deleteactivity(ishipID,actOID):
+    iship = Internship.objects.get(id=ishipID)
+    acts = iship.activities.filter(oid=actOID)
+    if len(acts) == 1:
+        acts.delete()
+        iship.save()
+    else:
+        "There are more than one activity with that ID.  That shouldn't happen!"
+
+    return redirect(url_for('internship',intID=ishipID))
 
 @app.route('/internship/deletestakeholder/<ishipID>/<shOID>')
 def deletestakeholder(ishipID,shOID):
@@ -217,7 +238,9 @@ def new_internship():
                 street = form.street.data,
                 city = form.city.data,
                 state = form.state.data,
-                zipcode = form.zipcode.data
+                zipcode = form.zipcode.data,
+                vision = form.vision.data,
+                mission = form.mission.data
             )
 
             new_internship.save()
@@ -276,7 +299,9 @@ def edit_internship(intID):
                 street = form.street.data,
                 city = form.city.data,
                 state = form.state.data,
-                zipcode = form.zipcode.data
+                zipcode = form.zipcode.data,
+                vision = form.vision.data,
+                mission = form.mission.data
             )
 
             if form.image.data:
@@ -323,6 +348,8 @@ def edit_internship(intID):
         form.city.data = editInt.city
         form.state.data = editInt.state
         form.zipcode.data = editInt.zipcode
+        form.mission.data = editInt.mission
+        form.vision.data = editInt.vision
 
         return render_template('internship/internshipform.html',form=form,iship=editInt)
     else:

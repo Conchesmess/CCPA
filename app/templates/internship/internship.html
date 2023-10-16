@@ -4,149 +4,190 @@
 
 <div class="container">
 
-<h1 class="display-1">{{internship.site_name}}</h1>
-<a data-toggle="tooltip" data-placement="top" title='Edit' href="/internship/edit/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
-<a data-toggle="tooltip" data-placement="top" title='Delete' href="/internship/delete/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
-{% if current_user in internship.ccpa_students %}
-    <a data-toggle="tooltip" data-placement="top" title='New Timesheet' href="/internship/newtimesheet/{{internship.id}}">
-        <img src="/static/timesheet.png" width="40">
-    </a>
-{% endif %}
+    <h1 class="display-1">{{internship.site_name}}</h1>
+    <a data-toggle="tooltip" data-placement="top" title='Edit' href="/internship/edit/{{internship.id}}"><img width="40" src="/static/edit.png"></a> 
+    <a data-toggle="tooltip" data-placement="top" title='Delete' href="/internship/delete/{{internship.id}}"><img width="40" src="/static/delete.png"></a> 
 
-<div class="row">
-    <div class="col">
-        {% if internship.image %}
-            <img width="600" class="img" src="data:image;base64,{{base64encode(internship.image.read())}}"> <br>
-        {% endif %}
-        <p><b>CCPA Staff Contact:</b> {{internship.ccpa_staff.fname}} {{internship.ccpa_staff.lname}}</p>
-        <b>Site Information</b> <br>
-        {% if internship.phone %}
-            ({{internship.phone[:3]}}) {{internship.phone[3:6]}}-{{internship.phone[6:]}} <br>
-        {% endif %}
-        {{internship.street}} 
-        {% if internship.street2 %}
-        <br>{{internship.street2}} 
-        {% endif %}
-        <br>
-        {{internship.city}}, {{internship.state}}  {{internship.zipcode}} 
-        {% if internship.lat %}
-        <br>{{internship.lat}}/{{internship.lon}} 
-        {% endif %}
-        <br>
-        <hr>
-        
-        <b>Site Contact</b> <br>
-        {{internship.contact_fname}} {{internship.contact_lname}} <br>
-        {{internship.contact_email}} <br>
-        {% if internship.contact_phone %}
-            ({{internship.contact_phone[:3]}}) {{internship.contact_phone[3:6]}}-{{internship.contact_phone[6:]}} <br>
-        {% endif %}        
-    </div>
-    <div class="col">
-
-<b>
-    Students Currently Enrolled:
-    <a data-toggle="tooltip" data-placement="top" title="If you are enrolled in this internship you can mouse over a student to see 
-    their mobile number. Edit you profile page to have your number show up here.
-    To enroll new students click the expand icon right after the last enrolled student.
-    " href="#"><img width="20" src="/static/info.png"></a>
-</b> <br>
-{% for stu in internship.ccpa_students %}
-    <a href="/internship/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
-    <a href="/profile/{{stu.id}}">
-        {{stu.fname}} {{stu.lname}}
-    </a>
-    {% if stu.mobile and current_user in internship.ccpa_students %}
-        - <a data-toggle="tooltip" data-placement="top" title="{{formatphone(stu.mobile)}}" href="#">mobile</a>
-    {% endif %}
-    <br>
-{% endfor %}
-<a data-bs-toggle="collapse" href="#collapseEnrollForm" aria-expanded="false" aria-controls="collapseEnrollForm">
-    <img src="/static/new.png" width="20">
-</a>
-<div class="collapse" id="collapseEnrollForm">
-    {% for field in form.errors %}
-        {% for error in form.errors[field] %}
-            <div class="alert alert-error">
-                <strong>Error!</strong>{{field}}: {{error}}
-            </div>
-        {% endfor %}
-    {% endfor %}
-    <b>Add Students</b>
-    <form method=post>
-    {{ form.hidden_tag() }}
-    Type a comma seperated list of one or more student email addresses to add them to this internship. <br>
-    {{ form.csv(cols="60",rows="8") }} <br>
-    {{form.submit()}}
-    </form>
-</div>
-<hr>
-<p>
-    <b>Timesheets</b>
-    {% if current_user in internship.ccpa_students %}
-        <a data-toggle="tooltip" data-placement="top" title='New Timesheet' href="/internship/newtimesheet/{{internship.id}}">
-            <img src="/static/timesheet.png" width="30">
-        </a>
-    {% endif %}
-</p>
-{% for tsheet in timesheets %}
-    <a href="/internship/timesheet/{{tsheet.id}}">{{tsheet.intern.fname}} {{tsheet.intern.lname}}</a> <br>
-{% endfor %}
-<br>
-    </div>
-</div>
-<hr class="border border-dark border-3">
-<p>
-    <b>Stakeholders</b>
-    <a data-bs-toggle="collapse" href="#collapseStakeholderForm" aria-expanded="false" aria-controls="collapseStakeholderForm">
-        <img src="/static/new.png" width="20">
-    </a>
-</p>
-<table class="table table-sm">
-    <tr>
-        <th></th><th>Title</th><th>Persona Name</th><th>Persona Story</th>
-    </tr>
-    {% for sh in internship.stakeholders %}
-    <tr>
-        <td>
-            <a href="/internship/deletestakeholder/{{internship.id}}/{{sh.oid}}"><img width="20" src="/static/delete.png"></a>
-        </td>
-        <td>
-            {{sh.title}}
-        </td>
-        <td>
-            {{sh.name}}
-        </td>
-        <td>
-            {{sh.story}}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
-<div class="collapse" id="collapseStakeholderForm">
-    <p><b>Add a Stakeholder</b></p>
-    <form method=post>
-        {{ stakeholderForm.hidden_tag() }}
-        <div class="row">
-            <div class="col">
-                <p>Title: {{stakeholderForm.title(class="form-control")}}</p>
-            </div>
-            <div class="col">
-                <p>Persona Name: {{stakeholderForm.name(class="form-control")}}</p>
-            </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <b>Vision:</b> {{internship.vision}} <br>
+            <b>Mission:</b> {{internship.mission}}
         </div>
-        <p>Persona Story: {{stakeholderForm.story(class="form-control")}}</p>
-        <p>{{stakeholderForm.stakeholderSubmit(class="form-control")}}</p>
-    </form>
-</div>
-<p>
-    <b>Notes:</b>
-    <a data-toggle="tooltip" data-placement="top" title='Edit' href="/internship/edit/{{internship.id}}">
-        <img width="30" src="/static/edit.png">
-    </a> 
-</p>
-{{internship.notes}}
+    </div>
+
+    <hr>
+    <div class="row">
+        <div class="col-4">
+            {% if internship.image %}
+                <img class="img-fluid" src="data:image;base64,{{base64encode(internship.image.read())}}"> <br>
+            {% endif %}
+            <p><b>CCPA Staff Contact:</b> {{internship.ccpa_staff.fname}} {{internship.ccpa_staff.lname}}</p>
+            <b>Site Information</b> <br>
+            {% if internship.phone %}
+                ({{internship.phone[:3]}}) {{internship.phone[3:6]}}-{{internship.phone[6:]}} <br>
+            {% endif %}
+            {{internship.street}} 
+            {% if internship.street2 %}
+            <br>{{internship.street2}} 
+            {% endif %}
+            <br>
+            {{internship.city}}, {{internship.state}}  {{internship.zipcode}} 
+            {% if internship.lat %}
+            <br>{{internship.lat}}/{{internship.lon}} 
+            {% endif %}
+            <br>
+            <hr>
+            
+            <b>Site Contact</b> <br>
+            {{internship.contact_fname}} {{internship.contact_lname}} <br>
+            {{internship.contact_email}} <br>
+            {% if internship.contact_phone %}
+                ({{internship.contact_phone[:3]}}) {{internship.contact_phone[3:6]}}-{{internship.contact_phone[6:]}} <br>
+            {% endif %}        
+        </div>
+        <div class="col">
+            <b>
+                Students Currently Enrolled:
+                <a data-toggle="tooltip" data-placement="top" title="If you are enrolled in this internship you can mouse over a student to see their mobile number. Edit you profile page to have your number show up here.To enroll new students click the expand icon right after the last enrolled student.
+                " href="#"><img width="20" src="/static/info.png"></a>
+                <a data-toggle="tooltip" data-placement="top" title="Enroll more students" data-bs-toggle="collapse" href="#collapseEnrollForm" aria-expanded="false" aria-controls="collapseEnrollForm">
+                    <img src="/static/new.png" width="20">
+                </a>
+            </b> <br>
+            {% for stu in internship.ccpa_students %}
+                <a href="/internship/unenrollstu/{{stu.id}}/{{internship.id}}"><img width="20" src="/static/delete.png"></a>
+                <a href="/profile/{{stu.id}}">
+                    {{stu.fname}} {{stu.lname}}
+                </a>
+                {% if stu.mobile and (current_user in internship.ccpa_students or current_user.role.lower() == "teacher") %}
+                    - <a data-toggle="tooltip" data-placement="top" title="{{formatphone(stu.mobile)}}" href="#">
+                        <img width="30" src="/static/phone.png">
+                    </a>
+                {% endif %}
+                <br>
+            {% endfor %}
+            <div class="collapse" id="collapseEnrollForm">
+                {% for field in form.errors %}
+                    {% for error in form.errors[field] %}
+                        <div class="alert alert-error">
+                            <strong>Error!</strong>{{field}}: {{error}}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                <b>Add Students</b>
+                <form method=post>
+                {{ form.hidden_tag() }}
+                Type a comma seperated list of one or more student email addresses to add them to this internship. <br>
+                {{ form.csv(cols="60",rows="8") }} <br>
+                {{form.submit()}}
+                </form>
+            </div>
+            <hr>
+            <p>
+                <b>Timesheets</b>
+                {% if current_user in internship.ccpa_students %}
+                    <a data-toggle="tooltip" data-placement="top" title='New Timesheet' href="/internship/newtimesheet/{{internship.id}}">
+                        <img src="/static/timesheet.png" width="30">
+                    </a>
+                {% endif %}
+            </p>
+            {% for tsheet in timesheets %}
+                <a href="/internship/timesheet/{{tsheet.id}}">{{tsheet.intern.fname}} {{tsheet.intern.lname}}</a> <br>
+            {% endfor %}
+            <br>
+            <hr>
+            <p>
+                <b>Activities</b>
+                <a data-bs-toggle="collapse" href="#collapseActivityForm" aria-expanded="false" aria-controls="collapseActivityForm">
+                    <img src="/static/new.png" width="20">
+                </a>
+            </p>
+            {% if internship.activities %}
+            <table class="table table-sm">
+                <tr>
+                    <th></th><th>Title</th><th colspan="3">Description</th>
+                </tr>
+            {% for act in internship.activities %}
+            <tr>
+                <td>
+                    <td>
+                        <a href="/internship/deleteactivity/{{internship.id}}/{{act.oid}}"><img width="20" src="/static/delete.png"></a>
+                    </td>
+                </td>
+                <td>{{act.title}}</td>
+                <td colspan="3">{{act.desc}}</td>
+            </tr>
+            {% endfor %}
+            </table>
+            {% endif %}
+
+            <div class="collapse" id="collapseActivityForm">
+                <p><b>Add an Activity</b></p>
+                <form method=post>
+                    {{ activityForm.hidden_tag() }}
+                    <p>Title: {{activityForm.title(class="form-control")}}</p>
+                    <p>Activity Description: {{activityForm.desc(class="form-control")}}</p>
+                    <p>{{activityForm.activitySubmit(class="form-control")}}</p>
+                </form>
+            </div>
+
+    </div>
+    <hr class="border border-dark border-3">
+    <p>
+        <b>Stakeholders</b>
+        <a data-bs-toggle="collapse" href="#collapseStakeholderForm" aria-expanded="false" aria-controls="collapseStakeholderForm">
+            <img src="/static/new.png" width="20">
+        </a>
+    </p>
+
+    {% if internship.stakeholders %}
+        <table class="table table-sm">
+            <tr>
+                <th></th><th>Title</th><th>Persona Name</th><th>Persona Story</th>
+            </tr>
+            {% for sh in internship.stakeholders %}
+            <tr>
+                <td>
+                    <a href="/internship/deletestakeholder/{{internship.id}}/{{sh.oid}}"><img width="20" src="/static/delete.png"></a>
+                </td>
+                <td>
+                    {{sh.title}}
+                </td>
+                <td>
+                    {{sh.name}}
+                </td>
+                <td>
+                    {{sh.story}}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <div class="collapse" id="collapseStakeholderForm">
+        <p><b>Add a Stakeholder</b></p>
+        <form method=post>
+            {{ stakeholderForm.hidden_tag() }}
+            <div class="row">
+                <div class="col">
+                    <p>Title: {{stakeholderForm.title(class="form-control")}}</p>
+                </div>
+                <div class="col">
+                    <p>Persona Name: {{stakeholderForm.name(class="form-control")}}</p>
+                </div>
+            </div>
+            <p>Persona Story: {{stakeholderForm.story(class="form-control")}}</p>
+            <p>{{stakeholderForm.stakeholderSubmit(class="form-control")}}</p>
+        </form>
+    </div>
+    <p>
+        <b>Notes:</b>
+        <a data-toggle="tooltip" data-placement="top" title='Edit' href="/internship/edit/{{internship.id}}">
+            <img width="30" src="/static/edit.png">
+        </a> 
+    </p>
+    {{internship.notes}}
 
 </div>
 {% endblock %}

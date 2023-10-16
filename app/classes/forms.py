@@ -17,8 +17,8 @@ class TextAreaForm(FlaskForm):
 
 class InternshipStakeholderForm(FlaskForm):
     title = StringField(validators=[InputRequired()])
-    name = StringField(validators=[InputRequired()])
-    story = TextAreaField(validators=[InputRequired()])
+    name = StringField(validators=[Optional()])
+    story = TextAreaField(validators=[Optional()])
     stakeholderSubmit = SubmitField('Submit')
 
 
@@ -35,6 +35,11 @@ class TimeSheetForm(FlaskForm):
     end_time_am_pm = SelectField(choices=[('PM','PM'),('AM','AM')],validators=[InputRequired()])
     desc = TextAreaField('What did you do?',validators=[InputRequired()] )
     submit = SubmitField('Submit')
+
+class InternshipActivityForm(FlaskForm):
+    title = StringField()
+    desc = TextAreaField()
+    activitySubmit = SubmitField("Submit")
 
 class InternshipForm(FlaskForm):
     site_name = StringField(validators=[InputRequired()])
@@ -55,6 +60,8 @@ class InternshipForm(FlaskForm):
     phone_suffix = StringField(validators=[Optional(),Length(min=4,max=4,message="Must be four characters")])
     notes = TextAreaField()
     image = FileField("Image: ")
+    vision = TextAreaField()
+    mission = TextAreaField()
     submit = SubmitField('Submit')
 
 class AddToCohortForm(FlaskForm):
