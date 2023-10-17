@@ -60,7 +60,7 @@ def internship(intID):
     activityForm = InternshipActivityForm()
     impactForm = InternshipImpactForm()
 
-    if form.submit.data and form.validate_on_submit():
+    if form.taSubmit.data and form.validate_on_submit():
         if current_user.oemail in admins or current_user.oemail in crew:
             emails = form.csv.data.split(',')
 
@@ -399,7 +399,14 @@ def newtimesheet(intID):
 def timesheet(tsID,p=''):
     ts = Internship_Timesheet.objects.get(pk=tsID)
     form = TimeSheetForm()
-    if form.validate_on_submit() and current_user == ts.intern:
+    statementForm = TextAreaForm()
+
+    if statementForm.taSubmit.data and statementForm.validate_on_submit() and current_user == ts.intern:
+        ts.update(statement=statementForm.csv.data)
+    else:
+        statementForm.csv.data = ts.statement
+
+    if form.submit.data and form.validate_on_submit() and current_user == ts.intern:
 
         if form.start_time_am_pm.data.lower() == "pm" and int(form.start_time_hr.data) < 12:
             start_hr = int(form.start_time_hr.data) + 12
@@ -462,7 +469,7 @@ def timesheet(tsID,p=''):
     if p == 'print':
         return render_template("internship/timesheetprint.html", ts=ts)
     else:
-        return render_template("internship/timesheet.html", ts=ts, form=form)
+        return render_template("internship/timesheet.html", ts=ts, form=form, statementForm=statementForm)
 
 
 @app.route('/internship/deletetsday/<tsID>/<dayOID>')

@@ -13,7 +13,7 @@ import phonenumbers
 
 class TextAreaForm(FlaskForm):
     csv = TextAreaField()
-    submit = SubmitField()
+    taSubmit = SubmitField("Submit")
 
 class InternshipStakeholderForm(FlaskForm):
     title = StringField(validators=[InputRequired()])

@@ -32,6 +32,7 @@ class Internship_Timesheet(Document):
     internship = ReferenceField('Internship', required=True)
     days = EmbeddedDocumentListField('Internship_Timesheet_Day')
     totalHrs = FloatField()
+    statement = StringField()
 
 class InternshipStakeholder(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)

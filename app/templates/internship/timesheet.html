@@ -18,9 +18,50 @@
     </div>
 
 </div>
-<h3>{{ts.internship.site_name}}</h3>
-<h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
-<h3>Total Hours: {{ts.totalHrs}}</h3>
+<div class="row">
+    <div class="col-4">
+        <h3>{{ts.internship.site_name}}</h3>
+        <h3>{{ts.intern.fname}} {{ts.intern.lname}}</h3>
+        <h3>Total Hours: {{ts.totalHrs}}</h3>
+    </div>
+    <div class="col">
+        <b>Statement</b>
+        <a data-toggle="tooltip" data-placement="top" title='This is a statement that connects the intern personally to the work. It can be a quote from a stakeholder or something from the organizations literature or a personal statment.' href="#">
+            <img width="20" src="/static/info.png">
+        </a> 
+        {% if current_user == ts.intern %}
+        <a data-toggle="tooltip" data-placement="top" title="Add an inspirational statement" data-bs-toggle="collapse" href="#collapseStatementForm" aria-expanded="false" aria-controls="collapseStatementForm">
+            {% if ts.statement %}
+                <img src="/static/edit.png" width="20">
+            {% else %}
+                <img src="/static/new.png" width="20">
+            {% endif %}
+        </a>
+        {% endif %}
+        {% if ts.statement %}
+            <br> {{ts.statement}}
+        {% else %}
+            <br> No statement yet.
+        {% endif %}
+        <div class="collapse" id="collapseStatementForm">
+            {% for field in form.errors %}
+                {% for error in form.errors[field] %}
+                    <div class="alert alert-error">
+                        <strong>Error!</strong>{{field}}: {{error}}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            <b>Add a Statement</b>
+            <form method=post>
+            {{ statementForm.hidden_tag() }}
+            {{ statementForm.csv(class="form-control", cols="60",rows="4") }} <br>
+            {{ statementForm.taSubmit()}}
+            </form>
+        </div>
+    </div>
+
+</div>
+
 <table class="table">
     <tr>
         <th></th><th>Date</th><th>Hours</th><th>Start</th><th>End</th><th>Create Date</th>
