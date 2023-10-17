@@ -59,11 +59,11 @@ def before_request():
     try: 
         session['return_URL']
     except:
-        session['return_URL'] = reqPath
+        if basePath not in ['/login','/static','/authorize']:
+            session['return_URL'] = reqPath
     else:
-        if session['return_URL'] != reqPath:
-            session['return_URL'] == reqPath
-
+        if session['return_URL'] != reqPath and basePath not in ['/login','/static','/authorize']:
+            session['return_URL'] = reqPath
 
     if basePath not in unauthPaths:
         if current_user.is_anonymous:
@@ -174,6 +174,7 @@ def callback():
             current_user.update(role = "Teacher")
     # Send user back to homepage
     return redirect(session['return_URL'])
+    # return redirect(url_for('index'))
 
 @app.route("/logout")
 @login_required
