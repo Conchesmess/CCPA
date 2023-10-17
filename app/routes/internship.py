@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, redirect, flash, url_for
-from app.classes.data import Internship, User, Internship_Timesheet, Internship_Timesheet_Day, Signature, InternshipStakeholder, InternshipActivity
-from app.classes.forms import InternshipForm, TextAreaForm, TimeSheetForm, SignatureForm, InternshipStakeholderForm, InternshipActivityForm
+from app.classes.data import Internship, InternshipImpact, User, Internship_Timesheet, Internship_Timesheet_Day, Signature, InternshipStakeholder, InternshipActivity
+from app.classes.forms import InternshipForm, InternshipImpactForm, TextAreaForm, TimeSheetForm, SignatureForm, InternshipStakeholderForm, InternshipActivityForm
 from datetime import datetime as dt
 from flask_login import current_user
 import phonenumbers
@@ -58,6 +58,7 @@ def internship(intID):
     timesheets = Internship_Timesheet.objects(internship=iship)
     stakeholderForm = InternshipStakeholderForm()
     activityForm = InternshipActivityForm()
+    impactForm = InternshipImpactForm()
 
     if form.submit.data and form.validate_on_submit():
         if current_user.oemail in admins or current_user.oemail in crew:
@@ -93,7 +94,28 @@ def internship(intID):
             )
         iship.save()
 
-    return render_template('internship/internship.html',internship=iship, form=form, stakeholderForm=stakeholderForm, activityForm=activityForm, timesheets=timesheets)
+    if impactForm.impactSubmit.data and impactForm.validate_on_submit():
+        iship.impact.create(
+            oid = ObjectId(),
+            metric = impactForm.metric.data,
+            howCollected = impactForm.howCollected.data,
+            howConnected = impactForm.howConnected.data
+            )
+        iship.save()
+
+    return render_template('internship/internship.html',internship=iship, form=form, impactForm=impactForm, stakeholderForm=stakeholderForm, activityForm=activityForm, timesheets=timesheets)
+
+@app.route('/internship/deleteimpact/<ishipID>/<impOID>')
+def deleteaimpact(ishipID,impOID):
+    iship = Internship.objects.get(id=ishipID)
+    imps = iship.impact.filter(oid=impOID)
+    if len(imps) == 1:
+        imps.delete()
+        iship.save()
+    else:
+        "There are more than one metrics with that ID.  That shouldn't happen!"
+
+    return redirect(url_for('internship',intID=ishipID))
 
 @app.route('/internship/deleteactivity/<ishipID>/<actOID>')
 def deleteactivity(ishipID,actOID):

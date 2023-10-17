@@ -44,6 +44,13 @@ class InternshipActivity(EmbeddedDocument):
     title = StringField()
     desc = StringField()
 
+class InternshipImpact(EmbeddedDocument):
+    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
+    metric = StringField()
+    howCollected = StringField()
+    howConnected = StringField()
+
+
 class Internship(Document):
     site_name = StringField()
     ccpa_staff = ReferenceField('User')
@@ -66,7 +73,7 @@ class Internship(Document):
     vision = StringField()
     mission = StringField()
     activities = EmbeddedDocumentListField('InternshipActivity')
-
+    impact = EmbeddedDocumentListField("InternshipImpact")
 
 
 class Adult(EmbeddedDocument):

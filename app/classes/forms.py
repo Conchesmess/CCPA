@@ -41,6 +41,12 @@ class InternshipActivityForm(FlaskForm):
     desc = TextAreaField()
     activitySubmit = SubmitField("Submit")
 
+class InternshipImpactForm(FlaskForm):
+    metric = StringField()
+    howCollected = TextAreaField()
+    howConnected = TextAreaField()
+    impactSubmit = SubmitField("Submit")
+
 class InternshipForm(FlaskForm):
     site_name = StringField(validators=[InputRequired()])
     ccpa_staff = EmailField(validators=[Optional()])

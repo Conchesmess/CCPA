@@ -11,8 +11,20 @@
     <hr>
     <div class="row">
         <div class="col">
-            <b>Vision:</b> {{internship.vision}} <br>
-            <b>Mission:</b> {{internship.mission}}
+            <b>
+                Vision:
+            </b> 
+            <a data-toggle="tooltip" data-placement="top" title="An organization's vision describes the organization that the world would like to see. A vision statement is big and inspiring." href="#">
+                <img width="20" src="/static/info.png">
+            </a> 
+            {{internship.vision}} <br>
+            <b>
+                Mission:
+            </b> 
+            <a data-toggle="tooltip" data-placement="top" title="An organization's mission is often smaller or more specific than their vision. A mission can usually be measured." href="#">
+                <img width="20" src="/static/info.png">
+            </a> 
+            {{internship.mission}}
         </div>
     </div>
 
@@ -97,16 +109,58 @@
             {% endfor %}
             <hr>
             <p>
-                <b>Impact</b>
+                <b>
+                    Impact
+                    <a data-toggle="tooltip" data-placement="top" title='This section contains goals with specific measuremets that the organization believes will help them know if they are acheiving theri mission.' href="#">
+                        <img width="20" src="/static/info.png">
+                    </a> 
+                </b>
                 <a data-bs-toggle="collapse" href="#collapseImpactForm" aria-expanded="false" aria-controls="collapseImpactForm">
                     <img src="/static/new.png" width="20">
                 </a>
             </p>
-            <p>
-                <i>Coming Soon... This is where students will record how this organization describes its impact using 
-                specific data, describing how that data is collectd and describing what that data can tell about 
-                the organization's impact on it's community.</i> 
-            </p>
+            {% if internship.impact %}
+            <table class="table table-sm">
+                <tr>
+                    <th></th><th>Metric</th><th>How is this collected?</th><th>How is this connected to the mission?</th>
+                </tr>
+                {% for i in internship.impact %} 
+                    <tr>
+                        <td>
+                            <a href="/internship/deleteimpact/{{internship.id}}/{{i.oid}}"><img width="20" src="/static/delete.png"></a>
+                        </td>
+                        <td>
+                            {{i.metric}}
+                        </td>
+                        <td>
+                            {{i.howCollected}}
+                        </td>
+                        <td>
+                            {{i.howConnected}}
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+            {% endif %}
+
+            <div class="collapse" id="collapseImpactForm">
+                <form method=post>
+                    {{ form.hidden_tag() }}
+                    <p>
+                        Metric: {{impactForm.metric(class='form-control')}}
+                    </p>
+                    <p>
+                        How is this metric collected? {{ impactForm.howCollected(class="form-control", cols="60",rows="4") }}
+                    </p>
+                    <P>
+                        How is this connected to the mission? {{ impactForm.howConnected(class="form-control", cols="60",rows="4") }}
+                    </P>
+                    {{impactForm.impactSubmit()}}
+                </form>
+            </div>
+
+
         </div>
         <div class="col-lg-12 col-xl-12">
             <br><hr>
@@ -124,9 +178,7 @@
             {% for act in internship.activities %}
             <tr>
                 <td>
-                    <td>
-                        <a href="/internship/deleteactivity/{{internship.id}}/{{act.oid}}"><img width="20" src="/static/delete.png"></a>
-                    </td>
+                    <a href="/internship/deleteactivity/{{internship.id}}/{{act.oid}}"><img width="20" src="/static/delete.png"></a>
                 </td>
                 <td>{{act.title}}</td>
                 <td colspan="3">{{act.desc}}</td>
@@ -157,7 +209,14 @@
     {% if internship.stakeholders %}
         <table class="table table-sm">
             <tr>
-                <th></th><th>Title</th><th>Persona Name</th><th>Persona Story</th>
+                <th></th><th>Title</th>
+                <th>
+                    Persona Name
+                    <a data-toggle="tooltip" data-placement="top" title="A 'persona' is an imaginary person that is the best example of a particular stakeholder. A persona is imagined as a real person and described in a way that describes that persons value and ow their needs are met by your organization." href="#">
+                        <img width="20" src="/static/info.png">
+                    </a> 
+                </th>
+                <th>Persona Story</th>
             </tr>
             {% for sh in internship.stakeholders %}
             <tr>
@@ -187,7 +246,12 @@
                     <p>Title: {{stakeholderForm.title(class="form-control")}}</p>
                 </div>
                 <div class="col">
-                    <p>Persona Name: {{stakeholderForm.name(class="form-control")}}</p>
+                    <p>Persona Name: 
+                        <a data-toggle="tooltip" data-placement="top" title="A 'persona' is an imaginary person that is the best example of a particular stakeholder. A persona is imagined as a real person and described in a way that describes that persons value and ow their needs are met by your organization." href="#">
+                            <img width="20" src="/static/info.png">
+                        </a> 
+                        {{stakeholderForm.name(class="form-control")}}
+                    </p>
                 </div>
             </div>
             <p>Persona Story: {{stakeholderForm.story(class="form-control")}}</p>
