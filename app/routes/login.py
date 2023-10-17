@@ -50,20 +50,28 @@ def before_request():
     studentPaths = ['/internship','/ontimeperc','/gclass','/transcript','/project','/myprojects','/getgclasses','/comp/','/compborrow','/student','/breaks','/classdash','/assignments','/help','/breakstart','/postgrad','/cc','/plan','/profile','/editprofile','/addadult','/editadult','/deleteadult','/sendstudentemail','/checkin','/deletecheckin','/editgclass','/deletegclass','/gclasses','/missingassignmentsstu'] 
     # this is some tricky code designed to send the user to the page they requested even if they have to first go through
     # a authorization process.
+
+    # find the first path argument in the URL
+    reqPath = request.path
+    basePath = reqPath.split('/')
+    basePath = '/'+basePath[1]
+
     try: 
         session['return_URL']
     except:
-        session['return_URL'] = '/'
+        session['return_URL'] = reqPath
+    else:
+        if session['return_URL'] != reqPath:
+            session['return_URL'] == reqPath
 
-    # find the first path argument in the URL
-    basePath = request.path
-    basePath = basePath.split('/')
-    basePath = '/'+basePath[1]
 
     if basePath not in unauthPaths:
-        if current_user.role.lower() == "student" and basePath not in studentPaths:
+        if current_user.is_anonymous:
+            return redirect(url_for('login'))
+        elif current_user.role.lower() == "student" and basePath not in studentPaths:
             flash("Students are not authorized to see that page.")
-            return redirect(url_for("checkin"))
+            session['return_URL'] = "/"
+            return redirect(url_for("/"))
 
 
 # When a route is decorated with @login_required and fails this code is run
@@ -165,7 +173,7 @@ def callback():
         if current_user.role != "Teacher":
             current_user.update(role = "Teacher")
     # Send user back to homepage
-    return redirect(url_for("index"))
+    return redirect(session['return_URL'])
 
 @app.route("/logout")
 @login_required

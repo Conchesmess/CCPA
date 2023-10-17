@@ -356,7 +356,8 @@ def edit_internship(intID):
         form.contact_fname.data = editInt.contact_fname
         form.contact_lname.data = editInt.contact_lname
         form.contact_email.data = editInt.contact_email
-        form.ccpa_staff.data = editInt.ccpa_staff.oemail
+        if editInt.ccpa_staff:
+            form.ccpa_staff.data = editInt.ccpa_staff.oemail
         if editInt.contact_phone:
             form.contact_phone_areacode.data = editInt.contact_phone[:3]
             form.contact_phone_prefix.data = editInt.contact_phone[3:6]
