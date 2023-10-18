@@ -8,6 +8,38 @@ import numpy as np
 import mongoengine.errors
 from flask_login import current_user
 
+@app.route('/transcript/list')
+def transcripts():
+    trans = Transcript.objects()
+    return render_template('transcripts/transcripts.html',trans=trans)
+
+@app.route('/my/transcript')
+def mytranscript():
+    try:
+        myTran = Transcipt.objects.get(student=current_user)
+    except:
+        flash("You don't have a transcript in the system. Ask Mr. Wright to add one for you if you want.")
+        return redirect('/')
+
+    transcriptDF = pd.DataFrame.from_dict(myTran.transcriptDF).fillna('-')
+
+    transcriptDFHTML = transcriptDF.style\
+        .format(precision=2)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:140px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_uuid('trans')\
+        .set_sticky(axis="columns",levels=0)\
+        .set_sticky(axis="index")\
+        .to_html()
+
+    transcriptDFHTML = Markup(transcriptDFHTML)
+
+    return render_template('transcripts/transcript.html', cols=list(transcriptDF.columns), transcriptHTML = transcriptDFHTML,tObj=myTran,student=myTran.student)
+
+
 @app.route('/transcript/delete/<tid>')
 def transcriptDelete(tid):
     tObj = Transcript.objects.get(id=tid)
@@ -16,6 +48,52 @@ def transcriptDelete(tid):
         tObj.delete()
         flash("Transcript is deleted.")
     return redirect(url_for('transcriptNew'))
+
+@app.route('/transcript/fancy/<aid>')
+def transcriptfancy(aid):
+    try:
+        student=User.objects.get(aeriesid=aid)
+    except mongoengine.errors.DoesNotExist:
+        flash(f"No student with Aeries ID: {aid}")
+        return redirect(url_for('transcriptNew'))
+    try:
+        tObj = Transcript.objects.get(student=student)
+    except:
+        flash(f"{student.fname} {student.lname} does not yet have a transcript on OTData.")
+        return redirect(url_for('transcriptNew'))
+
+    transcriptDF = pd.DataFrame.from_dict(tObj.transcriptDF).fillna('-')
+
+    transcriptGB = transcriptDF.groupby(['year','term','sname','grade'])
+
+    dfs = []
+    isFirst = True
+    for head,df in transcriptGB:
+        df = df.drop(['sname','term','year','snum','grade'],axis=1)
+        if isFirst:
+            df = df.drop(['mark','course','altCourse','College Prep?','Honors-AP-Not'],axis=1)
+            df = df.reset_index()
+            head = (f"Transcript for {student.fname} {student.lname}","")
+
+        df = df.style\
+        .format(precision=2)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:0px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table"')  \
+        .set_uuid('trans')\
+        .hide(axis='index')\
+        .to_html()
+
+        df = Markup(df)
+
+        dfs.append((head,df))
+        isFirst=False
+
+    return render_template('transcripts/transcriptfancy.html', cols=list(transcriptDF.columns), tObj=tObj,student=student, dfs=dfs)
+
+
 
 @app.route('/transcript/<aid>')
 def transcript(aid):
@@ -30,13 +108,8 @@ def transcript(aid):
         flash(f"{student.fname} {student.lname} does not yet have a transcript on OTData.")
         return redirect(url_for('transcriptNew'))
     
-    # Style and create the html
-    transcriptDF = pd.DataFrame.from_dict(tObj.transcriptDF)
+    transcriptDF = pd.DataFrame.from_dict(tObj.transcriptDF).fillna('-')
 
-    # miCols = []
-    # for i,col in enumerate(transcriptDF.columns):
-    #     miCols.append((i,col))
-    # transcriptDF.columns = pd.MultiIndex.from_tuples(miCols)
 
     transcriptDFHTML = transcriptDF.style\
         .format(precision=2)\
@@ -44,7 +117,7 @@ def transcript(aid):
             {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
             {'selector': 'thead','props': 'height:140px'},\
             {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
-        .set_table_attributes('class="table"')  \
+        .set_table_attributes('class="table table-sm"')  \
         .set_uuid('trans')\
         .set_sticky(axis="columns",levels=0)\
         .set_sticky(axis="index")\
@@ -62,6 +135,26 @@ def transcriptNew():
         html = form.transcript.data
         soup = BeautifulSoup(html,features="html.parser")
         stuName = soup.find('span',{'class':'student-full-name'})
+        acadGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGP'}).text.strip()
+        acadGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGPN'}).text.strip()
+        totalGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblTP'}).text.strip()
+        totalGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblTPN'}).text.strip()
+        tenTwelveGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCP'}).text.strip()
+        tenTwelveGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCP'}).text.strip()
+
+        #creditAttempted = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCA'})
+        #creditCompleted = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCC'}).text.strip()
+        #classRank = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCR'}).text.strip()
+        #classSize = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCS'}).text.strip()
+
+        stats = {
+            'acadGPA':(acadGPA1,acadGPA2),
+            'totalGPA':(totalGPA1,totalGPA2),
+            "tenTwelveGPA":(tenTwelveGPA1,tenTwelveGPA2)
+            #'credit':(creditAttempted,creditCompleted),
+            #'rank':(classRank,classSize)
+            }
+
         # strip extra whitespace from ends and center of string
         stuName = stuName.text.strip()
         stuName = " ".join(stuName.split())
@@ -79,8 +172,8 @@ def transcriptNew():
             except:
                 tObj = None
             else:
-                flash(f"This student already has a transcript in OTData.")
-                return redirect(url_for("transcript",aid=stuID))
+                flash(f"Deleting old transcript.")
+                tObj.delete()
 
         results = soup.find('table',{"class":"CourseHistory"})
         all_tr = results.find_all('tr')
@@ -184,10 +277,12 @@ def transcriptNew():
         transcriptDict = transcriptDF.to_dict()
         tObj = Transcript(
             student=student,
-            transcriptDF = transcriptDict        )
+            transcriptDF = transcriptDict,
+            stats = stats
+            )
         tObj.save()
         flash("Transcipt saved to OTData.")
 
         return redirect(url_for('transcript',aid=stuID))
     
-    return render_template('transcripts/transcript.html',form=form)
+    return render_template('transcripts/transcriptform.html',form=form)

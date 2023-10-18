@@ -1,27 +1,39 @@
 {% extends "base.html" %}
 
 {% block body %}
-
         <h1>Transcript</h1>
         {% if tObj %}
-            <a href="/transcript/delete/{{tObj.id}}">Delete</a> - <a href="/transcript/fancy/{{student.aeriesid}}">Fancy</a>
+            <a href="/transcript/delete/{{tObj.id}}">Delete</a> <a href="/transcript/{{student.aeriesid}}">Plain</a>
         {% endif %}
 
         {% if student %}
            <h1>
+            {% if student.stuName %}
+                {{student.stuName}}
+            {% else %}
                 {{student.fname}} {{student.lname}}
+            {% endif %}
            </h1>
-            AeriesID: {{student.aeriesid}}
+            {{student.aeriesid}}
         {% endif %}
 
-        {% if tObj %}
-        {% for stat in tObj.stats %}
-            <br>{{stat}}: {{tObj.stats[stat]}}
-        {% endfor %}
-        {% endif %}
+
         <div id="result"></div>
-        {{transcriptHTML}}
-        <br> <br>
+
+        {% if tObj and tObj.stats %}
+            {% for item in tObj.stats %}
+                {{item}}: {{tObj.stats[item]}}
+            {% endfor %}
+        {% endif %}
+
+        {% for head,df in dfs %}
+            <h3 class="text-light bg-dark pb-0 mb-0">
+                {{head[0]}} {% if head[1]|length > 0%}| term {{head[1]}} | grade {{head[3]|round|int}} | {{head[2]}} {% endif %} 
+            </h3>
+            {{df}} <br>
+        {% endfor %}
+<br><br>
+        
 
         <script>
             const tds = document.getElementsByTagName("td");

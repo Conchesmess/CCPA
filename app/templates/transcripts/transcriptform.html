@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block body %}
+        <h1>Transcript</h1>
+        {% if tObj %}
+            <a href="/transcript/delete/{{tObj.id}}">Delete</a>
+        {% endif %}
+
+        {% if student %}
+           <h1>
+            {% if student.stuName %}
+                {{student.stuName}}
+            {% else %}
+                {{student.fname}} {{student.lname}}
+            {% endif %}
+           </h1>
+            {{student.aeriesid}}
+        {% endif %}
+
+        {% if form %}
+
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <form method=post>
+            {{ form.hidden_tag() }}
+            Go to the transcript page in Aeries and right click on the page and choose "View Page Source". Select all and copy 
+            and then paste them in the box here and hit submit!
+            {{ form.transcript(cols=150, rows=10) }} <br>
+            {{ form.submit() }}
+        </form>
+        {% endif %}
+{% endblock %}

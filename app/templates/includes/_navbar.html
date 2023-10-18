@@ -20,6 +20,15 @@
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Transcripts
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/transcript/list">List</a></li>
+            <li><a class="dropdown-item" href="/transcript/new">New</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Students
           </a>
           <ul class="dropdown-menu">
@@ -45,7 +54,7 @@
           <a class="nav-link" href="/myprojects">Projects</a>
         </li> -->
         <li class="nav-item">
-          <a class="nav-link" href="/transcript/new">Transcripts</a>
+          <a class="nav-link" href="/my/transcript">My Transcript</a>
         </li>
         {% if current_user.role.lower() == "student" %}
         <li class="nav-item">

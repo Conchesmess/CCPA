@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<h1>Transcripts</h1>
+<a href="/transcript/new" class="btn btn-primary btn-sm" role="button">New</a> <br> <br>
+
+{% for tran in trans | sort(attribute="student.lname") | sort(attribute="student.fname") %}
+{{tran.student.lname}}, {{tran.student.fname}}  - 
+    <a href="/transcript/{{tran.student.aeriesid}}">Plain</a> - 
+    <a href="/transcript/fancy/{{tran.student.aeriesid}}">Fancy</a><br>    
+{% endfor %}
+        
+{% endblock %}
