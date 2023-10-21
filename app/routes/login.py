@@ -71,7 +71,7 @@ def before_request():
         elif current_user.role.lower() == "student" and basePath not in studentPaths:
             flash("Students are not authorized to see that page.")
             session['return_URL'] = "/"
-            return redirect(url_for("/"))
+            return redirect(url_for("index"))
 
 
 # When a route is decorated with @login_required and fails this code is run

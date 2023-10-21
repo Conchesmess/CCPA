@@ -560,5 +560,6 @@ class ReqClass(Document):
     
 class Transcript(Document):
     transcriptDF = DictField()
+    creditbydept = DictField()
     stats = DictField()
     student = ReferenceField('User',unique=True)

@@ -4,7 +4,12 @@
 
         <h1>Transcript</h1>
         {% if tObj %}
-            <a href="/transcript/delete/{{tObj.id}}">Delete</a> - <a href="/transcript/fancy/{{student.aeriesid}}">Fancy</a>
+            {% if current_user.role.lower() == 'student' %}
+                <a href="/my/transcript/new">Replace</a> 
+            {% else %}
+                <a href="/transcript/delete/{{tObj.id}}">Delete</a> 
+            {% endif %}
+            - <a href="/transcript/fancy/{{student.aeriesid}}">Fancy</a>
         {% endif %}
 
         {% if student %}
@@ -14,14 +19,81 @@
             AeriesID: {{student.aeriesid}}
         {% endif %}
 
-        {% if tObj %}
-        {% for stat in tObj.stats %}
-            <br>{{stat}}: {{tObj.stats[stat]}}
-        {% endfor %}
-        {% endif %}
+        <div class="row">
+            <div class="col-1">
+
+            </div>
+            <div class="col-3">
+                {{creditbydeptHTML}}
+            </div>
+            <div class="col-3">
+                <table class="table table-sm">
+                    {% if tObj %}
+                    <tr>
+                        <th>OUSD Calculations</th><th>Unweighted</th><th>Weighted</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            Total GPA OUSD
+                        </td>
+                        <td>
+                            {{tObj.stats['totalGPA'][1]}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['totalGPA'][0]}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Total GPA Recreated
+                        </td>
+                        <td>
+                            {{tObj.stats['totalGPA2'][1]|round(2)}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['totalGPA'][0]}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Academic GPA OUSD
+                        </td>
+                        <td>
+                            {{tObj.stats['acadGPA'][1]}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['acadGPA'][0]}}
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            10-12 GPA OUSD
+                        </td>
+                        <td>
+                            {{tObj.stats['tenTwelveGPA'][1]}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['tenTwelveGPA'][0]}}
+                        </td>
+
+                    </tr>
+                {% endif %}
+                </table>
+            </div>
+            <div class="col"></div>
+            
+
+        </div>
+
+
         <div id="result"></div>
         {{transcriptHTML}}
-        <br> <br>
+        <br>
+        <b>legend:</b> <br>
+        Yellow: AP class title without AP designation. <br>
+        Orange: No designation for college Prep, Honors, AP, etc.  Should at least be 'N'? <br>
+        Red: marked as BOTH College Prep and 'N'  <br> <br>
 
         <script>
             const tds = document.getElementsByTagName("td");

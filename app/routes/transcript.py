@@ -13,41 +13,40 @@ def transcripts():
     trans = Transcript.objects()
     return render_template('transcripts/transcripts.html',trans=trans)
 
-@app.route('/my/transcript')
-def mytranscript():
-    try:
-        myTran = Transcipt.objects.get(student=current_user)
-    except:
-        flash("You don't have a transcript in the system. Ask Mr. Wright to add one for you if you want.")
-        return redirect('/')
+# @app.route('/my/transcript')
+# def mytranscript():
+#     try:
+#         myTran = Transcript.objects.get(student=current_user)
+#     except:
+#         flash("You don't have a transcript in the system. You can create one now.")
+#         return redirect('/my/transcript/new')
 
-    transcriptDF = pd.DataFrame.from_dict(myTran.transcriptDF).fillna('-')
+#     transcriptDF = pd.DataFrame.from_dict(myTran.transcriptDF).fillna('-')
 
-    transcriptDFHTML = transcriptDF.style\
-        .format(precision=2)\
-        .set_table_styles([
-            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:140px'},\
-            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
-        .set_table_attributes('class="table table-sm"')  \
-        .set_uuid('trans')\
-        .set_sticky(axis="columns",levels=0)\
-        .set_sticky(axis="index")\
-        .to_html()
+#     transcriptDFHTML = transcriptDF.style\
+#         .format(precision=2)\
+#         .set_table_styles([
+#             {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+#             {'selector': 'thead','props': 'height:140px'},\
+#             {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+#         .set_table_attributes('class="table table-sm"')  \
+#         .set_uuid('trans')\
+#         .set_sticky(axis="columns",levels=0)\
+#         .set_sticky(axis="index")\
+#         .to_html()
 
-    transcriptDFHTML = Markup(transcriptDFHTML)
+#     transcriptDFHTML = Markup(transcriptDFHTML)
 
-    return render_template('transcripts/transcript.html', cols=list(transcriptDF.columns), transcriptHTML = transcriptDFHTML,tObj=myTran,student=myTran.student)
-
+#     return render_template(url_for('mytranscript'))
 
 @app.route('/transcript/delete/<tid>')
 def transcriptDelete(tid):
     tObj = Transcript.objects.get(id=tid)
     currUser = current_user
-    if tObj.student == currUser or currUser.isadmin:
+    if tObj.student == currUser or current_user.role.lower() == "teacher":
         tObj.delete()
         flash("Transcript is deleted.")
-    return redirect(url_for('transcriptNew'))
+    return redirect(url_for('transcripts'))
 
 @app.route('/transcript/fancy/<aid>')
 def transcriptfancy(aid):
@@ -64,6 +63,8 @@ def transcriptfancy(aid):
 
     transcriptDF = pd.DataFrame.from_dict(tObj.transcriptDF).fillna('-')
 
+    transcriptDF = transcriptDF.drop(['crsid','wgp','wcredit','credit','totalgp', 'totalwgp'],axis=1)
+
     transcriptGB = transcriptDF.groupby(['year','term','sname','grade'])
 
     dfs = []
@@ -71,7 +72,7 @@ def transcriptfancy(aid):
     for head,df in transcriptGB:
         df = df.drop(['sname','term','year','snum','grade'],axis=1)
         if isFirst:
-            df = df.drop(['mark','course','altCourse','College Prep?','Honors-AP-Not'],axis=1)
+            df = df.drop(['mark','course','altCourse','N/P/H/AP'],axis=1)
             df = df.reset_index()
             head = (f"Transcript for {student.fname} {student.lname}","")
 
@@ -93,10 +94,16 @@ def transcriptfancy(aid):
 
     return render_template('transcripts/transcriptfancy.html', cols=list(transcriptDF.columns), tObj=tObj,student=student, dfs=dfs)
 
-
-
+@app.route('/my/transcript')
 @app.route('/transcript/<aid>')
-def transcript(aid):
+def transcript(aid=None):
+
+    if not aid and current_user.aeriesid:
+        aid = current_user.aeriesid
+    else:
+        flash("You don't have a transcript in the system.  You can make one!")
+        return redirect(url_for('transcriptnew'))
+
     try:
         student=User.objects.get(aeriesid=aid)
     except mongoengine.errors.DoesNotExist:
@@ -107,26 +114,49 @@ def transcript(aid):
     except:
         flash(f"{student.fname} {student.lname} does not yet have a transcript on OTData.")
         return redirect(url_for('transcriptNew'))
-    
+
     transcriptDF = pd.DataFrame.from_dict(tObj.transcriptDF).fillna('-')
 
+    creditbydeptDF = pd.DataFrame.from_dict(tObj.creditbydept)
+
+    def highlight_cols(s):
+        color = 'grey'
+        return 'background-color: %s' % color
+
+    creditbydeptHTML = creditbydeptDF.style\
+        .set_uuid('creditbydept')\
+        .set_table_attributes('class="table"')  \
+        .applymap(highlight_cols, subset=pd.IndexSlice[:, ['Sum']])\
+        .apply(lambda row: ['background: grey' if row.name == 'Sum' else '' for cell in row], axis=1)\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:0px'},\
+            {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
+        .set_table_attributes('class="table"')  \
+        .to_html()
 
     transcriptDFHTML = transcriptDF.style\
+        .set_uuid('transcript')\
+        .set_table_attributes('class="table table-sm"')  \
         .format(precision=2)\
         .set_table_styles([
             {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:140px'},\
+            {'selector': 'thead','props': 'height:100px'},\
             {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
-        .set_table_attributes('class="table table-sm"')  \
-        .set_uuid('trans')\
+        .apply(lambda row: ['background:red' if cell == "P/N" else "" for cell in row])\
+        .apply(lambda row: ['background:yellow' if row['course'][0:3] == "AP " and row['N/P/H/AP'][-2:] != "AP" else "" for cell in row] ,axis=1)\
+        .apply(lambda row: ['background:#ffa533' if row['N/P/H/AP'] == "" else "" for cell in row] ,axis=1)\
         .set_sticky(axis="columns",levels=0)\
         .set_sticky(axis="index")\
         .to_html()
 
     transcriptDFHTML = Markup(transcriptDFHTML)
+    creditbydeptHTML = Markup(creditbydeptHTML)
 
-    return render_template('transcripts/transcript.html', cols=list(transcriptDF.columns), transcriptHTML = transcriptDFHTML,tObj=tObj,student=student)
+    return render_template('transcripts/transcript.html', cols=list(transcriptDF.columns), transcriptHTML = transcriptDFHTML,tObj=tObj,student=student,creditbydeptHTML=creditbydeptHTML)
 
+@app.route('/my/transcript/new', methods=['GET', 'POST'])
 @app.route('/transcript/new', methods=['GET', 'POST'])
 def transcriptNew():
     form = TranscriptForm()
@@ -134,7 +164,15 @@ def transcriptNew():
     if form.validate_on_submit():
         html = form.transcript.data
         soup = BeautifulSoup(html,features="html.parser")
-        stuName = soup.find('span',{'class':'student-full-name'})
+        try:
+            stuName = soup.find('span',{'class':'student-full-name'})
+            stuName = stuName.text.strip()
+            stuName = " ".join(stuName.split())
+        except:
+            stuName = soup.find('div',{'class':"StudentName ellipsis"})
+            stuName = stuName.text.strip()
+            stuName = " ".join(stuName.split())
+
         acadGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGP'}).text.strip()
         acadGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGPN'}).text.strip()
         totalGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblTP'}).text.strip()
@@ -156,10 +194,13 @@ def transcriptNew():
             }
 
         # strip extra whitespace from ends and center of string
-        stuName = stuName.text.strip()
-        stuName = " ".join(stuName.split())
         stuID = soup.find('span',attrs={"data-tcfc":"STU.ID"})
-        stuID = stuID.text
+        stuID = int(stuID.text)
+
+            
+        if current_user.aeriesid != stuID and current_user.role.lower() == 'student':
+            flash("You can only enter your own transcript and you can't enter a transcript if your student ID is not in your record")
+            return redirect(url_for('index'))
         try:
             student = User.objects.get(aeriesid = stuID)
         except:
@@ -183,6 +224,7 @@ def transcriptNew():
             schoolNum = tr.find('td',attrs={"data-tcfc":"HIS.ST"})
             schoolName = tr.find('span')
             grade = tr.find('td',attrs={"data-tcfc":"HIS.GR"})
+            crsid = tr.find('td',attrs={"data-tcfc":"HIS.CN"})
             year = tr.find('td',attrs={"data-tcfc":"HIS.YR"})
             term = tr.find('td',attrs={"data-tcfc":"HIS.TE"})
             mark = tr.find('td',attrs={"data-tcfc":"HIS.MK"})
@@ -207,6 +249,7 @@ def transcriptNew():
                     'term':term.text.strip(),
                     'mark':mark.text.strip(),
                     'course':txtCourse,
+                    'crsid':crsid.text.strip(),
                     'altCourse':txtOtherCourse,
                     'cp':cp.text.strip(),
                     'nh':nh.text.strip(),
@@ -237,52 +280,77 @@ def transcriptNew():
             {'mark':'F','gp':0},
             {'mark':'F-','gp':0},
         ]
+
         gpDF = pd.DataFrame.from_dict(gp)
 
         transcriptDF = pd.merge(transcriptDF, 
                             gpDF, 
                             on ='mark', 
                             how ='left')
+
+        ag = {'E':'English','Q':'Science','M':'Math','S':'Social Studies','Y':'Elective','Z':'Z?', 'G':'World Language','P':'Physical Education','R':'R?','B':'Art'}
+
+        transcriptDF['a-g'] = transcriptDF.apply(lambda row: ag[row['crsid'][:1]],axis=1)
+        col = transcriptDF.pop('a-g')
+        transcriptDF.insert(7, col.name, col)
                         
         transcriptDF['cc'] = transcriptDF['cc'].astype('float64')
         transcriptDF['cr'] = transcriptDF['cr'].astype('float64')
+
+        creditByDept = transcriptDF.groupby('a-g')['cc'].agg(['sum','count'])
+
         # Created an Adjusted Grade Points for Honors and AP whever grade is above a D
-        transcriptDF['adjgp'] = np.where(((transcriptDF['nh'] == "H") | (transcriptDF['nh'] == "H/AP")) & ((transcriptDF['gp'] > 1)), transcriptDF['gp']+1, transcriptDF['gp'])
+        transcriptDF['wgp'] = np.where(((transcriptDF['nh'] == "H") | (transcriptDF['nh'] == "H/AP")) & ((transcriptDF['gp'] > 1)), transcriptDF['gp']+1, transcriptDF['gp'])
         # Remove values from adjusted grade points that are not cllege prep
-        transcriptDF['adjgp'] = np.where((transcriptDF['nh'] == "N") | (transcriptDF['cp'] != "P"), np.nan, transcriptDF['adjgp'])
-        transcriptDF['adjcr'] = np.where(transcriptDF['adjgp'] > 0, transcriptDF['cr'],np.nan)
-        transcriptDF['countcr'] = np.where(transcriptDF['gp'] > 0, transcriptDF['cr'],np.nan)
+        transcriptDF['wgp'] = np.where((transcriptDF['nh'] == "N") | (transcriptDF['cp'] != "P"), np.nan, transcriptDF['wgp'])
+        transcriptDF['credit'] = np.where(transcriptDF['gp'] > 0, transcriptDF['cr'],np.nan)
+        transcriptDF['wcredit'] = np.where(transcriptDF['wgp'] > 0, transcriptDF['cr'],np.nan)
 
         # Sort the data
         transcriptDF = transcriptDF.sort_values(by=['grade', 'term','snum']).reset_index(drop=True)
         # created weighted colums that multiply the credits received by the gradepoints
-        transcriptDF['weightedgp'] = transcriptDF['cr']*transcriptDF['gp']
-        transcriptDF['weightedadjgp'] = transcriptDF['cr']*transcriptDF['adjgp']
+        transcriptDF['totalgp'] = transcriptDF['cr']*transcriptDF['gp']
+        transcriptDF['totalwgp'] = transcriptDF['cr']*transcriptDF['wgp']
+
         # get total for numeric columns
-        transcriptDF.loc['total'] = transcriptDF[['cc','cr','weightedgp','weightedadjgp','adjcr','countcr']].sum()
+        transcriptDF.loc['total'] = transcriptDF[['cc','cr','totalgp','totalwgp','wcredit','credit']].sum()
+
         # Divide weighted columns by credit earned (cc) to get weighted averages
+        #transcriptDF.loc['Ave'] = transcriptDF[['gp','wgp']].mean()
+        transcriptDF.at['Ave','totalwgp'] = transcriptDF.at['total','totalwgp'] / transcriptDF.at['total','wcredit']
+        transcriptDF.at['Ave','totalgp'] = transcriptDF.at['total','totalgp'] / transcriptDF.at['total','credit']
+        stats['totalGPA2'] = (transcriptDF.at['Ave','totalwgp'],transcriptDF.at['Ave','totalgp'])
+        def nhtocp(row):
+            if len(str(row['nh'])) > 0:
+                if len(str(row['cp'])) > 0:
+                    return str(row['cp']) + '/' + str(row['nh'])
+                else:
+                    return str(row['nh'])
+            else:
+                return str(row['cp'])
 
-        transcriptDF.loc['Ave'] = transcriptDF[['gp','adjgp']].mean()
-        transcriptDF.at['Ave','weightedadjgp'] = transcriptDF.at['total','weightedadjgp'] / transcriptDF.at['total','adjcr']
-        transcriptDF.at['Ave','weightedgp'] = transcriptDF.at['total','weightedgp'] / transcriptDF.at['total','countcr']
+        transcriptDF['cp'] = transcriptDF.apply(lambda row: nhtocp(row) ,axis=1)
+        creditByDept = pd.pivot_table(transcriptDF,values="cc",index='a-g',columns='cp',aggfunc=sum, margins=True, margins_name='Sum')
 
-        # Drop the weighted columns
-        # transcriptDF = transcriptDF.drop(['weightedgp','weightedadjgp'],axis=1)
+        creditByDept = creditByDept.fillna('-')
+
+
         # Cleanup the NaN's
         transcriptDF[["sname","snum",'grade','year','term','cc','cr','mark','course','altCourse','cp','nh']] = transcriptDF[["sname","snum",'grade','year','term','cc','cr','mark','course','altCourse','cp','nh']].fillna('')
-        transcriptDF.rename(columns={'cc': 'Credit Attempted', 'cr': 'Credit Earned', 'cp':'College Prep?','nh':'Honors-AP-Not'}, inplace=True)
-            
+        transcriptDF.rename(columns={'cc': 'Credit Earned', 'cr': 'Credit Attempted', 'cp':'N/P/H/AP'}, inplace=True)
+        transcriptDF = transcriptDF.drop(['nh'],axis=1)
         transcriptDF.index = transcriptDF.index.map(str)
 
         transcriptDict = transcriptDF.to_dict()
         tObj = Transcript(
             student=student,
             transcriptDF = transcriptDict,
-            stats = stats
+            stats = stats,
+            creditbydept = creditByDept
             )
         tObj.save()
         flash("Transcipt saved to OTData.")
-
+        print(session['return_URL'])
         return redirect(url_for('transcript',aid=stuID))
     
     return render_template('transcripts/transcriptform.html',form=form)

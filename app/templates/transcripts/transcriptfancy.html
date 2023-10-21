@@ -25,13 +25,17 @@
                 {{item}}: {{tObj.stats[item]}}
             {% endfor %}
         {% endif %}
-
+        <div class="row">
         {% for head,df in dfs %}
+            <div class="col border border-3 m-3">
             <h3 class="text-light bg-dark pb-0 mb-0">
                 {{head[0]}} {% if head[1]|length > 0%}| term {{head[1]}} | grade {{head[3]|round|int}} | {{head[2]}} {% endif %} 
             </h3>
-            {{df}} <br>
+            {{df}}
+            </div>
         {% endfor %}
+        </div>
+
 <br><br>
         
 
