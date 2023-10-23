@@ -98,11 +98,12 @@ def transcriptfancy(aid):
 @app.route('/transcript/<aid>')
 def transcript(aid=None):
 
-    if not aid and current_user.aeriesid:
-        aid = current_user.aeriesid
-    else:
-        flash("You don't have a transcript in the system.  You can make one!")
-        return redirect(url_for('transcriptnew'))
+    if not aid:
+        if current_user.aeriesid:
+            aid = current_user.aeriesid
+        else:
+            flash("You don't have a transcript in the system.  You can make one!")
+            return redirect(url_for('transcriptnew'))
 
     try:
         student=User.objects.get(aeriesid=aid)
