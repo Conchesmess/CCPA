@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import mongoengine.errors
 from flask_login import current_user
+import time
 
 @app.route('/transcript/list')
 def transcripts():
@@ -147,7 +148,7 @@ def transcript(aid=None):
             {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
         .apply(lambda row: ['background:red' if cell == "P/N" else "" for cell in row])\
         .apply(lambda row: ['background:yellow' if row['course'][0:3] == "AP " and row['N/P/H/AP'][-2:] != "AP" else "" for cell in row] ,axis=1)\
-        .apply(lambda row: ['background:#ffa533' if row['N/P/H/AP'] == "" else "" for cell in row] ,axis=1)\
+        .apply(lambda row: ['background:#ffa533' if row['N/P/H/AP'] == "(N)" else "" for cell in row] ,axis=1)\
         .set_sticky(axis="columns",levels=0)\
         .set_sticky(axis="index")\
         .to_html()
@@ -161,10 +162,12 @@ def transcript(aid=None):
 @app.route('/transcript/new', methods=['GET', 'POST'])
 def transcriptNew():
     form = TranscriptForm()
-
     if form.validate_on_submit():
         html = form.transcript.data
+        # with open('html.txt','w') as f:
+        #     f.write(html)
         soup = BeautifulSoup(html,features="html.parser")
+
         try:
             stuName = soup.find('span',{'class':'student-full-name'})
             stuName = stuName.text.strip()
@@ -173,25 +176,23 @@ def transcriptNew():
             stuName = soup.find('div',{'class':"StudentName ellipsis"})
             stuName = stuName.text.strip()
             stuName = " ".join(stuName.split())
-
         acadGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGP'}).text.strip()
         acadGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblGPN'}).text.strip()
         totalGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblTP'}).text.strip()
         totalGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblTPN'}).text.strip()
         tenTwelveGPA1 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCP'}).text.strip()
-        tenTwelveGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCP'}).text.strip()
-
-        #creditAttempted = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCA'})
-        #creditCompleted = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCC'}).text.strip()
-        #classRank = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCR'}).text.strip()
-        #classSize = soup.find('span',{'id','ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCS'}).text.strip()
+        tenTwelveGPA2 = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCPN'}).text.strip()
+        creditAtt = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCA'}).text.strip()
+        creditComp = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCC'}).text.strip()
+        classRank = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCR'}).text.strip()
+        classSize = soup.find('span',{'id':'ctl00_MainContent_subHIS_rptGPAInfo_ctl01_lblCS'}).text.strip()
 
         stats = {
             'acadGPA':(acadGPA1,acadGPA2),
             'totalGPA':(totalGPA1,totalGPA2),
-            "tenTwelveGPA":(tenTwelveGPA1,tenTwelveGPA2)
-            #'credit':(creditAttempted,creditCompleted),
-            #'rank':(classRank,classSize)
+            "tenTwelveGPA":(tenTwelveGPA1,tenTwelveGPA2),
+            'credit':(creditAtt,creditComp),
+            'rank':(classRank,classSize)
             }
 
         # strip extra whitespace from ends and center of string
@@ -300,10 +301,20 @@ def transcriptNew():
 
         creditByDept = transcriptDF.groupby('a-g')['cc'].agg(['sum','count'])
 
+        def addn(row):
+            if row['cp'] != 'P' and row['nh'] not in ['N','H','AP']:
+                return '(N)'
+            else:
+                return row['nh']
+
+        transcriptDF['nh'] = transcriptDF.apply(lambda row: addn(row), axis=1)
         # Created an Adjusted Grade Points for Honors and AP whever grade is above a D
         transcriptDF['wgp'] = np.where(((transcriptDF['nh'] == "H") | (transcriptDF['nh'] == "H/AP")) & ((transcriptDF['gp'] > 1)), transcriptDF['gp']+1, transcriptDF['gp'])
         # Remove values from adjusted grade points that are not cllege prep
         transcriptDF['wgp'] = np.where((transcriptDF['nh'] == "N") | (transcriptDF['cp'] != "P"), np.nan, transcriptDF['wgp'])
+        #transcriptDF['gp'] = np.where((transcriptDF['nh'] == "N") | (transcriptDF['cp'] != "P"), np.nan, transcriptDF['wgp'])
+        #transcriptDF['credit'] = np.where((transcriptDF['nh'] == "N") | (transcriptDF['cp'] != "P"), np.nan, transcriptDF['wgp'])
+        
         transcriptDF['credit'] = np.where(transcriptDF['gp'] > 0, transcriptDF['cr'],np.nan)
         transcriptDF['wcredit'] = np.where(transcriptDF['wgp'] > 0, transcriptDF['cr'],np.nan)
 
@@ -351,7 +362,6 @@ def transcriptNew():
             )
         tObj.save()
         flash("Transcipt saved to OTData.")
-        print(session['return_URL'])
         return redirect(url_for('transcript',aid=stuID))
     
     return render_template('transcripts/transcriptform.html',form=form)

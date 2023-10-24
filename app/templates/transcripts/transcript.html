@@ -23,14 +23,14 @@
             <div class="col-1">
 
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 {{creditbydeptHTML}}
             </div>
-            <div class="col-3">
+            <div class="col-3 ms-3">
                 <table class="table table-sm">
                     {% if tObj %}
                     <tr>
-                        <th>OUSD Calculations</th><th>Unweighted</th><th>Weighted</th>
+                        <th></th><th>Unweighted</th><th>Weighted</th>
                     </tr>
                     <tr>
                         <td>
@@ -76,7 +76,47 @@
                         <td>
                             {{tObj.stats['tenTwelveGPA'][0]}}
                         </td>
-
+                    </tr>
+                    <tr>
+                        <td>
+                            
+                        </td>
+                        <th>
+                            Credit Earned
+                        </th>                        
+                        <th>
+                            Attempted
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            
+                        </td>
+                        <td>
+                            {{tObj.stats['credit'][1]}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['credit'][0]}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <th>
+                            Class Rank
+                        </th>                        
+                        <th>
+                            Class Size
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            {{tObj.stats['rank'][0]}}
+                        </td>                        
+                        <td>
+                            {{tObj.stats['rank'][1]}}
+                        </td>
                     </tr>
                 {% endif %}
                 </table>
