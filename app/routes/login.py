@@ -46,7 +46,7 @@ def before_request():
     # If you have urls that you want your user to be able to see without logging in add them here.
     # TODO create a decorator or something for this
     # TODO could just prefix the url with "/stu/" for studentpaths
-    unauthPaths = ['/','/home','/authorize','/login','/oauth2callback','/static','/logout','/revoke','/msgreply','/msgstatus']   
+    unauthPaths = ['/','/home','/authorize','/login','/static','/logout','/revoke','/msgreply','/msgstatus']   
     studentPaths = ['/my','/internship','/ontimeperc','/gclass','/project','/myprojects','/getgclasses','/comp/','/compborrow','/student','/breaks','/classdash','/assignments','/help','/breakstart','/postgrad','/cc','/plan','/profile','/editprofile','/addadult','/editadult','/deleteadult','/sendstudentemail','/checkin','/deletecheckin','/editgclass','/deletegclass','/gclasses','/missingassignmentsstu'] 
     # this is some tricky code designed to send the user to the page they requested even if they have to first go through
     # a authorization process.
@@ -59,7 +59,7 @@ def before_request():
     try: 
         session['return_URL']
     except:
-        if basePath not in ['/login','/static','/authorize']:
+        if basePath not in ['/login','/static','/authorize','/favicon.ico']:
             session['return_URL'] = reqPath
     else:
         if session['return_URL'] != reqPath and basePath not in ['/login','/static','/authorize']:
