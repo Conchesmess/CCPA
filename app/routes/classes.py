@@ -172,8 +172,8 @@ def getstudentwork(gclassid):
     enrollment.update(
         myassignments = courseWorkDict
     )
-    return
-    return redirect(url_for('checkin'))
+    
+    return redirect(url_for('mywork',gclassid=gclassid))
 
 @app.route('/student/mywork/<gclassid>')
 def mywork(gclassid):
@@ -211,7 +211,10 @@ def mywork(gclassid):
     myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
     myWorkDF['perc'] = myWorkDF.apply(lambda row: row['assignedGrade']/row['maxPoints'],axis=1)
     myWorkDF['perc'] = myWorkDF.apply(lambda row: 0 if row['late'] and pd.isna(row['assignedGrade']) and row['status'] != "TURNED_IN" else row['perc'],axis=1)
+    myWorkDict = myWorkDF.fillna(0)
     myWorkDF.fillna("",inplace=True)
+    myWorkDict = myWorkDict.to_dict()
+    print(myWorkDict)
 
     def b_color(val):
         
@@ -241,8 +244,7 @@ def mywork(gclassid):
         .to_html()
     displayDFHTML = Markup(displayDFHTML)
     
-    return render_template('mywork.html',displayDFHTML=displayDFHTML)
-
+    return render_template('mywork.html',displayDFHTML=displayDFHTML,myWorkDict=myWorkDict)
 
 @app.route('/ontimeperc/<gclassid>')
 def ontimeperc(gclassid):

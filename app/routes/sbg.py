@@ -137,7 +137,6 @@ def gAss(assid):
         ass.reload()
     return render_template('sbg/assignment.html',ass=ass, form=form)
 
-
 @app.route('/standard/list', methods=['GET', 'POST'])
 def standardlist():
     form = StandardForm()
@@ -193,3 +192,7 @@ def standardDelete(standardid):
     standardDel.delete()
     flash('Standard is deleted.')
     return redirect(url_for('standardlist'))
+
+@app.route('/my/asssubs/<gclassID>')
+def getmyasssubs(gclassid):
+    gclass = GoogleClassroom.objects.get(gclassid=gclassid)
