@@ -210,7 +210,19 @@ def mywork(gclassid):
     myWorkDF['gradeCategory'] = myWorkDF.apply(lambda row: f"{row['gradeCategory']['name']}" if pd.notna(row['gradeCategory']) else row['gradeCategory'],axis=1)
     myWorkDF['status'] = myWorkDF.apply(lambda row: "Graded" if row['assignedGrade'] > 0 else row['status'],axis=1)
     myWorkDF['perc'] = myWorkDF.apply(lambda row: row['assignedGrade']/row['maxPoints'],axis=1)
-    myWorkDF['perc'] = myWorkDF.apply(lambda row: 0 if row['late'] and pd.isna(row['assignedGrade']) and row['status'] != "TURNED_IN" else row['perc'],axis=1)
+    
+    def perc(row):
+        try:
+            if row['late'] and pd.isna(row['assignedGrade']) and row['status'] != "TURNED_IN":
+                return 0
+            else:
+                return row['perc']
+        # No late assignments
+        except KeyError:
+            return row['perc'] 
+
+    myWorkDF['perc'] = myWorkDF.apply(lambda row: perc(row) ,axis=1)
+
     myWorkDict = myWorkDF.fillna(0)
     myWorkDF.fillna("",inplace=True)
     myWorkDict = myWorkDict.to_dict()
