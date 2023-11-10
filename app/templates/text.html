@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+
+{% for student in text[0] %}
+    {{student}},
+{% endfor %}
+<br> <br>
+{% for teacher in text[1] %}
+    {{teacher}},
+{% endfor %}
+
+
+{% endblock %}

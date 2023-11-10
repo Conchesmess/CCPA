@@ -8,37 +8,14 @@ import numpy as np
 import mongoengine.errors
 from flask_login import current_user
 import time
+from mongoengine.errors import DoesNotExist
+
 
 @app.route('/transcript/list')
 def transcripts():
     trans = Transcript.objects()
     return render_template('transcripts/transcripts.html',trans=trans)
 
-# @app.route('/my/transcript')
-# def mytranscript():
-#     try:
-#         myTran = Transcript.objects.get(student=current_user)
-#     except:
-#         flash("You don't have a transcript in the system. You can create one now.")
-#         return redirect('/my/transcript/new')
-
-#     transcriptDF = pd.DataFrame.from_dict(myTran.transcriptDF).fillna('-')
-
-#     transcriptDFHTML = transcriptDF.style\
-#         .format(precision=2)\
-#         .set_table_styles([
-#             {'selector': 'tr:hover','props': 'background-color: #CCCCCC; font-size: 1em;'},\
-#             {'selector': 'thead','props': 'height:140px'},\
-#             {'selector': 'th','props': 'background-color: white !important'}], overwrite=False)\
-#         .set_table_attributes('class="table table-sm"')  \
-#         .set_uuid('trans')\
-#         .set_sticky(axis="columns",levels=0)\
-#         .set_sticky(axis="index")\
-#         .to_html()
-
-#     transcriptDFHTML = Markup(transcriptDFHTML)
-
-#     return render_template(url_for('mytranscript'))
 
 @app.route('/transcript/delete/<tid>')
 def transcriptDelete(tid):

@@ -16,6 +16,9 @@
     <h3>
         {{currUser.role}}
     </h3>
+    {% if current_user.role.lower() == "teacher" %}
+        <a href="/createstudentfolder/{{currUser.oemail}}">Create a portfolio folder</a>
+    {% endif %}
     <div class="col-md-4">
         {% if currUser.image %}
             <img class="img-thumbnail" width = "200" src="data:image;base64,{{base64encode(currUser.image.read())}}">
@@ -37,46 +40,49 @@
                 <p class="card-text">
                     {% if currUser.pronouns %} <b>Pronouns:</b> {{currUser.pronouns}} <br>{% endif %} 
                     {% if currUser.linkedin %}<b>LinkedIn:</b> {{currUser.linkedin}} <br> {% endif %}
-{% if currUser == current_user or current_user.role.lower() == "teacher" %}
 
-                    {% if currUser.uethnicity %}
-                        <b>Ethnicity:</b> 
-                        {% for ethnicity in currUser.uethnicity %}
-                            {{ethnicity}}{% if loop.index < loop.length %}, {% endif %}
-                        {% endfor %} 
-                    {% endif %}<br>
+                    {% if currUser == current_user or current_user.role.lower() == "teacher" %}
+                        Aeries ID:{{currUser.aeriesid}} <br>
+                        School Email: {{currUser.oemail}} <br
 
-                    {% if currUser.uethnicityother %}
-                        <b>Ethnicity (non-OUSD Description):</b> {{currUser.uethnicityother}}<br>
-                    {% endif %} 
+                        {% if currUser.uethnicity %}
+                            <b>Ethnicity:</b> 
+                            {% for ethnicity in currUser.uethnicity %}
+                                {{ethnicity}}{% if loop.index < loop.length %}, {% endif %}
+                            {% endfor %} 
+                        {% endif %}<br>
 
-                    {% if currUser.mobile %}
-                        <b>Mobile:</b> 
-                        <a href="/msg/{{currUser.id}}/{{currUser.mobile}}">{{formatphone(currUser.mobile)}}</a>
-                    {% endif %}<br>
+                        {% if currUser.uethnicityother %}
+                            <b>Ethnicity (non-OUSD Description):</b> {{currUser.uethnicityother}}<br>
+                        {% endif %} 
 
-                    {% if currUser.altphone %}
-                        <b>Other Phone:</b> {% if currUser.altphone %}{{formatphone(currUser.altphone)}}{% endif %} <br>
+                        {% if currUser.mobile %}
+                            <b>Mobile:</b> 
+                            <a href="/msg/{{currUser.id}}/{{currUser.mobile}}">{{formatphone(currUser.mobile)}}</a>
+                        {% endif %}<br>
+
+                        {% if currUser.altphone %}
+                            <b>Other Phone:</b> {% if currUser.altphone %}{{formatphone(currUser.altphone)}}{% endif %} <br>
+                        {% endif %}
+
+                        {% if currUser.personalemail %}<b>Personal Email:</b> {{currUser.personalemail}}{% endif %} <br>
+                        {% if currUser.ugender %}
+                            <b>Gender:</b> {% if currUser.ugender %}{{currUser.ugender}} {% endif %}<br>
+                        {% endif %}
+
+                        {% if currUser.ustreet %}
+                        <b>Address:</b> <br>
+                        <span class="ms-2">
+                            {% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
+                            {% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
+                        </span>
+                        <span class="ms-2">
+                            {% if currUser.ucity %}{{currUser.ucity}}{% endif %} 
+                            {% if currUser.ustate %}{{currUser.ustate}}{% endif %}  
+                            {% if currUser.uzipcode %}{{currUser.uzipcode}}{% endif %} <br>
+                        </span>
+                        {% endif %}
                     {% endif %}
-
-                    {% if currUser.personalemail %}<b>Personal Email:</b> {{currUser.personalemail}}{% endif %} <br>
-                    {% if currUser.ugender %}
-                        <b>Gender:</b> {% if currUser.ugender %}{{currUser.ugender}} {% endif %}<br>
-                    {% endif %}
-
-                    {% if currUser.ustreet %}
-                    <b>Address:</b> <br>
-                    <span class="ms-2">
-                        {% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
-                        {% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
-                    </span>
-                    <span class="ms-2">
-                        {% if currUser.ucity %}{{currUser.ucity}}{% endif %} 
-                        {% if currUser.ustate %}{{currUser.ustate}}{% endif %}  
-                        {% if currUser.uzipcode %}{{currUser.uzipcode}}{% endif %} <br>
-                    </span>
-                    {% endif %}
-{% endif %}
                 </p>
             </div>
         </div>

@@ -23,4 +23,5 @@ from .project import *
 from .transcript import *
 from .static import *
 from .internship import *
+from .portfolio import *
 #from .zscripts import *

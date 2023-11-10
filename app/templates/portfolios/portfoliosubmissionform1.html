@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+
+
+        <h1>Portfolio Submission</h1>
+        
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <form method=post>
+            {{ form.hidden_tag() }}
+
+            <div class="row">
+                <div class="col">
+                    Type of Submission: {{form.origin(class='form-control')}} 
+                </div>
+                <div class="col">
+                    School Year:{{form.year(class='form-control')}}
+                </div>
+                <div class="col">
+                    Semester:{{form.term(class='form-control')}}
+                </div>
+                <div class="col">
+                    Grade: {{form.grade(class='form-control')}}
+                </div>
+            </div>
+
+
+            <span data-dependent='{"#origin":"Class"}'>
+                <div class="row">
+                    <div class="col">
+                        Teacher: {{form.teacher(class='form-control')}}
+                    </div>
+                    <div class="col">
+                        Per: {{form.per(class='form-control')}}
+                    </div>
+                </div>
+            </span>
+
+            <div class="row">
+                <div class="col">
+                    Subject: {{form.subject(class='form-control')}}
+                </div>
+                <div class="col-2 pt-4 text-end">
+                    Is this a writing sample?
+                </div>
+                <div class="col-1 pt-4">
+                    {{form.writing(class="form-check checkbox-lg")}}
+                </div>
+                <div class="col">
+                </div>
+            </div>
+            <hr>
+            {{form.submit(class='form-control')}}
+        </form>        
+    </div>
+
+    {% block javascript %}
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $('[data-dependent]').each(function () {
+            var $ele = $(this);
+            var dependsOn = $ele.data('dependent');
+            $.each(dependsOn, function (target, value) {
+                $(target).on('change', function () {
+                    if($(this).val() === value) {
+                        $ele.show();
+                    }
+                    else {
+                        $ele.hide();
+                    }
+                });
+            });
+        });
+    </script>
+    {% endblock %}
+
+{% endblock %}

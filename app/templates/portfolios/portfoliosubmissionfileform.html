@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+
+        Portfolio Submission for {{portfolio.student.fname}} {{portfolio.student.lname}} grade: {{submission.grade}} <br>
+        {{submission.year}} {{submission.term}}  <br>
+        {{submission.origin}} {{submission.subject}} {% if submission.origin.lower() == 'class' %} {{submission.teacher.lname}} {{submission.per}} {% endif %}<br>
+
+        <h3>Google Docs</h3>
+
+        {% for field in fileSearchForm.errors %}
+            {% for error in fileSearchForm.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!--TODO add files that have been chosen via javascript-->
+
+
+        
+
+        <div class="overflow-auto"  style="max-width: 100%; max-height: 600px;">
+            <table class="table table-hover">
+                <form method=post>
+                    {{ fileSearchForm.hidden_tag() }}
+                    <tr>
+                        <td></td>
+                        <td>Name Contains: {{ fileSearchForm.nameContains() }}</td>
+                        <td></td>
+                        <td>All Time: {{fileSearchForm.allTime()}}</td>
+                        <td>{{fileSearchForm.fileSearchSubmit()}}</td>
+                    </tr>
+                      
+                </form>
+                <tr>
+                    <th></th><th>File</th><th>Owner</th><th>Created</th><th>Modified By Me</th>
+                </tr>
+                {% for file in files %}
+                <tr>
+                    <td>
+                        <button id="{{file.id}}" onclick="chooseFile('{{file.id}}')">x</button>
+                    </td>
+                    <td>
+                        <img src="{{file.iconLink}}"> <a href="{{file.webViewLink}}" target="_blank">{{file.name}}</a> 
+                    </td>
+                    <td>
+                        {% for owner in file.owners %}
+                            {{owner.displayName}}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {{moment(file.createdTime).calendar()}}
+                    </td>
+                    <td>
+                        {% if file.modifiedByMeTime %}
+                            {{moment(file.modifiedByMeTime).calendar()}}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <br>
+        </div>
+
+
+        <h1>File Form</h1>
+        {% for field in fileForm.errors %}
+            {% for error in fileForm.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!--TODO add files that have been chosen via javascript-->
+
+        <form method=post>
+            {{ fileForm.hidden_tag() }}
+            {{ fileForm.gfileids(id="content",size="100") }}
+            {{fileForm.fileSubmit()}}
+        </form>
+    </div>
+    {% block javascript %}
+    <script type="text/javascript">
+        async function chooseFile(fileId) {
+            console.log(fileId);
+            document.getElementById('content').value = fileId;
+        }
+        
+    </script>
+    {% endblock %}
+
+{% endblock %}

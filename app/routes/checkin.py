@@ -9,6 +9,7 @@ from datetime import datetime as dt
 from datetime import timedelta
 from zoneinfo import ZoneInfo
 from mongoengine import Q
+from mongoengine.errors import DoesNotExist
 from .msgs import txtGroupAdhoc
 from flask_login import current_user
 
@@ -17,7 +18,7 @@ def classdash(gclassid):
     currUser = current_user
     try:
         gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
-    except Exception as error:
+    except DoesNotExist:
         flash(f"Google Classroom doesn't exist: {error}")
         return redirect(url_for('checkin'))
 
@@ -166,9 +167,6 @@ def breakstart(gclassid):
     if currUser.breakstart and dt.now().date() == currUser.breakstart.date() and currUser.breakclass == gclassid:
         flash('You already took a break today.')
         return redirect(url_for('classdash',gclassid=gclassid)) 
-
-    #gEnrollment = GEnrollment.objects.get(gclassroom=gclassid,owner=session['currUserId'])
-    #gClass = gEnrollment.gclassroom
 
     gClass = GoogleClassroom.objects.get(gclassid=gclassid)
     form.gclassid.choices = [(gClass.gclassdict['id'],gClass.gclassdict['name'])]

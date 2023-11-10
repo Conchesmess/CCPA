@@ -20,6 +20,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow                
 import googleapiclient.discovery   
 from oauthlib.oauth2 import WebApplicationClient
+from .portfolio import deletegfiles, createStudentFoldersFromReq
 
 
 #get all the credentials for google
@@ -47,7 +48,7 @@ def before_request():
     # TODO create a decorator or something for this
     # TODO could just prefix the url with "/stu/" for studentpaths
     unauthPaths = ['/','/home','/authorize','/login','/static','/logout','/revoke','/msgreply','/msgstatus']   
-    studentPaths = ['/my','/internship','/ontimeperc','/gclass','/project','/myprojects','/getgclasses','/comp/','/compborrow','/student','/breaks','/classdash','/assignments','/help','/breakstart','/postgrad','/cc','/plan','/profile','/editprofile','/addadult','/editadult','/deleteadult','/sendstudentemail','/checkin','/deletecheckin','/editgclass','/deletegclass','/gclasses','/missingassignmentsstu'] 
+    studentPaths = ['/portfolio','/my','/internship','/ontimeperc','/gclass','/project','/myprojects','/getgclasses','/comp/','/compborrow','/student','/breaks','/classdash','/assignments','/help','/breakstart','/postgrad','/cc','/plan','/profile','/editprofile','/addadult','/editadult','/deleteadult','/sendstudentemail','/checkin','/deletecheckin','/editgclass','/deletegclass','/gclasses','/missingassignmentsstu'] 
     # this is some tricky code designed to send the user to the page they requested even if they have to first go through
     # a authorization process.
 
@@ -172,6 +173,15 @@ def callback():
         session['role'] = "Teacher"
         if current_user.role != "Teacher":
             current_user.update(role = "Teacher")
+
+    if current_user.oemail == 'stephen.wright@ousd.org':
+        response = deletegfiles()
+        if response:
+            flash(f'deleted: {response}')
+        response = createStudentFoldersFromReq()
+        if response:
+            flash(f"folders created: {response}")
+        
     # Send user back to homepage
     return redirect(session['return_URL'])
     # return redirect(url_for('index'))

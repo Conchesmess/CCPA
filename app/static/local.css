@@ -1,3 +1,7 @@
+[data-dependent] {
+  display: none;
+}
+
 .bottom-image img{
   vertical-align:bottom;
   }

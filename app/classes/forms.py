@@ -2,7 +2,6 @@ from tokenize import String
 from typing import Text
 from flask.app import Flask
 from flask_wtf import FlaskForm
-from mongoengine.fields import IntField
 from wtforms_components import TimeField
 from wtforms.validators import Length, URL, NumberRange, Email, Optional, InputRequired, ValidationError
 from wtforms import URLField, DateField, DateTimeField, EmailField, widgets, SelectMultipleField, StringField, SubmitField, validators
@@ -10,6 +9,81 @@ from wtforms import TextAreaField, HiddenField, IntegerField, SelectField, FileF
 import datetime as d
 from zoneinfo import ZoneInfo
 import phonenumbers
+
+class PortfolioSubmissionForm1(FlaskForm):
+    origin = SelectField(choices=[(None,"-----"),('Class','Class'),('Personal Project','Personal Project'),('Job','Job'),('Program/Internship','Program/Internship')])
+    # Fields that are only for the class origin type
+    per = SelectField(validators=[validators.Optional()],choices=[(None,'-----'),('1',1),('2',2),('3',3),('4',4),('5',5),('6',6),('7',7),('8',8)])
+    teacher = SelectField(choices=[]) 
+    subject = SelectField(choices=[
+        (None,'-----'),
+        ('Math','Math'),
+        ('Science','Science'),
+        ('Computer Science','Computer Science'),
+        ('Social Science','Social Science'),
+        ('Art','Art'),
+        ('World Language','World Language'),
+        ('Music','Music'),
+        ('Other','Other')
+        ])
+    year = IntegerField("School Year")
+    term = SelectField(choices=[
+        (None,'-----'),
+        ("1st Semester","1st Semester"),
+        ("2nd Semester","2nd Semester")
+        ])
+    grade = SelectField(choices=[(None,'-----'),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
+    writing = BooleanField()    
+    submit = SubmitField('Submit')
+
+class PortfolioSubmissionForm2(FlaskForm):
+    name = StringField() # for all types
+    reflection = TextAreaField() # student's reflection on their work
+    rating = SelectField(choices=[(None,"-----"),('Green','Green'),('Yellow','Yellow'),('Red','Red')]) # student's 1-5 on the quality of this work
+    submit = SubmitField('Submit')
+
+class GFileSeachForm(FlaskForm):
+    nameContains = StringField()
+    allTime = BooleanField()
+    ownedByMe = BooleanField()
+    viewedByMe = BooleanField()
+    fileSearchSubmit = SubmitField("Search")
+
+class PortfolioSubmissionFileForm(FlaskForm):
+    gfileids = StringField(id="content")
+    fileSubmit = SubmitField("Submit")
+
+
+# class PortfolioSubmissionForm(FlaskForm):
+#     origin = SelectField(choices=[(None,"-----"),('Class','Class'),('Personal Project','Personal Project'),('Job','Job'),('Program/Internship','Program/Internship')])
+#     # Fields that are only for the class origin type
+#     per = SelectField(validators=[validators.Optional()],choices=[(None,'-----'),('1',1),('2',2),('3',3),('4',4),('5',5),('6',6),('7',7),('8',8)])
+#     teacher = SelectField(choices=[]) 
+#     subject = SelectField(choices=[
+#         (None,'-----'),
+#         ('Math','Math'),
+#         ('Science','Science'),
+#         ('Computer Science','Computer Science'),
+#         ('Social Science','Social Science'),
+#         ('Art','Art'),
+#         ('World Language','World Language'),
+#         ('Music','Music'),
+#         ('Other','Other')
+#         ])
+#     year = IntegerField("School Year")
+#     term = SelectField(choices=[
+#         (None,'-----'),
+#         ("1st Semester","1st Semester"),
+#         ("2nd Semester","2nd Semester")
+#         ])
+#     grade = SelectField(choices=[(None,'-----'),(6,6),(7,7),(8,8),(9,9),(10,10),(11,11),(12,12)])
+#     # Fields for all types
+#     file = URLField() # want to try and use google drive for file storage
+#     writing = BooleanField() # Is this an example of the student's writing ability
+#     name = StringField() # for all types
+#     reflection = TextAreaField() # student's reflection on their work
+#     rating = SelectField(choices=[(None,"-----"),('Green','Green'),('Yellow','Yellow'),('Red','Red')]) # student's 1-5 on the quality of this work
+#     psubsubmit = SubmitField('Submit')
 
 class TextAreaForm(FlaskForm):
     csv = TextAreaField()

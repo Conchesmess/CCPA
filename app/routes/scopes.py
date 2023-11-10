@@ -9,8 +9,6 @@
 # 'https://www.googleapis.com/auth/gmail.labels'
 
 scopes_ousd = [
-    'email',
-    'profile',
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
     'openid',
@@ -23,4 +21,12 @@ scopes_ousd = [
     'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
     'https://www.googleapis.com/auth/classroom.guardianlinks.students',
     'https://www.googleapis.com/auth/classroom.guardianlinks.me.readonly',
-    'https://www.googleapis.com/auth/classroom.topics.readonly']
+    'https://www.googleapis.com/auth/classroom.topics.readonly',
+    'https://www.googleapis.com/auth/drive.install',
+    'https://www.googleapis.com/auth/drive.appdata',
+    'https://www.googleapis.com/auth/drive.appfolder',
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.resource',
+    'https://www.googleapis.com/auth/drive.metadata',
+    'https://www.googleapis.com/auth/drive'
+    ]

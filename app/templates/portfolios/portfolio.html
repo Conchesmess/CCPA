@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <h1>
+        Portfolio for {{portfolio.student.fname}} {{portfolio.student.lname }}
+        <a href="{{portfolio.folderDict.webViewLink}}" target="_blank"> <img src="{{portfolio.folderDict.iconLink}}"></a>
+    </h1>
+    {% if portfolio.submissions %}
+    <table class="table">
+        <tr>
+            <th></th><th>Year</th><th>Semester</th><th>Grade</th><th>Type</th><th>Writing</th><th></th>
+        </tr>
+        {% for s in portfolio.submissions %}
+        <tr>
+            <td>
+                <a href="/portfolio/deletesubmission/{{portfolio.id}}/{{s.oid}}"><img width="20" src="/static/delete.png"></a> 
+            </td>
+            <td>{{s.year}}</td><td>{{s.term}}</td><td>{{s.grade}}</td><td>{{s.origin}}</td><td>{{s.writing}}</td><td></td>
+        </tr>
+        {% if s.origin == "Class" %}
+            <tr>
+                <td></td>
+                <th class='text-light bg-secondary'>Teacher: {{s.teacher.lname}}, {{s.teacher.fname}}</th>
+                <th class='text-light bg-secondary'>Subject: {{s.subject}}</th>
+                <td colspan="6"></td>
+            </tr>
+        {% endif %}
+        {% if s.rating %}
+        <tr>
+            <th></th><th>Rating</th><th colspan="6">Reflection</th>
+        </tr>
+        <tr>
+            <td></td>
+            <td>{{s.rating}}</td>
+            <td colspan="7ratin6">{{s.reflection}}</td>
+        </tr>
+        {% endif %}
+        {% if s.gfileids %} 
+        <tr>
+            <th></th>
+            <th></th>
+            <th>Last Modifying User</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Data</th>
+        </tr>
+        {% for file in s.gfileids %}
+        <tr>
+            <td></td>
+            <td>
+                <a href="/portfolio/submissionfiledelete/{{portfolio.id}}/{{s.oid}}/{{loop.index0}}"><img src="/static/delete.png" width="20"></a>
+            </td>
+            <td>
+                {{file.lastModifyingUser.displayName}}
+            </td>
+            <td>
+                <a href="{{file.webViewLink}}" target="_blank">{{file.name}}</a>
+            </td>
+            <td>
+                <img src="{{file.iconLink}}">
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="top" title='{{file}}' href="#">data</a>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+
+    </table>
+
+    {% endif %}
+    {% if current_user == portfolio.student %}
+    <a href="/portfolio/newsubmission/{{portfolio.id}}">New Submission</a>
+    {% endif %}
+
+{% endblock %}

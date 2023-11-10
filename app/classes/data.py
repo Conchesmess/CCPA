@@ -8,6 +8,35 @@ from bson.objectid import ObjectId
 import datetime as d
 import phonenumbers
 
+class GFilesToDelete(Document):
+    fileid = StringField(unique=True)
+
+class CreatePortfolioFolderReq(Document):
+    oemail = StringField()
+
+class PortfolioSubmission(EmbeddedDocument):
+    oid = ObjectIdField(sparse=True, required=True, unique=True, primary_key=True)
+    createdate = DateTimeField(default=d.datetime.utcnow())
+    origin = StringField() # class, personal, job, program/internship
+    # Fields that are only for the class origin type
+    per = StringField() # only for classes
+    teacher = ReferenceField('User', null=True) # only for classes
+    subject = StringField() # only for classes
+    year = IntField()
+    term = StringField()
+    grade = IntField() # only for classes
+    # Fields for all types
+    gfileids = ListField(DictField())
+    writing = BooleanField() # Is this an example of the student's writing ability
+    name = StringField() # for all types
+    reflection = StringField() # student's reflection on their work
+    rating = StringField() # student's 1-5 on the quality of this work
+
+class Portfolio(Document):
+    createdate = DateTimeField(default=d.datetime.utcnow())
+    student = ReferenceField('User',required=True, unique=True)
+    folderDict = DictField()
+    submissions = EmbeddedDocumentListField('PortfolioSubmission')
 
 class Internship_Timesheet_Day(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
@@ -51,7 +80,6 @@ class InternshipImpact(EmbeddedDocument):
     howCollected = StringField()
     howConnected = StringField()
 
-
 class Internship(Document):
     site_name = StringField()
     ccpa_staff = ReferenceField('User')
@@ -75,7 +103,6 @@ class Internship(Document):
     mission = StringField()
     activities = EmbeddedDocumentListField('InternshipActivity')
     impact = EmbeddedDocumentListField("InternshipImpact")
-
 
 class Adult(EmbeddedDocument):
     preferredcontact = BooleanField()
@@ -164,7 +191,6 @@ class CheckIn(Document):
     meta = {
         'ordering': ['-createdate']
     }
-
 
 class PostGrad(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)

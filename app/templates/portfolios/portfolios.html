@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% if portfolios %}
+{% for p in portfolios %}
+<a href="/portfolio/{{p.id}}">{{p.student.fname}} {{p.student.lname }}</a>
+    {% if p.submissions %}
+        # of Submissions: {{p.submissions|length}}
+    {% endif %}
+<br>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
