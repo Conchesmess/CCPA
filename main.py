@@ -1,6 +1,7 @@
 
 from app import app
 import os
+import nltk
 
 if __name__ == "__main__":
     
@@ -8,7 +9,7 @@ if __name__ == "__main__":
 
     root = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.join(root, 'nltk_data')
-    os.chdir(download_dir)
+    #os.chdir(download_dir)
     nltk.data.path.append(download_dir)
     
     # app.run(debug="True")
