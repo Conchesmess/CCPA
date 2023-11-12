@@ -543,7 +543,7 @@ def portfolioreadability(gfileid):
     else:
         return redirect('/authorize')
 
-    nltk.data.path.append('/nltk_data')
+    nltk.data.path = []
     root = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.join(root, 'nltk_data')
     # os.chdir(download_dir)
