@@ -35,7 +35,7 @@
             <td colspan="7ratin6">{{s.reflection}}</td>
         </tr>
         {% endif %}
-        {% if s.gfileids %} 
+        {% if s.gfiledict %} 
         <tr>
             <th></th>
             <th></th>
@@ -44,26 +44,27 @@
             <th>Type</th>
             <th>Data</th>
         </tr>
-        {% for file in s.gfileids %}
         <tr>
-            <td></td>
             <td>
-                <a href="/portfolio/submissionfiledelete/{{portfolio.id}}/{{s.oid}}/{{loop.index0}}"><img src="/static/delete.png" width="20"></a>
+                <a href="/portfolio/readability/{{s.gfiledict.id}}">{{s.gfiledict.id}}</a>
             </td>
             <td>
-                {{file.lastModifyingUser.displayName}}
+                <a href="/portfolio/submissionfiledelete/{{portfolio.id}}/{{s.oid}}"><img src="/static/delete.png" width="20"></a>
             </td>
             <td>
-                <a href="{{file.webViewLink}}" target="_blank">{{file.name}}</a>
+                {{s.gfiledict.lastModifyingUser.displayName}}
             </td>
             <td>
-                <img src="{{file.iconLink}}">
+                <a href="{{s.gfiledict.webViewLink}}" target="_blank">{{s.gfiledict.name}}</a>
             </td>
             <td>
-                <a data-toggle="tooltip" data-placement="top" title='{{file}}' href="#">data</a>
+                <img src="{{s.gfiledict.iconLink}}">
+            </td>
+            <td>
+                <a data-toggle="tooltip" data-placement="top" title='{{s.gfiledict}}' href="#">data</a>
             </td>
         </tr>
-        {% endfor %}
+        <tr><td colspan="6">{{s.readabilitydict}}</td></tr>
         {% endif %}
         {% endfor %}
 

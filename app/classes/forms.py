@@ -18,6 +18,7 @@ class PortfolioSubmissionForm1(FlaskForm):
     subject = SelectField(choices=[
         (None,'-----'),
         ('Math','Math'),
+        ('English','English'),
         ('Science','Science'),
         ('Computer Science','Computer Science'),
         ('Social Science','Social Science'),

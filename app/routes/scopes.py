@@ -28,5 +28,6 @@ scopes_ousd = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/drive.resource',
     'https://www.googleapis.com/auth/drive.metadata',
-    'https://www.googleapis.com/auth/drive'
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/documents.readonly'
     ]

@@ -9,13 +9,13 @@ from bson import ObjectId
 from flask_login import current_user
 from mongoengine.errors import NotUniqueError, DoesNotExist
 from mongoengine import Q
-
 import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 import ast
 import datetime as dt
+from readability import Readability
 
 # Google File Attributes: 
 # kind, copyRequiresWriterPermission, writersCanShare, viewedByMe, mimeType, exportLinks, parents, thumbnailLink, iconLink, 
@@ -28,7 +28,8 @@ driveId = '0ABi_BR4s9fIsUk9PVA'
 #student folder in shared drive
 folderId = '1ot03EN_B9g86lhKjBZHKBvFWfP260vfh'
 
-
+# Students can't create their own folder in the shared file so request is created that is run when 
+# some one with appropriate privledges logs in
 def createStudentFoldersFromReq():
     folderReqs = CreatePortfolioFolderReq.objects()
     for folderReq in folderReqs:
@@ -38,6 +39,8 @@ def createStudentFoldersFromReq():
     return
 
 
+# students can't delete documents from the drive so this creates a request which 
+# will automatically delete the document when some one with appropriate provledges logs in
 def deletegfiles():
 
     deletes = GFilesToDelete.objects()
@@ -177,6 +180,7 @@ def addTeachersToSharedDrive():
     return render_template('index.html')
 
 
+# Helper function to create one or more student folder's in the shared drive
 def create_student_folders(oemails):
     if google.oauth2.credentials.Credentials(**session['credentials']).valid:
         credentials = google.oauth2.credentials.Credentials(**session['credentials'])
@@ -310,7 +314,7 @@ def portfolio_deletesubmission(pid,soid):
     portfolio=Portfolio.objects.get(pk=pid)
     submission = portfolio.submissions.get(oid=soid)
     print(submission)
-    if submission['gfileids']:
+    if submission.gfiledict:
         flash("you can't delete this submission without deleting the file first.")
         return redirect(url_for('portfolio',pid=pid))
     portfolio.submissions.filter(oid=soid).delete()
@@ -377,13 +381,12 @@ def portfolio_newsubmision(pid):
 
 # TODO the student can't delete the actual files so there needs to be something saved
 # that will automatically delete the files the next time an "owner" logs in.
-@app.route('/portfolio/submissionfiledelete/<pid>/<soid>/<gfi>')
-def submissionfiledelete(pid,soid,gfi):
-    gfi=int(gfi)
+@app.route('/portfolio/submissionfiledelete/<pid>/<soid>')
+def submissionfiledelete(pid,soid):
     portfolio = Portfolio.objects.get(pk=pid)
     submission = portfolio.submissions.get(oid=soid)
-    fileId = submission.gfileids[gfi]['id']
-    submission.gfileids.pop(gfi)
+    fileId = submission.gfiledict['id']
+    submission.gfiledict = None
     portfolio.save()
 
     GFilesToDelete(
@@ -399,7 +402,6 @@ def portfoliosubmissionfile(pid,submissionId):
     submission = portfolio.submissions.get(oid=submissionId)
     fileForm = PortfolioSubmissionFileForm()
     fileSearchForm = GFileSeachForm()
-
 
     if google.oauth2.credentials.Credentials(**session['credentials']).valid:
         credentials = google.oauth2.credentials.Credentials(**session['credentials'])
@@ -455,7 +457,6 @@ def portfoliosubmissionfile(pid,submissionId):
 
         fileId = fileForm.gfileids.data
 
-        cloneDicts=[]
         try:
             file = service.files().get(fileId=fileId,fields='id,name,owners').execute()
             # Create a new name for the file that includes the users name
@@ -473,16 +474,14 @@ def portfoliosubmissionfile(pid,submissionId):
                 'parents': [portfolio.folderDict['id']]
                 }
 
-
             #Copy the file
             if file:
                 try:
-                    clone = service.files().copy(
+                    cloneDict = service.files().copy(
                         fileId=fileId,
                         body=file_metadata,
                         fields='*',
                         supportsAllDrives=True).execute()
-                    cloneDicts.append(clone)
                     flash("file copied")
                 
                 except HttpError as error:
@@ -491,16 +490,18 @@ def portfoliosubmissionfile(pid,submissionId):
 
                 else:
                     flash("file has been copied")
-        
-        except:
-            for gFileDict in gFileDicts:
-                if fileId == gFileDict['id']:
-                    flash(f"Something went wrong with the file {gFileDict['name']}.")            
+                    print(cloneDict['id'])
+                    readabilityDict = portfolioreadability(cloneDict['id'])  
+                    portfolio.submissions.filter(oid=submissionId).update(
+                        gfiledict = cloneDict,
+                        readabilitydict = readabilityDict
+                        )
+                    portfolio.save()
 
-        portfolio.submissions.filter(oid=submissionId).update(
-            gfileids = cloneDicts
-        )
-        portfolio.save()
+        
+        except Exception as error:
+            flash(error)
+            
 
         return redirect(url_for('portfoliosubmission_p2',pid=pid, soid=submission.oid))
 
@@ -532,4 +533,49 @@ def portfolios():
     portfolios = Portfolio.objects()
     return render_template('portfolios/portfolios.html',portfolios=portfolios)
 
-    
+
+@app.route('/portfolio/readability/<gfileid>')
+def portfolioreadability(gfileid):
+    if google.oauth2.credentials.Credentials(**session['credentials']).valid:
+        credentials = google.oauth2.credentials.Credentials(**session['credentials'])
+    else:
+        return redirect('/authorize')
+
+    #try:
+    service = build("docs", "v1", credentials=credentials)
+
+    # Retrieve the documents contents from the Docs service.
+    document = service.documents().get(documentId=gfileid).execute()
+
+    gcontent = document['body']['content']
+    content=''
+    for item in gcontent:
+        try:
+            for element in item['paragraph']['elements']:
+                content += element['textRun']['content']
+        except Exception as error:
+            #flash(f"error: {error}")
+            pass
+
+    #flash(content)
+
+    # Readability reference: https://github.com/cdimascio/py-readability-metrics
+    r = Readability(content)
+    stats = r.statistics()
+    if stats['num_words'] > 99:
+        gf = r.gunning_fog()
+        fk = r.flesch_kincaid()
+        f = r.flesch()
+        dc = r.dale_chall()
+        readabilityDict={
+            'statastics':stats,
+            'GunningFog':{'score':gf.score,'gl':gf.grade_level},
+            'FleschKincaid':{'score':fk.score,'fk':fk.grade_level},
+            'Flesch':{'score':f.score,'gl':f.grade_levels},
+            'DaleChall':{'score':dc.score,'gl':dc.grade_levels}
+            }
+    else:
+        flash("writing sample must have at least 100 words to be analyzed for complexity.")
+        readabilityDict = {'statistics':stats}
+    #return render_template('index.html')
+    return readabilityDict
