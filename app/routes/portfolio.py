@@ -16,6 +16,8 @@ from googleapiclient.http import MediaFileUpload
 import ast
 import datetime as dt
 from readability import Readability
+import nltk
+import os
 
 # Google File Attributes: 
 # kind, copyRequiresWriterPermission, writersCanShare, viewedByMe, mimeType, exportLinks, parents, thumbnailLink, iconLink, 
@@ -540,6 +542,12 @@ def portfolioreadability(gfileid):
         credentials = google.oauth2.credentials.Credentials(**session['credentials'])
     else:
         return redirect('/authorize')
+
+    nltk.data.path.append('/nltk_data')
+    root = os.path.dirname(os.path.abspath(__file__))
+    download_dir = os.path.join(root, 'nltk_data')
+    # os.chdir(download_dir)
+    nltk.data.path.append(download_dir)
 
     #try:
     service = build("docs", "v1", credentials=credentials)
