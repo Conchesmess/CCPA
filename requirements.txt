@@ -29,5 +29,6 @@ py-readability-metrics~=1.4.5
 requests~=2.22.0
 twilio~=8.7.0
 Werkzeug~=2.3.7
+wordcloud~=1.9.2
 WTForms~=3.0.1
 WTForms_Components~=0.10.5

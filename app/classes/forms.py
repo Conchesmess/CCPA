@@ -10,6 +10,11 @@ import datetime as d
 from zoneinfo import ZoneInfo
 import phonenumbers
 
+class WCloudForm(FlaskForm):
+    text = TextAreaField()
+    stopwords = TextAreaField()
+    submit = SubmitField('Submit')
+
 class PortfolioSubmissionForm1(FlaskForm):
     origin = SelectField(choices=[(None,"-----"),('Class','Class'),('Personal Project','Personal Project'),('Job','Job'),('Program/Internship','Program/Internship')])
     # Fields that are only for the class origin type

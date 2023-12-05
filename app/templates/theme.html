@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+        <img width=1000 src="static/wc/{{current_user.id}}.png">
+
+        <h1>Find Themes</h1>
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            Paste all text here <br>
+            {{form.text(cols="100", rows="10")}} <br> <br>
+            Add a list of words seperated by commas with no spaces that you want removed from the image. <br>
+            {{form.stopwords(cols="100", rows="2")}} <br>
+            {{form.submit()}}
+        </form>        
+    </div>
+{% endblock %}

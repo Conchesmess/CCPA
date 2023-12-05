@@ -27,6 +27,8 @@ class PortfolioSubmission(EmbeddedDocument):
     grade = IntField() # only for classes
     # Fields for all types
     gfiledict = DictField()
+    file_created = StringField()
+    file_modified = StringField()
     readabilitydict = DictField()
     writing = BooleanField() # Is this an example of the student's writing ability
     name = StringField() # for all types

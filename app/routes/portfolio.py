@@ -8,6 +8,7 @@ import datetime as dt
 from bson import ObjectId
 from flask_login import current_user
 from mongoengine.errors import NotUniqueError, DoesNotExist
+from google.auth.exceptions import RefreshError
 from mongoengine import Q
 import google.auth
 from googleapiclient.discovery import build
@@ -397,7 +398,7 @@ def submissionfiledelete(pid,soid):
     
     return redirect(url_for('portfolio',pid=pid))
 
-
+# TODO get the created date and the last modified date and user of the original document
 @app.route('/portfolio/submissionfile/<pid>/<submissionId>', methods=['GET', 'POST'])
 def portfoliosubmissionfile(pid,submissionId):
     portfolio = Portfolio.objects.get(pk=pid)
@@ -422,8 +423,8 @@ def portfoliosubmissionfile(pid,submissionId):
         if fileSearchForm.allTime.data and fileSearchForm.nameContains.data:
             createdSearch = (dt.datetime.utcnow() - dt.timedelta(days=365*6))
         else:
-            flash("Just searching last 30 days. Add a file name to search all time.")
-            createdSearch = (dt.datetime.utcnow() - dt.timedelta(days=60))
+            flash("Just searching last 120 days. Add a file name to search all time.")
+            createdSearch = (dt.datetime.utcnow() - dt.timedelta(days=120))
         createdSearch = createdSearch.strftime('%Y-%m-%dT%H:%M:%S')
         if fileSearchForm.nameContains.data:
             nameContains = fileSearchForm.nameContains.data
@@ -478,6 +479,7 @@ def portfoliosubmissionfile(pid,submissionId):
 
             #Copy the file
             if file:
+                
                 try:
                     cloneDict = service.files().copy(
                         fileId=fileId,
@@ -493,10 +495,15 @@ def portfoliosubmissionfile(pid,submissionId):
                 else:
                     flash("file has been copied")
                     print(cloneDict['id'])
-                    readabilityDict = portfolioreadability(cloneDict['id'])  
+                    readabilityDict = portfolioreadability(cloneDict['id']) 
+                    if readabilityDict['statistics']['num_words'] > 0:
+                        writing = True
+                    else:
+                        writing = False 
                     portfolio.submissions.filter(oid=submissionId).update(
                         gfiledict = cloneDict,
-                        readabilitydict = readabilityDict
+                        readabilitydict = readabilityDict,
+                        writing = writing
                         )
                     portfolio.save()
 
@@ -538,10 +545,6 @@ def portfolios():
 
 @app.route('/portfolio/readability/<gfileid>')
 def portfolioreadability(gfileid):
-    if google.oauth2.credentials.Credentials(**session['credentials']).valid:
-        credentials = google.oauth2.credentials.Credentials(**session['credentials'])
-    else:
-        return redirect('/authorize')
 
     nltk.data.path = []
     root = os.path.dirname(os.path.abspath(__file__))
@@ -549,11 +552,18 @@ def portfolioreadability(gfileid):
     # os.chdir(download_dir)
     nltk.data.path.append(download_dir)
 
-    #try:
+    if google.oauth2.credentials.Credentials(**session['credentials']).valid:
+        credentials = google.oauth2.credentials.Credentials(**session['credentials'])
+    else:
+        return redirect('/authorize')
+
     service = build("docs", "v1", credentials=credentials)
 
     # Retrieve the documents contents from the Docs service.
-    document = service.documents().get(documentId=gfileid).execute()
+    try:
+        document = service.documents().get(documentId=gfileid).execute()
+    except RefreshError:
+        return redirect('/authorize')
 
     gcontent = document['body']['content']
     content=''
@@ -564,8 +574,6 @@ def portfolioreadability(gfileid):
         except Exception as error:
             #flash(f"error: {error}")
             pass
-
-    #flash(content)
 
     # Readability reference: https://github.com/cdimascio/py-readability-metrics
     r = Readability(content)
