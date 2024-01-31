@@ -1,7 +1,13 @@
 steps:
-- name: 'gcr.io/k8s-skaffold/pack'
-  entrypoint: 'pack'
-  args: ['build', '--builder=heroku/buildpacks:18', '--path', 'samples/python', '--publish', 'gcr.io/$PROJECT_ID/cloudbowl-samples-python:$COMMIT_SHA']
-
-- name: 'gcr.io/cloud-builders/gcloud'
-  args: ['run', 'deploy', '--image=gcr.io/$PROJECT_ID/cloudbowl-samples-python:$COMMIT_SHA', '--platform=managed', '--project=$PROJECT_ID', '--region=us-west1', '--memory=256Mi', 'cloudbowl-samples-python']
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/ccpa-394520/CCPA', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/ccpa-394520/CCPA']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'ccpa', '--image=gcr.io/ccpa-394520/CCPA', '--region=us-west1']
+images:
+- gcr.io/ ccpa-394520 /CCPA
