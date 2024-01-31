@@ -1,15 +1,15 @@
 steps:
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/ccpa-394520/CCPA', '.']
+  args: ['build', '-t', 'gcr.io/ccpa-394520/ccpa', '.']
 # Push the container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/ccpa-394520/CCPA']
+  args: ['push', 'gcr.io/ccpa-394520/ccpa']
 # Deploy container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'ccpa', '--image=gcr.io/ccpa-394520/CCPA', '--region=us-west1']
+  args: ['run', 'deploy', 'ccpa', '--image=gcr.io/ccpa-394520/ccpa', '--region=us-west1']
 images:
-- gcr.io/ccpa-394520/CCPA
+- gcr.io/ccpa-394520/ccpa
 options:
   logging: CLOUD_LOGGING_ONLY
