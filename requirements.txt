@@ -1,11 +1,8 @@
-# run 'pipreqs' from the root directory to generate the requirements.txt file 
-
 beautifulsoup4~=4.12.2
-dnspython~=2.4.2
-email-validator~=2.0.0
+#dnspython~=2.4.2
+#email-validator~=2.0.0
 Flask~=2.3.3
 Flask_Moment~=1.0.5
-#flask_mongoengine==1.0.0
 Flask_WTF~=1.1.1
 Flask_Login~=0.6.2
 Jinja2~=3.1.2
@@ -23,8 +20,8 @@ numpy~=1.25.2
 oauthlib~=3.2.2
 pandas~=2.1.0
 phonenumbers~=8.13.22
-protobuf~=4.24.2
-pymongo~=4.5.0
+#protobuf~=4.24.2
+#pymongo~=4.5.0
 py-readability-metrics~=1.4.5
 requests~=2.22.0
 twilio~=8.7.0
