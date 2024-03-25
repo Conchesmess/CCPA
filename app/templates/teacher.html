@@ -1,0 +1,168 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+{% block body %}
+{% if current_user.id == teacher.id or session['isadmin'] %}
+<a href="/teacher/edit/{{teacher.id}}"><img width="50" src="/static/edit.png"></a>
+{% endif %}
+
+<h1 class="display-1">
+    {{teacher.fname}} {{teacher.lname}}
+    {% if teacher.pronouns %}
+        ({{teacher.pronouns}})
+    {% endif %}
+</h1>
+<div class="row">
+    <div class="col-4">
+        {% if teacher.image %}
+        <img class="img-thumbnail img-fluid" width='200' src="data:image;base64,{{base64encode(teacher.image.read())}}"> <br>
+        {% else %}
+        <img class="img-thumbnail" width = "100" src="/static/lion.png">
+        {% endif %} 
+        <p class="fs-4">
+            Roles: 
+            {% for role in teacher.roles %}
+                {{role.name}}{% if loop.index < teacher.roles|length %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p class="fs-4">
+        {{teacher.email}} <br>
+        RM: {{teacher.troom_number}} <br>
+        {#
+            RM Ph Number
+            {% if teacher.troom_phone == 0 %} 
+                None
+            {% else %}
+                {{teacher.troom_phone}} 
+            {% endif %}<br>
+        #}
+        Division: {{teacher.tdivision}} <br>
+        Department: {{teacher.tdepartment}} <br>
+        </p>
+    {#
+        <h1 class="display-6">Classes</h1>
+        <ul class="fs-5">
+        {% for tc in tCourses  %}
+
+            {% if tc.course.course_name %}
+                <li><a href="/teachercourse/{{tc.id}}">{{tc.course.course_name}}</a></li>
+            {% else %}
+                <li><a href="/teachercourse/{{tc.id}}">{{tc.course.course_title}}</a></li>
+            {% endif %}
+
+        {% endfor %}
+        </ul>
+        
+        {% if current_user.id == teacher.id or current_user.isadmin %}
+            <a href="/teachercourse/add/{{teacher.id}}"><button type="button" class="btn btn-primary">Add a course</button></a>
+        {% endif %}
+    #}
+    </div>
+    <div class="col-8">
+            <p class="fs-2 mb-0 pb-0">
+                Late work
+            </p>
+            {% if teacher.late_work %}
+            <p class="fs-6 mt-0 pt-0">
+                Never 
+                {% for i in range(1,6) %}
+                    {% if teacher.late_work == i %}
+                        <span class="fs-3"><b>{{teacher.late_work}}</b></span>
+                    {% else %}
+                        {{i}}
+                    {% endif %}
+                    {% if i < 5 %}
+                        &nbsp;-&nbsp;
+                    {% endif %}
+                {% endfor %}
+                 Always
+            </p>
+                {% if teacher.late_work_policy %}
+                    <p>
+                        {{teacher.late_work_policy | safe}}
+                    </p>
+                {% endif %}
+            {% else %}
+                &#60;So Much Empty> <br>
+            {% endif %}
+            <p class="fs-2 my-0 py-0">
+                Openness to Feedback
+            </p>
+            <p class="fs-6 my-0 py-0">
+                {% if teacher.feedback %}
+                    Never 
+                    {% for i in range(1,6) %}
+                        {% if teacher.feedback == i %}
+                            <span class="fs-3"><b>{{teacher.feedback}}</b></span>
+                        {% else %}
+                            {{i}}
+                        {% endif %}
+                        {% if i < 5 %}
+                            &nbsp;-&nbsp;
+                        {% endif %}
+                    {% endfor %}
+                    Always
+                    {% if teacher.feedback_policy %}
+                        <p>
+                            {{teacher.feedback_policy|safe}}
+                        </p>
+                    {% endif %}
+                {% else %}
+                    &#60;So Much Empty> 
+                {% endif %}
+            </p>
+            <p class="fs-2">
+                Classroom Environment
+            </p>
+            <p class="fs-6 mt-0 pt-0">
+                {% if teacher.classcontrol %}
+                    Chaos 
+                    {% for i in range(1,6) %}
+                        {% if teacher.classcontrol == i %}
+                            <span class="fs-3"><b>{{teacher.classcontrol}}</b></span>
+                        {% else %}
+                            {{i}}
+                        {% endif %}
+                        {% if i < 5 %}
+                            &nbsp;-&nbsp;
+                        {% endif %}
+                    {% endfor %}
+                    Control
+                    {% if teacher.classcontrol_policy %}
+                        <p>
+                            {{teacher.classcontrol_policy|safe}}
+                        </p>
+                    {% endif %}
+                {% else %}
+                    &#60;So Much Empty> 
+                {% endif %}
+            </p>
+        <p class="fs-2">Grading Policy</p>
+        <p class="fs-6">
+            {% if teacher.grading_policy %}
+                {{teacher.grading_policy|safe}}
+            {% else %}
+                &#60;So Much Empty>
+            {% endif %}
+        </p>
+        <p class="fs-2">Classroom</p>
+        <p class="fs-6">
+            {% if teacher.classroom %}
+                {{teacher.classroom|safe}}
+            {% else %}
+                &#60;So Much Empty>
+            {% endif %}
+        </p>
+        <p class="fs-2">Personal Statement</p>
+        <p class="fs-6">
+            {% if teacher.tdescription %}
+                {{teacher.tdescription|safe}}
+            {% else %}
+                &#60;So Much Empty>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -197,7 +197,7 @@ def profile(uid=None):
         checkins = None
         tokens = None
         try:
-            targetUser=User.objects.get(id=uid)
+            targetUser=User.objects.get(aeriesid=uid)
         except:
             flash("This user does not exist in the database.")
             return redirect('/')

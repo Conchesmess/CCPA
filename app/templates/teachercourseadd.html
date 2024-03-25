@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h1>Add Course to {{teacher.fname}} {{teacher.lname}}</h1>
+
+{% for course in courses %}
+    <a href="/teachercourse/add/{{teacher.id}}/{{course.id}}">{{course.course_number}}</a>
+     {{course.course_title}} {{course.course_department}} <br>
+
+{% endfor %}
+
+{% endblock %}

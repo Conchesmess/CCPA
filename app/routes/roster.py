@@ -3,7 +3,7 @@ from app import app
 from app.routes.sbg import gclass
 from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, Markup
-from app.classes.data import Course, User, GoogleClassroom, GEnrollment, CourseWork
+from app.classes.data import Courses, User, GoogleClassroom, GEnrollment, CourseWork
 from app.classes.forms import SimpleForm, SortOrderCohortForm
 from datetime import datetime as dt
 from mongoengine.errors import NotUniqueError

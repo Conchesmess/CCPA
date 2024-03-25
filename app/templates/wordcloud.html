@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container">
+
+        <h1>Find Themes</h1>
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            Paste all text here <br>
+            {{form.text(cols="100", rows="10")}} <br> <br>
+            Add a list of words seperated by commas with no spaces that you want removed from the image. <br>
+            {{form.stopwords(cols="100", rows="2")}} <br>
+            {{form.submit()}}
+        </form>        
+
+        {% if img_data %}
+            To Download the Image --> Right click or Control click on the image and choose "Save Image As..." <br> 
+            <img width="1000" id="picture" src="data:image/jpeg;base64,{{ img_data }}"> <br>
+            Frequency of each word.  The most frequent word is given a score of 1 and all th eother words are given a score relative to that. <br>
+            <table class="table table-sm">
+                <tr>
+                    <th>word</th><th>frequency</th>
+                </tr>
+            {% for word in words %}
+                <tr>
+                    <td>{{word}}</td>
+                    <td>{{words[word]}}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% endif %}
+
+    </div>
+{% endblock %}

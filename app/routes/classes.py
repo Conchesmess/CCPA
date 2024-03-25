@@ -1,4 +1,4 @@
-from app.routes.coursecat import course
+#from app.routes.coursecatalog import course
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 

@@ -1,11 +1,33 @@
 from flask.helpers import url_for
 from app import app
 from flask import render_template, redirect, flash, session
-from app.classes.data import CheckIn, User,Help
+from app.classes.data import CheckIn, User,Help,Role
 from mongoengine import Q
 import requests
 import time
 import pandas as pd
+
+@app.route('/setTSRolesAll')
+def setTSRoles():
+    users = User.objects()
+    studentOBJ=Role.objects.get(name='student')
+    teacherOBJ=Role.objects.get(name='teacher')
+    t=len(users)
+    
+    for i,user in enumerate(users):
+        if user.oemail[0:2]  == 's_':
+            if not studentOBJ in user.roles:
+                user.roles.append(studentOBJ)
+                user.save()
+                print(f's:{i}:{t}')
+        else:
+            if not teacherOBJ in user.roles:
+                user.roles.append(teacherOBJ)
+                user.save()
+                print(f't:{i}:{t}')
+
+    return render_template('index.html')
+
 
 @app.route('/nolatlon')
 def fixapt():

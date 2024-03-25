@@ -1,0 +1,212 @@
+<!-- this is a generic form page.  Best way to make a new form page is to 
+copy this one and then edit it. -->
+
+{% extends "base.html" %}
+
+{% block body %}
+        {% if current_user.oemail[-1] == 's'  %}
+            <h1>{{ current_user.fname }}' Project Post</h1>
+        {% else %}
+            <h1>{{ current_user.fname }}'s Project Post</h1>
+        {% endif %}
+
+        <br>
+
+        <h3>What is a project post?</h3>
+        <b>
+            A Project post happens TWICE a day. Each day that you work on your project you start with 
+        </b> 
+            <ol>
+                <li>
+                    an <b>intention</b> post where you Describe
+                    what you intend to do and <b>rate your confidence</b>b> in you ability to complete what you intend.  
+                </li>
+                <li>
+                    Then, when you are done working, 
+                    you describe what you did and evaluate what you accomplished vs what you intended.
+                </li>
+            </ol>
+
+        <!--List all errors in a group at the top-->
+        {% if form.errors %}
+        <p class="text-danger"> Check fields below for errors.</p>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+
+            {{ form.hidden_tag() }}
+
+            <h3>Which Milestone are you working on</h3>
+            {{ form.milestone(class='form-control') }} 
+            <p class="text-danger">
+                {% for error in form.milestone.errors %}
+                    {{error}}
+                {% endfor %}
+            </p> 
+
+            <h3>Type of post</h3> 
+            {{ form.post_type(class='form-control', id='postType', onchange="int_ref()") }}
+            <p class="text-danger">
+                {% for error in form.post_type.errors %}
+                    {{error}}
+                {% endfor %}
+            </p> 
+
+            <div class="intention">
+                <h3>What do you intend to do today?</h3>
+                {{ form.intention(class='tmce-editor') }}</b>  
+                <p class="text-danger">
+                    {% for error in form.intention.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+
+                <h3>How confident are you that you will complete your goal?</h3>
+                {{ form.confidence(class='form-control') }}</b>  
+                <p class="text-danger">
+                    {% for error in form.confidence.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+            </div>
+            <div class="reflection pb-3">
+                <h3>Are you satisfied with your work today?</h3>
+                {{ form.satisfaction(class='form-control') }}</b>              
+                <p class="text-danger">
+                    {% for error in form.satisfaction.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+
+                <h3>What did you complete?</h3>
+                {{ form.reflection(class='tmce-editor') }}</b>  
+                <p class="text-danger">
+                    {% for error in form.reflection.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+
+                <h3>Want to include an image?</h3>
+                this doesn't work yet... <br>
+                {{ form.image_reflection(id="image-input") }}</b>  
+                <p class="text-danger">
+                    {% for error in form.image_reflection.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+                <!--src tag is added by the javascript below-->
+                <img id="preview"></img> <br><br><br>
+                {{ form.image_reflection_src(id="image-save") }}</b>  
+                <p class="text-danger">
+                    {% for error in form.image_reflection.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+
+                <br><br><br>
+            </div>
+
+
+            {{ form.submit(class='form-control btn-primary') }}
+        </form>
+
+        {% block javascript %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" integrity="sha512-6JR4bbn8rCKvrkdoTJd/VFyXAN4CE9XMtgykPWgKiHjou56YDJxWsi90hAeMTYxNwUnKSQu9JPc3SQUg+aGCHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript">
+            tinymce.init({
+                selector: 'textarea.tmce-editor',
+                plugins:'advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table directionality emoticons',
+                toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | forecolor backcolor emoticons',
+                image_advtab: true
+            });
+        </script>
+
+        <script type="text/javascript">
+            var postTypeValue = document.getElementById("postType").value;
+
+            if (postTypeValue.length > 1) {
+                if (postTypeValue == 'Reflection') {
+                    $('.intention').hide();
+                    $('.reflection').show(); 
+                } else if (postTypeValue == 'Intention') {
+                    $('.intention').show();
+                    $('.reflection').hide();       
+                }
+            } else {
+                $('.intention').hide();
+                $('.reflection').hide();
+            }
+
+            function int_ref() {
+
+                var postTypeValue = document.getElementById("postType").value;
+                if (postTypeValue == 'Reflection') {
+                    $('.intention').hide();
+                    $('.reflection').show(); 
+                } else if (postTypeValue == 'Intention') {
+                    $('.intention').show();
+                    $('.reflection').hide();       
+                }
+            };
+        </script>
+
+        <script  type="text/javascript">
+            let imgInput = document.getElementById('image-input');
+            var MAX_WIDTH = 400;
+            var MAX_HEIGHT = 400;
+
+            imgInput.addEventListener('change', function (e) {
+                if (e.target.files) {
+                    let imageFile = e.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = document.createElement("img");
+
+                        img.onload = function (event) {
+                            // Dynamically create a canvas element
+                            var canvas = document.createElement("canvas");
+
+                            // var canvas = document.getElementById("canvas");
+                            var ctx = canvas.getContext("2d");
+
+                            var width = img.width;
+                            var height = img.height;
+
+                            // Change the resizing logic
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height = height * (MAX_WIDTH / width);
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width = width * (MAX_HEIGHT / height);
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+
+
+                            canvas.width = width
+                            canvas.height = height
+
+                            // Actual resizing
+                            ctx.drawImage(img, 0, 0, width, height);
+                            console.log(width,height)
+
+
+                            // Show resized image in preview element
+                            var dataurl = canvas.toDataURL(imageFile.type);
+                            document.getElementById("preview").src = dataurl;
+                            document.getElementById("image-save").value = dataurl; 
+                        }
+                        img.src = e.target.result;
+                    }
+                    reader.readAsDataURL(imageFile);
+                }
+            });
+        </script>
+  
+
+        {% endblock %}
+        
+{% endblock %}

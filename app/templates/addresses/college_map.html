@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+
+{% block body_no_container %}
+
+<!--Maps stylesheet-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.pinsearch/src/Leaflet.PinSearch.css" crossorigin=""></script>
+<!--link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"-->
+<!--link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css"-->
+
+<!--this is where the javascript will insert the map-->
+<div id="map" class="w-auto mx-3 ratio ratio-21x9"></div>
+
+<!--link the javascript library-->
+<!--script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script-->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
+<script src="https://unpkg.com/leaflet.pinsearch/src/Leaflet.PinSearch.js" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script> 
+<!--script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script-->
+<script type="text/javascript">
+
+    // // This focuses the map on loadstyle="height: 600px;" 
+    // // The first parameter are the coordinates of the center of the map
+    // // The second parameter is the zoom level
+    // var map = L.map('map').setView([37.7614926, -122.1929292], 10);
+
+    // var schools = ""
+    // datasets = [
+    //   { 'name': 'schools', 'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtFnRSJ__Rne8FH9igV93l42bsQE6PhFijwoQ4gimr5l5vlQJnljexLXOK4deup-0hLF0B-tDLA77u/pub?gid=1593214570&single=true&output=csv' },
+    //   // { 'name': 'people', 'url': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtFnRSJ__Rne8FH9igV93l42bsQE6PhFijwoQ4gimr5l5vlQJnljexLXOK4deup-0hLF0B-tDLA77u/pub?gid=435305116&single=true&output=csv' },
+    // ]
+
+    // {s}, {z}, {x} and {y} are placeholders for map tiles
+    // {x} and {y} are the x/y of where you are on the map
+    // {z} is the zoom level
+    // {s} is the subdomain of cartodb
+    // 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'
+    // 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    var base = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+    });
+    
+    // Now add the layer onto the map
+    // map.addLayer(base);
+
+    var blueIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    var noIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [0,0],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [0.0]
+    });
+
+    var redIcon = new L.Icon({
+      iconUrl:
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    var ucIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='uc.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [30, 30],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [30,30]
+    });
+    var cccIcon = new L.Icon({
+      iconUrl:
+        "https://3.files.edl.io/b9f3/21/12/14/224436-cffea7b1-3a7d-4398-ba41-fe2fb3143b5c.png",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [70, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [0,0]
+    });
+
+    var csuIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='csu.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [30, 30],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [30, 30]
+    });
+
+    var teacherIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='lion.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [35, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    var alumniIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='lion.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [35, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    var ccpaIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='lion.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [35, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    var schoolIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='school.png') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [35, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [35,41]
+    });
+
+    var tradeIcon = new L.Icon({
+      iconUrl:
+        "{{ url_for('static', filename='trade.jpg') }}",
+      shadowUrl:
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+      iconSize: [20, 25],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [20,25]
+    });
+
+    var cccLayerGroup = L.layerGroup([])
+    {% for c in ccc %}
+      {% if c.lat and c.lon %}
+          // Add your fields to the ppup on the next line.
+          L.marker(['{{c.lat}}', '{{c.lon}}'],{title:'{{c.name}}',icon:cccIcon,forceZIndex: 3000}).addTo(cccLayerGroup).bindPopup("<strong>{{c.name}}<br>{{c.streetAddress}}<br>{{c.city}},{{c.state}}  {{c.zipcode}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{c.unitid}}'>link</a></strong>")
+          {% endif %}
+    {% endfor %}
+
+    var markersOtherCCs = L.markerClusterGroup();
+    var ccLayerGroup = L.layerGroup([])
+    {% for c in cc %}
+      {% if c.lat and c.lon %}
+          // Add your fields to the ppup on the next line.
+          var newMarker = L.marker(['{{c.lat}}', '{{c.lon}}'],{title:'{{c.name}}',icon:tradeIcon,forceZIndex: 1000}).bindPopup("<strong>{{c.name}}<br>{{c.streetAddress}}<br>{{c.city}},{{c.state}}  {{c.zipcode}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{c.unitid}}'>link</a></strong>")
+          markersOtherCCs.addLayer(newMarker)  
+        {% endif %}
+    {% endfor %}
+
+    var ucLayerGroup = L.layerGroup([])
+    {% for u in uc %}
+      {% if u.lat and u.lon %}
+          // Add your fields to the ppup on the next line.
+          L.marker(['{{u.lat}}', '{{u.lon}}'],{title:'{{u.name}}',icon:ucIcon,forceZIndex: 5000}).addTo(ucLayerGroup).bindPopup("<strong>{{u.name}}<br>{{u.streetAddress}}<br>{{u.city}},{{u.state}}  {{u.zipcode}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{u.unitid}}'>link</a></strong>")
+      {% endif %}
+    {% endfor %}
+
+    var csuLayerGroup = L.layerGroup([])
+    {% for c in csu %}
+      {% if c.lat and c.lon %}
+          L.marker(['{{c.lat}}', '{{c.lon}}'],{title:'{{c.name}}',icon:csuIcon,forceZIndex: 4000}).addTo(csuLayerGroup).bindPopup("<strong>{{c.name}}<br>{{c.streetAddress}}<br>{{c.city}},{{c.state}}  {{c.zipcode}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{c.unitid}}'>link</a></strong>")
+      {% endif %}
+    {% endfor %}
+
+    var markersOtherColls = L.markerClusterGroup();
+    var otherLayerGroup = L.layerGroup([])
+    {% for o in other %}
+      {% if o.lat and o.lon %}
+          L.marker(['{{o.lat}}', '{{o.lon}}'],{title:'{{o.name}}',icon:noIcon}).addTo(otherLayerGroup)
+          newMarker = L.marker(['{{o.lat}}', '{{o.lon}}'],{title:'{{o.name}}',icon:schoolIcon,forceZIndex:2000}).bindPopup("<strong>{{o.name}}<br>{{o.streetAddress}}<br>{{o.city}},{{o.state}}  {{o.zipcode}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{o.unitid}}'>link</a></strong>")          
+          markersOtherColls.addLayer(newMarker)
+          //newMarker.addTo(otherLayerGroup)
+        {% endif %}
+    {% endfor %}
+
+
+    var staffLayerGroup = L.layerGroup([])
+    {% for e in teacherEnrollments %}
+      {% if e.college.lat and e.college.lon %}
+          L.marker(['{{e.college.lat}}', '{{e.college.lon}}'],{title:'{{e.student.fname}} {{e.student.lname}} ({{e.college.name}})',icon:teacherIcon,forceZIndex: 5000}).addTo(staffLayerGroup).bindPopup("<strong>'{{e.student.fname}} {{e.student.lname}} {{e.grad_year}} ({{e.college.name}})'<br>{{e.college.city}},{{e.college.state}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{e.college.unitid}}'>link</a></strong>")
+      {% endif %}
+    {% endfor %}
+
+    L.marker([37.7614926,-122.1929292], { title: 'CCPA' ,icon:ccpaIcon,forceZIndex: 10000}).addTo(staffLayerGroup).bindPopup("<stron>CCPA</strong>"); 
+
+    var alumniLayerGroup = L.layerGroup([])
+    {% for e in studentEnrollments %}
+    {% if e.college.lat and e.college.lon %}
+          L.marker(['{{e.college.lat}}', '{{e.college.lon}}'],{title:'{{e.student.fname}} {{e.student.lname}} ({{e.college.name}})',icon:alumniIcon,forceZIndex:6000}).addTo(alumniLayerGroup).bindPopup("<strong>'{{e.student.fname}} {{e.student.lname}} {{e.grad_year}} ({{e.college.name}})'<br>{{e.college.city}},{{e.college.state}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{e.college.unitid}}'>link</a></strong>")
+      {% endif %}
+    {% endfor %}
+
+
+    var map = L.map('map', {
+        center: [37.7614926, -122.1929292],
+        zoom: 12,
+        minZoom: 2,
+        zoomSnap: 0,
+        layers: [base,otherLayerGroup,cccLayerGroup,ccLayerGroup,ucLayerGroup,csuLayerGroup,alumniLayerGroup,staffLayerGroup]
+    });
+
+
+    var baseMaps = {
+      'base' : base
+    }
+
+    var overlayMaps = {
+      'CA Community Colleges' : cccLayerGroup,
+      'University of CA' : ucLayerGroup,
+      'CA State University':csuLayerGroup,
+      //'Other Colleges and Universities':otherLayerGroup,
+      //'Other Community Colleges':ccLayerGroup,
+      'Alumni':alumniLayerGroup,
+      'Staff':staffLayerGroup,
+    }
+
+  
+
+
+map.addLayer(markersOtherColls);
+map.addLayer(markersOtherCCs);
+
+map.on('zoomend', function() {
+    var currentZoom = map.getZoom();
+    console.log(map.getZoom())
+      if (currentZoom > 9) {
+
+        var csuIcon = new L.Icon({
+          iconUrl:
+            "{{ url_for('static', filename='csu.png') }}",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+          iconSize: [30, 30],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [30, 30]
+        });
+
+        var ucIcon = new L.Icon({
+          iconUrl:
+            "{{ url_for('static', filename='uc.png') }}",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+          iconSize: [30, 30],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [30,30]
+        });
+
+        var cccIcon = new L.Icon({
+          iconUrl:
+            "https://3.files.edl.io/b9f3/21/12/14/224436-cffea7b1-3a7d-4398-ba41-fe2fb3143b5c.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+          iconSize: [70, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [70,41]
+        });
+
+        cccLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(cccIcon);
+        });
+
+        ucLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(ucIcon);
+        });
+
+        csuLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(csuIcon);
+        });
+
+      } else {
+
+          var csuIcon = new L.Icon({
+            iconUrl:
+              "{{ url_for('static', filename='csu.png') }}",
+            shadowUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+            iconSize: [15,15],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [0,0]
+          });
+
+          var ucIcon = new L.Icon({
+            iconUrl:
+              "{{ url_for('static', filename='uc.png') }}",
+            shadowUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+            iconSize: [15,15],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [0,0]
+          });
+
+          var cccIcon = new L.Icon({
+            iconUrl:
+              "https://3.files.edl.io/b9f3/21/12/14/224436-cffea7b1-3a7d-4398-ba41-fe2fb3143b5c.png",
+            shadowUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+            iconSize: [40, 25],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [0,0]
+          });
+
+        cccLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(cccIcon);
+        });
+
+        ucLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(ucIcon);
+        });
+
+        csuLayerGroup.eachLayer(function(layer) {
+          layer.setIcon(csuIcon);
+        });
+
+    }
+});
+
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// PinSearch component
+var searchBar = L.control.pinSearch({
+    position: 'topright',
+    placeholder: 'Search...',
+    buttonText: 'Search',
+    onSearch: function(query) {
+        console.log('Search query:', query);
+        map.setZoom(16)
+    },
+    searchBarWidth: '200px',
+    searchBarHeight: '30px',
+    maxSearchResults: 10
+}).addTo(map);
+
+(function(global){
+  var MarkerMixin = {
+    _updateZIndex: function (offset) {
+      this._icon.style.zIndex = this.options.forceZIndex ? (this.options.forceZIndex + (this.options.zIndexOffset || 0)) : (this._zIndex + offset);
+    },
+    setForceZIndex: function(forceZIndex) {
+      this.options.forceZIndex = forceZIndex ? forceZIndex : null;
+    }
+  };
+  if (global) global.include(MarkerMixin);
+})(L.Marker);
+
+</script>
+
+{% endblock %}

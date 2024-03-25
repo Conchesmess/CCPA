@@ -14,7 +14,7 @@ from .roster import *
 from .equipment import *
 from .equity import *
 from .plan import *
-from .coursecat import *
+from .coursecatalog import *
 from .ztemp import *
 from .help import *
 from .sandbox import *
@@ -24,5 +24,7 @@ from .transcript import *
 from .static import *
 from .internship import *
 from .portfolio import *
-from .theme import *
+from .wordcloud import *
+from .qr import *
+from .address import *
 #from .zscripts import *

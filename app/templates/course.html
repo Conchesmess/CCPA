@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% if course %}
+<div class="col-sm">
+Created {{moment(course.create_date).calendar()}}
+{% if course.modify_date %}
+    modified {{moment(course.modify_date).calendar()}}
+{% endif %}
+<br>
+    {% if current_user.isadmin %}
+        <a data-toggle="tooltip" data-placement="top" title="Delete Post" href="/course/delete/{{course.id}}">
+            <img width="40" class="bottom-image" src="/static/delete.png">
+        </a>
+        <a data-toggle="tooltip" data-placement="top" title="Edit Post" href="/course/edit/{{course.id}}">
+            <img width="40" class="bottom-image" src="/static/edit.png">
+        </a>
+    {% endif %}
+    <p class="fs-3 text-break">
+        {% if course.course_name %}
+        <h1 class="display-5">
+            {{course.course_name}}
+        </h1>
+            <b>Aeries Name:</b> {{course.course_title}} <br>
+        {% else %}
+        <h1 class="display-5">
+            {{course.course_title}}
+        </h1>
+        {% endif %}
+    
+        <b>Course ID:</b> {{course.course_number}} <br> 
+
+            <p>
+                <b>Name:</b> {{course.course_name}} <br> 
+                <b>A-G Requirement:</b> {{course.course_ag_requirement}}<br> 
+                <b>Difficulty:</b>  {{course.course_difficulty}} <br> 
+                <b>Department:</b>  {{course.course_department}} <br>
+                {% if course.course_pathway %}
+                    <b>Course Pathway:</b>  {{course.course_pathway}}
+                {% endif %}
+            </p>
+            
+            {% if teacherCourses %}
+            <h5>Teachers</h5>
+                {% for tcourse in teacherCourses %}
+                    <a href="/teachercourse/{{tcourse.id}}">{{tcourse.teacher.fname}} {{tcourse.teacher.lname}}</a> <br>
+                {% endfor %}
+            {% endif %}
+    </p>
+
+      <a href="/course/list" class="btn btn-primary btn-sm"  role="button">View All Courses</a>
+      <a href="/course/new" class="btn btn-primary btn-sm"  role="button">Add New Course</a>
+      <a href="/comment/new/{{course.id}}" class="btn btn-primary btn-sm" role="button">New Comment</a>
+
+</div>
+    <div>
+        {% if comments %}
+        <h1 class="display-5">Comments</h1>
+        {% for comment in comments %}
+            {% if current_user == comment.author %}
+                <a href="/comment/delete/{{comment.id}}"><img width="20" src="/static/delete.png"></a> 
+                <a href="/comment/edit/{{comment.id}}"><img width="20" src="/static/edit.png"></a>
+            {% endif %}
+            {{moment(comment.create_date).calendar()}} {{comment.author.username}} 
+            {% if comment.modifydate %}
+                modified {{moment(comment.modifydate).calendar()}}
+            {% endif %}
+            <br>
+            <p class="fs-3">
+                {{comment.content}}
+            </p>
+        {% endfor %}
+        {% else %}
+            <h1 class="display-5">No Comments</h1>
+        {% endif %}
+    </div>
+{% else %}
+    <h1 class="display-5">No Course</h1>
+{% endif %}
+
+{% endblock %}

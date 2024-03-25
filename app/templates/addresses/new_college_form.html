@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block body %}
+        <h1>New College for {{user.fname}} {{user.lname}}</h1>
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            <p>
+                College Name 
+                <small>(Select a college from the list that pops up)</small> <br>
+                {{ form.name(size=64, id="tags") }}
+                <!--List the errors for this field-->
+                {% for error in form.name.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>    
+            <p>
+                {{ form.gradyear.label }} <br>
+                {{ form.gradyear(size=64) }}
+                <!--List the errors for this field-->
+                {% for error in form.gradyear.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>      
+            <p>
+                {{form.submit()}}
+            </p>
+        </form>
+
+        <!-- <input type="text" id="tags">  -->
+    
+        {% block javascript %}
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js">   
+        </script>   
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/ui-lightness/jquery-ui.min.css"
+            rel="stylesheet" type="text/css" /> 
+            <script> 
+            $( function() { 
+                var availableTags = [ 
+                    {% for college in collegeNames %} 
+                        "{{college}}", 
+                    {% endfor %} 
+                ]; 
+                $( "#tags" ).autocomplete({ 
+                source: availableTags 
+                }); 
+            }); 
+        </script> 
+    
+      {% endblock %}
+    
+        
+{% endblock %}

@@ -1,0 +1,145 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+
+    <h1 class="display-5 text-center">
+        {{title}}
+    </h1>
+    <div class="text-center">
+        {% if title == "Active Courses" %}
+        <small>All of these classes are being taught this year so they are likely to be taught next year.</small>
+        {% else %}
+        <small>Some of these classes are NOT being taught this year so they may not be taught next year.</small>
+        {% endif %}
+    </div>
+
+<div class="mb-3">
+    <a href="/course/new" class="btn btn-primary btn-sm mt-5" role="button">New Course</a>
+</div>
+<br> 
+
+<!--List all errors in a group at the top-->
+{% for field in form.errors %}
+    {% for error in form.errors[field] %}
+        <div class="alert alert-error">
+            <strong>Error!</strong>{{field}}: {{error}}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<form method=post>
+    {{ form.hidden_tag() }}
+
+    <h5>Filter</h1>
+    <div class="row border border-3 pt-2">
+        <div class="col">
+            {{form.name}} <br> Name (Partial is OK)
+        </div>
+        <div class="col">
+            {{form.department}} <br> Department
+        </div>
+        <div class="col">
+            {{form.incomplete}} <br> Incomplete?
+        </div>
+        <div class="col">
+            {{form.submit()}}
+        </div>
+        <div class="col-4"></div>
+    </div>
+</form>
+<br>
+
+{% if skip and limit %}
+Showing: {{skip-limit+1}} - 
+{% if skip+1 < total %}
+    {{skip+1}} of {{total}}
+{% else %}
+    {{total}} of {{total}}  
+{% endif %}  
+<br>
+{% if skip-limit>0 %}
+    <--<a href="/activecourses/{{skip - limit - limit}}">Previous</a>
+{% endif %}
+
+{% if skip+1 < total %}
+    <a href="/activecourses/{{skip}}">Next</a>-->
+{% endif %}
+{% endif %}
+
+<table class="table">
+{% if courses %}
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>A-G</th>
+        <th>Level</th>
+        <th>Pathway</th>
+        <th>Grade Level</th>
+        <th>Last Update</th>
+    </tr>
+    {% for course in courses | sort(attribute="course_number") %}
+    <tr>
+        <td>
+            <a href="/course/{{course._id}}">{{course.course_number}}</a>
+            {% if current_user.isadmin %}
+                <a href="/course/edit/{{course._id}}"><img width="20" src="/static/edit.png"></a>
+                <!-- <a href="/course/delete/{{course.id}}"><img width="20" src="/static/delete.png"></a> -->
+            {% endif %} 
+        </td>
+        <td>
+            {% if course.course_name %}
+                {{course.course_name}}<br>
+                <small>{{course.course_title}}</small>
+            {% else %}
+                {{course.course_title}} 
+            {% endif %}
+        </td>
+        <td>
+            {% if course.course_department %}
+                {{course.course_department}} 
+            {% else %}
+                ?
+            {% endif %}
+        </td>
+        <td>
+            {% if course.course_ag_requirement %}
+                {{course.course_ag_requirement}} 
+            {% else %}
+                ?
+            {% endif %}
+        </td>
+        <td>
+            {% if course.course_difficulty %}
+                {{course.course_difficulty}}
+            {% else %}
+                ?
+            {% endif %}
+        </td>
+        <td>
+            {% if course.course_pathway %}
+                {{course.course_pathway}}
+            {% endif %}
+
+        </td>
+        <td>
+            {% if course.course_gradelevel %}
+                {{course.course_gradelevel}}
+            {% endif %}
+        </td>
+        <td>
+            <small>{{moment(course.modify_date).calendar()}}</small>
+        </td>
+    </tr>
+    {% endfor %}
+    {% else %}
+        <tr>
+            <td><h1>No Courses</h1></td>
+        </tr>
+    {% endif %}
+</table>
+
+
+{% endblock %}

@@ -1,0 +1,41 @@
+<!-- this is a generic form page.  Best way to make a new form page is to 
+copy this one and then edit it. -->
+
+{% extends "base.html" %}
+
+{% block body %}
+    <h1>{{current_user.fname}} {{current_user.lname}}'s review of {{sRev.teacher_course.teacher.fname}} {{sRev.teacher_course.teacher.lname}}'s {{sRev.teacher_course.course.course_name}} class.</h1>
+            
+    <div class="row">
+        <div class="col-5 bg-white">
+            <p class="fs-2">
+                Year Class Taken: {{ sRev.year_taken }} 
+            </p>
+        </div>
+        <div class="col-5 bg-white">            
+            <p class="fs-2">
+                Late Work: {{ sRev.late_work }}/5
+            </p>
+        </div>
+        <div class="col-5 bg-white">
+            <p class="fs-2">
+                Feedback: {{ sRev.feedback }}/5
+            </p>
+        </div>
+        <div class="col-5 bg-white">
+            <p class="fs-2">
+                Class Control: {{ sRev.classcontrol }}/5
+            </p>
+        </div>
+        <div class="col-5 bg-white">
+            <p class="fs-2">
+                Grading Policy: {{ sRev.grading_policy }}/5
+            </p>
+        </div>
+        <div class="col-5 bg-white">
+            <p class="fs-2">
+                Classroom Environment: {{ sRev.classroom_environment }}/5
+            </p>
+        </div>
+    </div>
+{% endblock %}

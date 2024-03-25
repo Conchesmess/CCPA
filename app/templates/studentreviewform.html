@@ -1,0 +1,255 @@
+<!-- this is a generic form page.  Best way to make a new form page is to 
+copy this one and then edit it. -->
+
+{% extends "base.html" %}
+
+{% block body %}
+        <h1>{{current_user.fname}} {{current_user.lname}}'s review of {{tCourse.teacher.fname}} {{tCourse.teacher.lname}}'s {{tCourse.course.course_name}} class.</h1>
+
+        <!--List all errors in a group at the top-->
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            
+            <div class="row">
+                <div class="col-5 bg-white">
+                    <p class="fs-1">Your Review</p>
+                    Please only review the teacher if you have taken the class.
+                    <p>
+                        {{ form.year_taken.label }}: 
+                        {{ form.year_taken(size=6) }} 
+                        <!--List the errors for this field-->
+                        {% for error in form.year_taken.errors %}
+                            <br><span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="col-7">
+                    <p class="fs-1">Teacher Responses</p>
+                </div>
+                <div class="col-5 bg-white">            
+                    <p class="fs-2">
+                        {{ form.late_work.label }}
+                    </p>
+                    <p class="text-center">
+                        Never {{ form.late_work(min=1, max=5, oninput="outputLWUpdate(value)") }} Always
+                    </p>
+                    <div class="text-center fs-4">
+                        <output for="lw" id="lwork">
+                                {{ form.late_work.data }}
+                        </output>
+                    </div>
+                    <p>
+                        <!--List the errors for this field-->
+                        {% for error in form.late_work.errors %}
+                            <br><span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+
+                </div>
+                <div class="col-7">
+                    <p class="fs-6">
+                        Never 
+                        {% for i in range(1,6) %}
+                            {% if tCourse.teacher.late_work == i %}
+                                <span class="fs-2"><b>{{tCourse.teacher.late_work}}</b></span>
+                            {% else %}
+                                {{i}}
+                            {% endif %}
+                            {% if i < 5 %}
+                                &nbsp;-&nbsp;
+                            {% endif %}
+                        {% endfor %}
+                         Always
+                    </p>
+                    {% if tCourse.teacher.late_work %}
+                        <p class="fs-6">{{tCourse.teacher.late_work_policy}}</p>
+                    {% else %}
+                    <p class="fs-6">
+                        {{tCourse.teacher.fname}} {{tCourse.teacher.lname}} has not yet enterred their late work policy. 
+                        Please rate them based on your experience in their class from NEVER accepts late work to Always. 
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="col-12"><hr class="w-100"></div>
+                <div class="col-5 bg-white">
+                    <p class="fs-2">
+                        {{ form.feedback.label }}
+                    </p>
+                    <p class="text-center">
+                        Never {{ form.feedback(min=1, max=5, oninput="outputFBUpdate(value)") }} Always
+                    </p>
+                    <p class="text-center fs-4">
+                        <output for="fb" id="fback">
+                                {{ form.feedback.data }}
+                        </output>
+                    </p>
+                    <p>
+                        <!--List the errors for this field-->
+                        {% for error in form.feedback.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="col-7">
+                    <p class="fs-6">
+                        Never 
+                        {% for i in range(1,6) %}
+                            {% if tCourse.teacher.feedback == i %}
+                                <span class="fs-2"><b>{{tCourse.teacher.feedback}}</b></span>
+                            {% else %}
+                                {{i}}
+                            {% endif %}
+                            {% if i < 5 %}
+                                &nbsp;-&nbsp;
+                            {% endif %}
+                        {% endfor %}
+                         Always
+                    </p>
+                    {% if tCourse.teacher.feedback %}
+                        <p class="fs-6">{{tCourse.teacher.feedback_policy}}</p>
+                    {% else %}
+                        <p class="fs-6">
+                            {{tCourse.teacher.fname}} {{tCourse.teacher.lname}} has not yet enterred their feedback policy. 
+                            Please rate them based on your experience in their class from NEVER accepts feedback on thier teaching to always. 
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="col-12"><hr class="w-100"></div>
+                <div class="col-5 bg-white">
+                    <p class="fs-2">
+                        {{ form.classcontrol.label }}
+                    </p>
+                    <p>
+                        <p class="text-center">
+                            Chaotic {{ form.classcontrol(min=1, max=5, oninput="outputCCUpdate(value)") }} Controlled
+                        </p>
+                        <p class="text-center fs-4">
+                            <output for="cc" id="ccontrol">
+                                    {{ form.classcontrol.data }}
+                            </output>
+                        </p>
+                        <!--List the errors for this field-->
+                        {% for error in form.classcontrol.errors %}
+                            <br><span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>    
+                </div>
+                <div class="col-7">
+                    <p class="fs-6">
+                        Chaos 
+                        {% for i in range(1,6) %}
+                            {% if tCourse.teacher.classcontrol == i %}
+                                <span class="fs-2"><b>{{tCourse.teacher.classcontrol}}</b></span>
+                            {% else %}
+                                {{i}}
+                            {% endif %}
+                            {% if i < 5 %}
+                                &nbsp;-&nbsp;
+                            {% endif %}
+                        {% endfor %}
+                         Control
+                    </p>
+                    {% if tCourse.teacher.classcontrol_policy %}
+                        <p class="fs-6">{{tCourse.teacher.classcontrol_policy}}</p>
+                    {% else %}
+                    <p class="fs-6">
+                        {{tCourse.teacher.fname}} {{tCourse.teacher.lname}} has not yet enterred their class control policy. 
+                        Please rate them based on your experience in their class from a CHAOTIC classroom to a CONTROLLED classroom. 
+                    </p>
+                    {% endif %}              
+                </div>
+                <div class="col-12"><hr class="w-100"></div>
+                <div class="col-5 bg-white">
+                    <p class="fs-2">
+                        {{ form.grading_policy.label }}
+                    </p>
+                    <p class="text-center">
+                        Confusing {{ form.grading_policy(min=1, max=5, oninput="outputGPUpdate(value)") }} Clear
+                    </p>
+                    <p class="text-center fs-4">
+                        <output for="gp" id="gpolicy">
+                                {{ form.grading_policy.data }}
+                        </output>
+                    </p>
+                    <p>
+                        <!--List the errors for this field-->
+                        {% for error in form.grading_policy.errors %}
+                            <br><span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>                
+                </div>
+                <div class="col-7">
+                    {% if tCourse.teacher.grading_policy %}
+                        <p class="fs-6">{{tCourse.teacher.grading_policy}}</p>
+                    {% else %}
+                    <p class="fs-6">
+                        {{tCourse.teacher.fname}} {{tCourse.teacher.lname}} has not yet enterred their grading policy. 
+                        Please rate them based on your experience in their class from a CONFUSING grading policy t0 a CLEAR one. 
+                    </p>
+                    {% endif %}  
+                </div>
+                <div class="col-12"><hr class="w-100"></div>
+                <div class="col-5 bg-white">
+                    <p class="fs-2">
+                        {{ form.classroom_environment.label }}
+                    </p>
+                    <p class="text-center">
+                        Cold {{ form.classroom_environment(min=1, max=5, oninput="outputCEUpdate(value)") }} Warm
+                    </p>
+                    <p class="text-center fs-4">
+                        <output for="ce" id="cenvironment">
+                                {{ form.classroom_environment.data }}
+                        </output>
+                    </p>
+                    <p>
+                        <!--List the errors for this field-->
+                        {% for error in form.classroom_environment.errors %}
+                            <br><span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>                
+                </div>
+                <div class="col-7">
+                    {% if tCourse.teacher.classroom %}
+                        <p class="fs-6">{{tCourse.teacher.classroom}}</p>
+                    {% else %}
+                    <p class="fs-6">
+                        {{tCourse.teacher.fname}} {{tCourse.teacher.lname}} has not yet enterred a description of their classroom environment. 
+                        Please rate them based on your experience in their class from a COLD environment to a WARM one. 
+                    </p>
+                    {% endif %}               
+                </div>
+            </div>
+            {{form.submit()}}
+        </form>
+<script>
+
+    function outputCCUpdate(cc) {
+        document.querySelector('#ccontrol').value = cc;
+    }
+
+    function outputFBUpdate(fb) {
+        document.querySelector('#fback').value = fb;
+    }
+
+    function outputLWUpdate(lw) {
+        document.querySelector('#lwork').value = lw;
+    }
+
+    function outputGPUpdate(gp) {
+        document.querySelector('#gpolicy').value = gp;
+    }
+
+    function outputCEUpdate(ce) {
+        document.querySelector('#cenvironment').value = ce;
+    }
+
+</script>
+{% endblock %}

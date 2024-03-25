@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block body %}
+        <h1 class="display-1">{{teacher.fname}} {{teacher.lname}}</h1>
+
+        <!--List all errors in a group at the top-->
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+            
+        <form action="" method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-4">
+                    {{ form.pronouns.label }} <br>
+                    {{ form.pronouns(size=20) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.pronouns.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.fname.label }} <br>
+                    {{ form.fname(size=20) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.fname.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.lname.label }} <br>
+                    {{ form.lname(size=20) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.lname.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.troom_number.label }} <br>
+                    {{ form.troom_number(size=6) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.troom_number.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.tdivision.label }} <br>
+                    {{ form.tdivision() }} 
+                    <!--List the errors for this field-->
+                    {% for error in form.tdivision.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>                    <br>
+                    {{ form.tdepartment.label }} <br>
+                    {{ form.tdepartment() }}
+                    <!--List the errors for this field-->
+                    {% for error in form.tdepartment.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    Room Phone Number<br>
+                    {{ form.troom_phone(size=10) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.troom_phone.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.image.label }}<br>
+                    {% if teacher.image %}
+                        <img class="img-thumbnail" width="100" src="data:image;base64,{{base64encode(current_user.image.read())}}"> <br>
+                    {% else %}
+                        <img class="img-thumbnail" width = "100" src="/static/lion.png">
+                    {% endif %} <br>
+                    {{ form.image() }}<br>
+                    {% for error in form.image.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br> <br>
+
+                </div>
+                <div class="col-8 pb-5">
+                    <p class="fs-2">Please rate yourself on each of the following. </p>
+                    <p class="fs-4">Late work</p>
+                    Never {{ form.late_work(min=1, max=5) }} Always
+                    <!--List the errors for this field-->
+                    {% for error in form.late_work.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{form.late_work_policy(rows=4, cols=64, class="tmce-editor")}}
+                    <br>
+                    <p class="fs-4">{{ form.feedback.label }}</p>
+                    Never {{ form.feedback(min=1, max=5, default=3) }} Always
+                    <!--List the errors for this field-->
+                    {% for error in form.feedback.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.feedback_policy.label }} <br>
+                    {{ form.feedback_policy(rows=4, cols=64, class="tmce-editor") }}
+                    <!--List the errors for this field-->
+                    {% for error in form.feedback_policy.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    <p class="fs-4">{{ form.classcontrol.label }}</p>
+                    Chaos {{ form.classcontrol(min=1, max=5, default=3) }} Control
+                    <!--List the errors for this field-->
+                    {% for error in form.classcontrol.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    {{ form.classcontrol_policy.label }} <br>
+                    {{ form.classcontrol_policy(rows=4, cols=64, class="tmce-editor") }}
+                    <!--List the errors for this field-->
+                    {% for error in form.classcontrol_policy.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    <p class="fs-2"> {{ form.grading_policy.label }} </p>
+                    <p class="fs-6">
+                        What is your grading system? do you use a 50% floor? Do you use a 4 point system?
+                        Do you grade on a curve? What are your A-F grade ranges? 
+                    </p>
+                    {{ form.grading_policy(cols=64, rows=4, class="tmce-editor") }}
+                    <!--List the errors for this field-->
+                    {% for error in form.grading_policy.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    <p class="fs-2"> Tell us about yourself.</p> 
+                    <p class="fs-6">
+                        Who are you? Why do you teach? What do you want 
+                        students to get from your class?
+                    </p>
+                    {{ form.tdescription(cols=64, class="tmce-editor") }}
+                    <!--List the errors for this field-->
+                    {% for error in form.tdescription.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br>
+                    <p class="fs-2"> {{ form.classroom.label }} </p>
+                    <p class="fs-6">
+                        Do you have a sink? Do you allow food/tea? Couch? 
+                    </p>
+                    {{ form.classroom(class="tmce-editor") }}
+                    <!--List the errors for this field-->
+                    {% for error in form.classroom.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                    <br> <br>
+                    {{form.submit(class='form-control btn-primary')}}
+                </div>
+
+            </div>
+        </form>
+
+        {% block javascript %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" integrity="sha512-6JR4bbn8rCKvrkdoTJd/VFyXAN4CE9XMtgykPWgKiHjou56YDJxWsi90hAeMTYxNwUnKSQu9JPc3SQUg+aGCHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript">
+            tinymce.init({
+                selector: 'textarea.tmce-editor',
+                plugins:'advlist autolink lists link image charmap print preview hr anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table contextmenu directionality emoticons template paste textcolor colorpicker textpattern imagetools',
+                toolbar: 'preview code insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | forecolor backcolor emoticons',
+                image_advtab: true
+            });
+          </script>
+        {% endblock %}
+        
+{% endblock %}

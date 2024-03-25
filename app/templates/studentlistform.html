@@ -63,10 +63,10 @@
 <h1>Total students {{total}}</h1>
 <table class="table">
     <tr>
-        <th>ID</th><th>name</th><th>grade</th><th>Address</th><th>lat/lon</th><th>Siblings</th>
+        <th>Aeries ID</th><th>name</th><th>grade</th><th>Address</th><th>lat/lon</th><th>Siblings</th>
     </tr>
 {% if users %}
-{% for user in users | sort(attribute="alname,afname") %}
+{% for user in users | sort(attribute="lname,fname") %}
     <tr>
         <td>{{user.aeriesid}}</td>
         <td><a href="/profile/{{user.aeriesid}}">{{user.fname}} {{user.lname}}</a></td>
@@ -98,7 +98,7 @@
 <a href="#parents">parent emails</a>
 <h1>Student emails</h1>
 {% for user in users %}
-    {% if user.grade > 12 and user.personalemail %}
+    {% if user.personalemail %}
     {{user.personalemail}},
     {% else %}
     {{user.oemail}},

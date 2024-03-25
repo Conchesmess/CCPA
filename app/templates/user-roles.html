@@ -1,0 +1,17 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% for user in users %}
+bob {{user}}
+    {{user.fname}} {{user.lname}}
+    {% for role in user.roles %}
+        {{role}},
+    {% endfor %}
+    <br>
+
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,49 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% if current_user.fname[-1] == 's'  %}
+<h1>{{ current_user.fname }}' Project</h1>
+{% else %}
+<h1>{{ current_user.fname }}'s Project</h1>
+{% endif %}
+
+<br>
+
+<h3>What is a project?</h3>
+<b>A Project is an effort to make something that will take several steps over several days.</b> <br>
+<br>
+<h3>How will my project be graded?</h3>
+Your project grade will have two equal components.
+<ol>
+    <li>Evidence of work: You will record (images, video, audio, pictures, documents, etc) evidence of your work every day.</li>
+    <li>Intention/Reflection: Every day you will record: </li>
+    <ul>
+        <li>The work you want to get done that day.</li>
+        <li>Evidence of the work that you got done.</li>
+        <li>Refection on your work as well as your thoughts about any differences between what you got done and what you intended to do.</li>
+    </ul>
+</ol>
+<br>
+<H3>What are Milestones?</H3>
+Milestone are major accomplishments along the way to completing your project. <br>
+A project should have several milestones. A small project might only have two or three total milestones. We will create only one milestone at a time. 
+When you complete a milestone you will create another one until the last milestone which is the project completion. <br>
+<br>
+<h3>Daily Work</h3>
+<ul>
+    <li><b>Intention:</b> 
+        Every day that you work on this project you will begin by recording your intention which is simply answer the questions: What are you going to do today? 
+    </li>
+    <li>
+        <b>Evidence:</b> 
+        Record evidence of what you did with a picture or audio or video or text or a document or what ever you believe will show evidence of your work.
+    </li>
+    <li><b>Reflection:</b> 
+        Provide a short reflection on your work (are you happy with it, frrustrared at your progress, annoyed at yourself, proud of yourself...) as well as 
+        reflect on any differences between what you did and what you intended to do. </li>
+</ul>
+<br>
+{% endblock %}

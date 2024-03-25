@@ -4,9 +4,49 @@ from mongoengine import Document, EmbeddedDocumentListField, DictField, FloatFie
 from mongoengine import BooleanField, URLField, DateField, FileField, StringField, IntField, ReferenceField, EmbeddedDocument
 from mongoengine import DateTimeField, ListField, URLField, CASCADE
 from flask_login import UserMixin
+from flask_security import RoleMixin
 from bson.objectid import ObjectId
 import datetime as d
 import phonenumbers
+
+class College (Document):
+    unitid = IntField()
+    coltype = StringField()
+    name = StringField()
+    street = StringField()
+    city = StringField()
+    state = StringField()
+    zipcode = StringField()
+    lat = FloatField()
+    lon = FloatField()
+    locale = StringField()
+
+class CollegeEnrollment(Document):
+    college = ReferenceField('College')
+    student = ReferenceField('User')
+    grad_year = IntField()
+
+class Address(EmbeddedDocument):
+    oid = ObjectIdField(default=ObjectId())
+    createdate = DateTimeField(default=d.datetime.utcnow())
+    modifydate = DateTimeField(default=d.datetime.utcnow())
+    modifiedby = ReferenceField('User')
+    name = StringField()
+    streetAddress = StringField()
+    city = StringField()
+    state = StringField()
+    zipcode = IntField()
+    description = StringField()
+    lat = FloatField()
+    lon = FloatField()
+    # College, Work, Home
+    addresstype = StringField()
+    iscurrent = BooleanField()
+    gradyear = IntField()
+    
+    meta = {
+        'ordering': ['-createdate']
+    }
 
 class GFilesToDelete(Document):
     fileid = StringField(unique=True)
@@ -40,6 +80,47 @@ class Portfolio(Document):
     student = ReferenceField('User',required=True, unique=True)
     folderDict = DictField()
     submissions = EmbeddedDocumentListField('PortfolioSubmission')
+
+class Obstacle(EmbeddedDocument):
+    obstacle = StringField()
+    desc = StringField()
+
+class Milestone(EmbeddedDocument):
+    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)    
+    status = StringField(default="In Progress")
+    name = StringField()
+    number = IntField()
+    desc = StringField()
+    reflection = StringField()
+    sat = IntField()
+
+class Project(Document):
+    owner = ReferenceField('User')
+    status = StringField(default='In Progress')
+    createDateTime = DateTimeField(default=d.datetime.utcnow())
+    name = StringField()
+    desc = StringField()
+    product = StringField()
+    obstacles = EmbeddedDocumentListField('Obstacle')
+    milestones = EmbeddedDocumentListField('Milestone')
+
+class ProjPost(Document):
+    owner = ReferenceField('User')
+    project = ReferenceField('Project')
+    milestoneOID = StringField()
+    createDateTime = DateTimeField(default=d.datetime.utcnow())
+    # intention, reflection
+    post_type = StringField()
+    # 1-3
+    satisfaction = IntField()
+    confidence = IntField()
+    reflection = StringField()
+    intention = StringField()
+    image_reflection_src = StringField()
+
+    meta = {
+        'ordering': ['createDateTime']
+    }
 
 class Internship_Timesheet_Day(EmbeddedDocument):
     oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
@@ -210,42 +291,6 @@ class PostGrad(EmbeddedDocument):
     pg_state = StringField()
     pg_zip = IntField()
 
-class ProjectTask(EmbeddedDocument):
-    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
-    order = IntField()
-    name = StringField()
-    desc = StringField()
-    status = StringField(default="New")
-    completedate = DateTimeField()
-    createdate = DateTimeField(default=d.datetime.utcnow)
-    
-    meta = {
-        'ordering': ['order','createdate']
-    }
-
-class ProjectCheckin(EmbeddedDocument):
-    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)
-    workingon = ObjectIdField('ProjectTask')
-    workingonname = StringField()
-    status = StringField()
-    desc = StringField()
-    createdate = DateTimeField(default=d.datetime.utcnow)
-
-    meta = {
-        'ordering': ['-createdate']
-    }
-
-class Project(Document):
-    name = StringField()
-    student = ReferenceField('User')
-    gclass = ReferenceField('GoogleClassroom')
-    tasks = EmbeddedDocumentListField('ProjectTask')
-    checkins = EmbeddedDocumentListField('ProjectCheckin')
-    createdate = DateTimeField(default=d.datetime.utcnow)
-
-    meta = {
-        'ordering': ['-createdate']
-    }
 
 class User(UserMixin, Document):
     # temp
@@ -281,7 +326,8 @@ class User(UserMixin, Document):
     gclassguardianinvites = DictField(default={})
     gprofile_pic = URLField()
     gname = StringField()
-    
+    roles = ListField(ReferenceField("Role"))
+
     # Data that can be edited
     lat = FloatField()
     lon = FloatField()
@@ -347,6 +393,25 @@ class User(UserMixin, Document):
     meta = {
         'ordering': ['+glname', '+gfname']
     }
+
+class Role(RoleMixin, Document):
+    # The RoleMixin requires this field to be named "name"
+    name = StringField(unique=True)
+
+# To require a role for a specific route use this decorator
+# @require_role(role="student")
+
+def require_role(role):
+    """make sure user has this role"""
+    def decorator(func):
+        @wraps(func)
+        def wrapped_function(*args, **kwargs):
+            if not current_user.has_role(role):
+                return redirect("/")
+            else:
+                return func(*args, **kwargs)
+        return wrapped_function
+    return decorator
 
 class Equipment(Document):
     type = StringField(required=True)
@@ -439,41 +504,84 @@ class PlanCheckin(Document):
     todaynarrative = StringField()
     previousreference = ReferenceField('self')
 
-# used in CourseCatalog
-class Course(Document):
-    aeriesnum = StringField(unique=True)
-    aeriesname = StringField()
-    level = StringField()
-    name = StringField()
-    dept = StringField()
-    atog = StringField()
-    yearinschool = StringField()
-    pathway = StringField()
+# Old Course table
+# class Course(Document):
+#     aeriesnum = StringField(unique=True)
+#     aeriesname = StringField()
+#     level = StringField()
+#     name = StringField()
+#     dept = StringField()
+#     atog = StringField()
+#     yearinschool = StringField()
+#     pathway = StringField()
 
-# used in CourseCatalog
-class Section(Document):
-    course = ReferenceField('Course')
-    teacher = ReferenceField('User', unique_with='course')
-    pers = ListField()
-    url = URLField()
-    desc = StringField()
-    pathway = StringField()
-    prereq = StringField()
-    yearinschool = ListField(StringField()) #frosh, soph, jr, sr
-    modified = DateTimeField()
+
+# _____________________ Start CourseCatalog
+
+class Courses(Document): 
+    course_number = StringField(required=True,unique=True)
+    course_title = StringField()
+    course_name = StringField()
+    course_ag_requirement = StringField()
+    course_difficulty = StringField()
+    course_department = StringField()
+    course_pathway = StringField()
+    course_gradelevel = StringField()
+    create_date = DateTimeField(default=d.datetime.utcnow())
+    modify_date = DateTimeField()
 
     meta = {
-        'ordering': ['teacher.alname','teacher.afname']
+        'ordering': ['-createdate'],
+        'indexes':
+            [
+                {
+                    'fields': ['course_name','course_title'],
+                    'collation' : {'locale': 'en', 'strength': 2} 
+                }   
+            ]
+        }
+
+class TeacherCourse(Document):
+    teachercourseid = StringField(sparse=True, required=True,unique=True)
+    teacher = ReferenceField('User',reverse_delete_rule=CASCADE, required=True) 
+    course = ReferenceField('Courses',reverse_delete_rule=CASCADE,required=True)
+    course_description = StringField()
+    course_files = FileField()
+    course_link = StringField()
+    create_date = DateTimeField(default=d.datetime.utcnow())
+    modify_date = DateTimeField()
+
+    meta = {
+        'ordering': ['-createdate']
     }
+
+class StudentReview(Document):
+    teacher_course = ReferenceField('TeacherCourse')
+    student = ReferenceField('User')
+    year_taken = IntField()
+    late_work = IntField()
+    feedback = IntField()
+    classcontrol = IntField()
+    grading_policy = IntField()
+    classroom_environment = IntField()
+    create_date = DateTimeField(default=d.datetime.utcnow())
+    modify_date = DateTimeField()
 
 class Comment(Document):
+    author = ReferenceField('User',reverse_delete_rule=CASCADE) 
+    course = ReferenceField('Courses',reverse_delete_rule=CASCADE)
     content = StringField()
-    owner = ReferenceField('User',reverse_delete_rule=CASCADE)
-    comment = ReferenceField('self')
+    create_date = DateTimeField(default=d.datetime.utcnow())
+    modify_date = DateTimeField()
+    role = StringField("Role")
 
     meta = {
-        'ordering': ['+createdate']
+        'ordering': ['-createdate']
     }
+
+# End CourseCatalog
+
+
 
 class Feedback(Document): 
     author = ReferenceField('User',reverse_delete_rule=CASCADE)

@@ -1,0 +1,121 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% if current_user.isadmin or current_user == proj.owner %}
+    <a href="/project/edit/{{proj.id}}"><img width='40' src="/static/edit.png"></a> 
+    <a href="/project/delete/{{proj.id}}"><img width='40' src="/static/delete.png"></a> <br>
+{% endif %}
+
+{% if current_user.fname[-1] == 's'  %}
+    <h1>{{ proj.owner.fname }}' Project</h1>
+{% else %}
+    <h1>{{ proj.owner.fname }}'s Project</h1>
+{% endif %}
+
+<h4>{{proj.name}}</h4>
+
+<b>Created:</b> {{moment(proj.createDateTime).calendar()}} <br>
+<b>Owner:</b> {{proj.owner.fname}} {{proj.owner.lname}} <br>
+<b>Status:</b> {{proj.status}} <br>
+<b>Product:</b> <br> {{proj.product|safe}} <br>
+
+{% if proj.milestones|length != 0 and not edit %}
+    <h3>
+        Milestones
+        <a href="/project/milestone/new/{{proj.id}}"><img src="/static/new.png" width='40'></a>
+    </h3>
+    Milestones are major accomplishments along the way to completing your project.
+<br>
+
+    {% for m in proj.milestones %}
+        {% if current_user == proj.owner %}
+            <a data-toggle="tooltip" data-placement="top" title="Edit Milestone" href="/project/milestone/edit/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/edit.png"></a>
+            <a data-toggle="tooltip" data-placement="top" title="Delete Milestone" href="/project/milestone/delete/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/delete.png"></a>
+            <a data-toggle="tooltip" data-placement="top" title="Mark Milestone as Complete" href="/project/milestone/reflection/{{proj.id}}/{{m.oid}}"><img width="30" src="/static/finish.png"></a>
+        {% endif %}
+            <br>
+            <h4>#{{m.number}}: {{m.name}}</h4>
+            <b>Status:</b> {{m.status}} <br>
+            <b>Description:</b><br>
+            {{m.desc|safe}}
+            {% if m.reflection %}
+                <b>Reflection:</b> <br>
+                {{m.reflection|safe}} <br>
+            {% endif %}
+            <hr>
+                <h5>Posts <a href="/project/post/new/{{proj.id}}/{{m.oid}}"><img src="/static/new.png" width="20"></a> </h5>
+                {% if m.posts %}
+                    {% for post in m.posts %}
+                        {% if post.post_type.lower() == 'intention' %}
+                            <div class="bg-primary text-light px-3 py-1">
+                        {% else %}
+                            <div class="bg-success text-light px-3 py-1">
+                        {% endif %}
+                        {{post.post_type}} {{moment(post.createDateTime).calendar()}} 
+                        <a href="/project/post/delete/{{post.id}}"><img src="/static/delete.png" width="20"></a>
+                        <br>
+                        {% if post.post_type.lower() == "intention" %}
+                            Confidence: {{post.confidence}} <br>
+                            Intention: {{post.intention | safe}}
+                        {% endif %}
+                        {% if post.post_type.lower() == "reflection" %}
+                            Satisfaction: {{post.satisfaction}} <br>
+                            Reflection: {{post.reflection | safe}}
+                            {% if post.image_reflection_src %}
+                                {# <img class="img-thumbnail img-fluid" src="data:image;base64,{{base64encode(post.image_reflection.read())}}"> <br> #}
+                                <img src="{{post.image_reflection_src}}">
+                                {% endif %} 
+                        {% endif %}    
+                            </div>
+                    {% endfor %}
+                {% endif %}
+            <hr>
+            <hr>
+    {% endfor %}
+{% endif %}
+
+<br> <br>
+
+{% if proj.milestones|length == 0 %}
+    No Milestones yet. <br>
+{% endif %}
+
+{% if proj.owner == current_user %}
+{% if proj.milestones|length == 0 or proj.milestones[-1].status == 'Done' or edit %}
+    {% if edit %}
+        <h3>Edit Milestone </h3>
+    {% else %}
+        <h3>New Milestone</h3>
+    {% endif %}
+
+    <form method=post>
+        {{ form.hidden_tag() }}
+        Describe what work you will have done when this milestone is complete. Include images or links to any resources (online tutorials, tools, similar project milestones) if you have them.: <br>
+        {{ form.desc(class='tmce-editor') }} <br>
+        <h3>Name:</h3>
+        Give it a descriptive name. Not "Milestone 1" but "Getting started" or "Design the final product" or "Practice" or "Finish the tutorial"
+        {{ form.name(class='form-control') }} <br>
+        <h3>Status:</h3>
+        The initial status will always be "In Progress" <br>
+        {{ form.status(class="form-control") }} <br>
+        {{ form.submit(class="form-control btn-primary") }}
+    </form> 
+{% endif %}
+{% endif %}
+
+{% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" integrity="sha512-6JR4bbn8rCKvrkdoTJd/VFyXAN4CE9XMtgykPWgKiHjou56YDJxWsi90hAeMTYxNwUnKSQu9JPc3SQUg+aGCHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript">
+    tinymce.init({
+        selector: 'textarea.tmce-editor',
+        plugins:'advlist autolink lists link image charmap print preview hr anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table contextmenu directionality emoticons template paste textcolor colorpicker textpattern imagetools',
+        toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | forecolor backcolor emoticons',
+        image_advtab: true
+    });
+  </script>
+{% endblock %}
+
+{% endblock %}

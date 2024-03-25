@@ -1,0 +1,66 @@
+<!-- this is a generic form page.  Best way to make a new form page is to 
+copy this one and then edit it. -->
+
+{% extends "base.html" %}
+
+{% block body %}
+        
+        {{teacherCourse.teacher.fname}} {{teacherCourse.teacher.lname}} <br>
+        {% if teacherCourse.course.course_name %}
+            <h1>{{teacherCourse.course.course_name}}</h1>
+            {{teacherCourse.course.course_title}} <br> <br>
+        {% else %}
+            <h1>{{teacherCourse.course.course_title}}</h1>
+        {% endif %}
+
+        <!--List all errors in a group at the top-->
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            
+
+            Please tell us more about this class <br>
+            <div class="row">
+                <div class="col-5">
+                    <span class="fs-6">
+                        Helpful information to include:
+                        <ul>
+                            <li class="list-group-item border-0">Policy on grading and late work.</li>
+                            <li class="list-group-item border-0">What's the classroom like? Sink, microwave, hot water?</li>
+                            <li class="list-group-item border-0">Amount of required public speaking?</li>
+                            <li class="list-group-item border-0">Group work?</li>
+                            <li class="list-group-item border-0">Is there homework? Is it an extension of classwork?</li>
+                            <li class="list-group-item border-0">Grade statistics. Pass/Fail percentages. A-F breakdowns.</li>
+                        </ul>
+                    </span>
+                </div>
+                <div class="col-7">
+                    {{ form.course_description(cols=80,rows=12) }}
+                    <!--List the errors for this field-->
+                    {% for error in form.course_description.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            
+
+            <br>
+            {{ form.course_link.label }} <br>
+            {{ form.course_link(size=64) }}
+            <!--List the errors for this field-->
+            {% for error in form.course_link.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+<br>
+            {{form.submit()}}
+        </form>
+        
+{% endblock %}

@@ -1,0 +1,37 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+{% if current_user.isadmin or current_user == tCourse.teacher %}
+    <a href="/teachercourse/edit/{{tCourse.id}}"><img width="20" src="/static/edit.png"></a>
+    {% if current_user.isadmin %}
+        <a href="/teachercourse/delete/{{tCourse.id}}"><img width="20" src="/static/delete.png"></a>
+    {% endif %}
+{% endif %}
+<h1>
+    {% if tCourse.course.course_name %}
+        <a href="/course/{{tCourse.course.id}}">{{tCourse.course.course_name}}</a>
+    {% else %}
+        <a href="/course/{{tCourse.course.id}}">{{tCourse.course.course_title}}</a>
+    {% endif %}
+</h1>
+<h3>Taught by: <a href="/teacher/{{tCourse.teacher.id}}">{{tCourse.teacher.fname}} {{tCourse.teacher.lname}}</a></h3>
+
+{% if tCourse.course_description %}
+    {{tCourse.course_description}} 
+{% else %}
+    No Course Description yet... 
+{% endif %}
+<br>
+<br>
+{% if tCourse.course_link %}
+    <a class="fs-2" href="{{tCourse.course_link}}">Syllabus</a>
+{% else %}
+    No Links to course resources yet...
+{% endif %}
+<br> <br>
+Number of Reviews: {{sRevs | length}} <br>
+<a href="/studentreview/new/{{tCourse.id}}"><button type="button" class="btn btn-primary">New Student Review</button></a>
+
+{% endblock %}

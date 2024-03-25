@@ -1,0 +1,49 @@
+<!-- this is a generic form page.  Best way to make a new form page is to 
+copy this one and then edit it. -->
+
+{% extends "base.html" %}
+
+
+
+{% block body %}
+        <h1>Milestone Reflection</h1>
+        <b>Project owner</b>: {{ proj.owner.fname }} {{ proj.owner.lname }} <br>
+        <b>Project Name:</b> {{ proj.name }} <br>
+        <b>Milestone Name:</b> {{ ms.name }} <br>
+        <b>Milestone Description:</b> {{ ms.desc|safe }} <br>
+
+        <!--List all errors in a group at the top-->
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+
+            Are you satisfied with your work on this milestone? <br>
+            {{ form.sat() }} <br> <br>
+
+            Tell me about the work.  What was the hardest part? Was it easy? How long did it take?  Was it boring? fun? <br>
+            Include images and/or links to work that you completed. br
+            {{ form.reflection(class='tmce-editor') }} <br>
+
+            {{form.submit()}}
+        </form>
+        
+        {% block javascript %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" integrity="sha512-6JR4bbn8rCKvrkdoTJd/VFyXAN4CE9XMtgykPWgKiHjou56YDJxWsi90hAeMTYxNwUnKSQu9JPc3SQUg+aGCHw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript">
+            tinymce.init({
+                selector: 'textarea.tmce-editor',
+                plugins:'advlist autolink lists link image charmap print preview hr anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table contextmenu directionality emoticons template paste textcolor colorpicker textpattern imagetools',
+                toolbar: 'preview code insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | forecolor backcolor emoticons',
+                image_advtab: true
+            });
+          </script>
+        {% endblock %}
+
+{% endblock %}

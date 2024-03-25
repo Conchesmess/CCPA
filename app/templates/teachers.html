@@ -1,16 +1,54 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
 {% extends 'base.html' %}
 
 {% block body %}
-{% if teachers %}
-{% for teacher in teachers %}
-{{teacher.tnum}}, {{teacher.tdept}}, {{teacher.taeriesname}}, {{teacher.trmphone}}, {{teacher.oemail}}, {{teacher.afname}}, {{teacher.alname}} <br>
-{% endfor %}
-{% endif %}
+
+
+<h1 class="text-center">Teachers</h1>
+<h3 class="text-center">
+    <a href="/teacher/list">All</a>
+    {% for searchLetter in teacherFirstLetters %}
+        <a href="/teacher/list/{{searchLetter}}">{{searchLetter}}</a>
+    {% endfor %}
+</h3>
+<br> <br>
+
+
+{% set ns = namespace(letter="") %}
+<div class="row">
+    {% for teacher in teachers %}
+        {% if ns.letter != teacher.lname[0] %}
+            <div class="col-12">
+                {% set ns.letter = teacher.lname[0] %}
+                <br>
+                <h2>{{ns.letter}}</h2>
+            </div>
+        {% endif %}
+        <div class="col-4">
+            <div class="row">
+                <div class="col">
+                    <h3>
+                        <a href="/teacher/{{teacher.id}}" class="text-capitalize">{{teacher.fname}} {{teacher.lname}}</a>
+                    </h3> 
+                </div>
+                <div class="col">
+                    <small>
+                        {% if teacher == current_user or current_user.has_role("admin") %}
+                            <a href="/profile/{{teacher.id}}">p</a>
+                        {% endif %}
+                        {% if teacher.late_work %}lw{% endif %}
+                        {% if teacher.feedback %}fb{% endif %}
+                        {% if teacher.classcontrol %}cc{% endif %}
+                        {% if teacher.grading_policy %}gp{% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+
 
 {% endblock %}
-
-tnum = IntField()
-troom = StringField()
-tdept = StringField()
-taeriesname = StringField()
-trmphone = StringField()

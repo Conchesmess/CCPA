@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block body %}
+        <h1>New Address</h1>
+
+        <form method=post>
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.addresstype.label }} <br>
+                {{ form.addresstype() }}
+                <!--List the errors for this field-->
+                {% for error in form.addresstype.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>        
+            <p>
+                {{ form.name.label }} <br>
+                {{ form.name(size=64, id="tags") }}
+                <!--List the errors for this field-->
+                {% for error in form.name.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.streetAddress.label }} <br>
+                {{ form.streetAddress(size=64) }}
+                <!--List the errors for this field-->
+                {% for error in form.streetAddress.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.city.label }} <br>
+                {{ form.city(size=64) }}
+                <!--List the errors for this field-->
+                {% for error in form.city.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.state.label }} <br>
+                {{ form.state(size=64) }}
+                <!--List the errors for this field-->
+                {% for error in form.state.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.zipcode.label }} <br>
+                {{ form.zipcode(size=64) }}
+                <!--List the errors for this field-->
+                {% for error in form.zipcode.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{form.submit()}}
+            </p>
+        </form>
+        
+{% endblock %}

@@ -1,16 +1,19 @@
 from app import app
 from app.classes.forms import WCloudForm
-from .users import credentials_to_dict
+#from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, Markup
+from flask_login import current_user
+from time import sleep
 from os import path
 from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import matplotlib.pyplot as plt
-from flask_login import current_user
-from time import sleep
+import matplotlib
+import base64
+import io
 
-@app.route('/theme', methods=['GET', 'POST'])
-def theme():
+@app.route('/wordcloud', methods=['GET', 'POST'])
+def wordcloud():
     form = WCloudForm()
     if form.validate_on_submit():
         text = form.text.data
@@ -23,13 +26,22 @@ def theme():
         for word in stopwords:
             wordcloud.stopwords.add(word)
         wordcloud.generate(text)
+        words = wordcloud.words_
 
         # Display the generated image:
+        matplotlib.use('agg')
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis("off")
-        plt.savefig(f'app/static/wc/{current_user.id}.png')
-        sleep(5)
-        return render_template('theme.html',form=form)
 
-    return render_template('theme.html',form=form)
+        data = io.BytesIO()
+        plt.savefig(data, format='jpeg')
+        data.seek(0)
+        im = Image.open(data)
+        im.save(data, "jpeg")
+        encoded_img_data = base64.b64encode(data.getvalue())
+
+        return render_template("wordcloud.html", img_data=encoded_img_data.decode('utf-8'),form=form, words=words)
+
+    return render_template('wordcloud.html',form=form)
+
 

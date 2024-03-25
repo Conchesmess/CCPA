@@ -1,0 +1,21 @@
+
+Create
+Obj.embeddedobjfiled.create(
+    embeddeddocfield,
+    ...
+)
+obj.save()
+
+Update
+obj.embeddedObjField.filter(oid=objid).update(
+    embeddeddocfield,
+    ...
+)
+obj.save()
+
+Delete
+    obj.embeddedObjField.filter(oid=adultoid).delete()
+    obj.save()
+
+Get/Read one
+    embeddedObj = obj.embeddedObjField.get(oid=objectid)

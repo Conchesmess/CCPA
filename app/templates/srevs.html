@@ -1,0 +1,20 @@
+<!-- This is a blank template.  You can copy this to make a new template page. -->
+
+{% extends 'base.html' %}
+
+{% block body %}
+{% for rev in sRevs %}
+    <a href="/srev/delete/{{rev.id}}">del</a>
+    {{rev.student.fname}} 
+    {{rev.student.lname}} 
+    {{rev.teacher_course.course.course_title}} 
+    {{rev.teacher_course.teacher.lname}} 
+    {{rev.late_work}} 
+    {{rev.feedback}} 
+    {{rev.classcontrol}}
+    {{rev.classroom_environment}}
+    {{rev.grading_policy}}
+    <br>
+{% endfor %}
+
+{% endblock %}
