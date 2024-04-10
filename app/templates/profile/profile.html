@@ -14,9 +14,13 @@
         {% endif %}
     </h1>
     <h3>
-        {{currUser.role}}
+        Depricated --> Role: {{currUser.role}}
     </h3>
-    {% if current_user.role.lower() == "teacher" %}
+    <h3>Roles: 
+    {% for r in currUser.roles %}
+        {{r.name}},
+    {% endfor %} </h3>
+    {% if current_user.has_role("teacher") %}
         <a href="/createstudentfolder/{{currUser.oemail}}">Create a portfolio folder</a>
     {% endif %}
     <div class="col-md-4">

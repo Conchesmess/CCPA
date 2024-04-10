@@ -106,6 +106,7 @@ def collegeNew(uid=None):
     return render_template('addresses/new_college_form.html',form=form, collegeNames=collegeNames, user=user)
 
 @app.route('/college/delete/<ceid>')
+@login_required
 def collegeEnrollmentDelete(ceid):
     ce = CollegeEnrollment.objects.get(pk=ceid)
 

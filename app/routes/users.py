@@ -188,7 +188,7 @@ def profile(uid=None):
     if not uid:
         uid = current_user.id
 
-    if current_user.role.lower() == "student":
+    if current_user.has_role("student"):
         groups=None
         targetUser = current_user
         checkins = CheckIn.objects(student=current_user).limit(15)
@@ -197,7 +197,7 @@ def profile(uid=None):
         checkins = None
         tokens = None
         try:
-            targetUser=User.objects.get(aeriesid=uid)
+            targetUser=User.objects.get(pk=uid)
         except:
             flash("This user does not exist in the database.")
             return redirect('/')

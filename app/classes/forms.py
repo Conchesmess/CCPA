@@ -548,6 +548,8 @@ class AssignmentForm(FlaskForm):
 
 class ProjectForm(FlaskForm):
     name = StringField('Name')
+    course = StringField('Course')
+    open_to_contributors = BooleanField()
     #desc = TextAreaField('Description')
     product = TextAreaField('What do you think you will make?')
     status = SelectField('Status',choices=[('In Progress','In Progress'),('Done','Done')])

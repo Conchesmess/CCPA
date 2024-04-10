@@ -5,6 +5,7 @@ from mongoengine import BooleanField, URLField, DateField, FileField, StringFiel
 from mongoengine import DateTimeField, ListField, URLField, CASCADE
 from flask_login import UserMixin
 from flask_security import RoleMixin
+from flask import flash
 from bson.objectid import ObjectId
 import datetime as d
 import phonenumbers
@@ -86,7 +87,8 @@ class Obstacle(EmbeddedDocument):
     desc = StringField()
 
 class Milestone(EmbeddedDocument):
-    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)    
+    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)  
+    owner = ReferenceField('User')  
     status = StringField(default="In Progress")
     name = StringField()
     number = IntField()
@@ -96,8 +98,11 @@ class Milestone(EmbeddedDocument):
 
 class Project(Document):
     owner = ReferenceField('User')
+    contributors = ListField(ReferenceField('User'))
+    open_to_contributors = BooleanField(default=False)
     status = StringField(default='In Progress')
     createDateTime = DateTimeField(default=d.datetime.utcnow())
+    course = StringField()
     name = StringField()
     desc = StringField()
     product = StringField()
@@ -394,6 +399,19 @@ class User(UserMixin, Document):
         'ordering': ['+glname', '+gfname']
     }
 
+    def has_role(self, name):
+        """Does this user have this permission?"""
+        try:
+            chk_role = Role.objects.get(name=name)
+        except:
+            flash(f"{name} is not a valid role.")
+            return False
+        if chk_role in self.roles:
+            return True
+        else:
+            # flash(f"That page requires the {name} role.")
+            return False
+
 class Role(RoleMixin, Document):
     # The RoleMixin requires this field to be named "name"
     name = StringField(unique=True)
@@ -503,17 +521,6 @@ class PlanCheckin(Document):
     yesterdaynarrative = StringField()
     todaynarrative = StringField()
     previousreference = ReferenceField('self')
-
-# Old Course table
-# class Course(Document):
-#     aeriesnum = StringField(unique=True)
-#     aeriesname = StringField()
-#     level = StringField()
-#     name = StringField()
-#     dept = StringField()
-#     atog = StringField()
-#     yearinschool = StringField()
-#     pathway = StringField()
 
 
 # _____________________ Start CourseCatalog

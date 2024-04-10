@@ -4,7 +4,7 @@
 
 {% block body %}
 
-{% if current_user.isadmin or current_user == proj.owner %}
+{% if current_user.has_role('admin') or current_user == proj.owner %}
     <a href="/project/edit/{{proj.id}}"><img width='40' src="/static/edit.png"></a> 
     <a href="/project/delete/{{proj.id}}"><img width='40' src="/static/delete.png"></a> <br>
 {% endif %}
@@ -16,10 +16,25 @@
 {% endif %}
 
 <h4>{{proj.name}}</h4>
-
+<b>Course:</b> {{proj.course}} <br>
 <b>Created:</b> {{moment(proj.createDateTime).calendar()}} <br>
 <b>Owner:</b> {{proj.owner.fname}} {{proj.owner.lname}} <br>
 <b>Status:</b> {{proj.status}} <br>
+
+{% if proj.open_to_contributors %}
+    <b>Open to Collaborators</b> 
+    <a href="/project/join/{{proj.id}}">Join</a>
+    <br>
+    {% if proj.collaborators|length > 0 %}
+    <b>Current Collaborators</b> <br>
+        {% for c in proj.collagorators %}
+            {{c.fname}} {{c.lname}},
+        {% endfor %}
+    {% else %}
+        No Collaborators yet. <br>
+    {% endif %}
+{% endif %}
+
 <b>Product:</b> <br> {{proj.product|safe}} <br>
 
 {% if proj.milestones|length != 0 and not edit %}
@@ -38,8 +53,8 @@
         {% endif %}
             <br>
             <h4>#{{m.number}}: {{m.name}}</h4>
-            <b>Status:</b> {{m.status}} <br>
             <b>Description:</b><br>
+            <b>Status:</b> {{m.status}} <br>
             {{m.desc|safe}}
             {% if m.reflection %}
                 <b>Reflection:</b> <br>

@@ -3,11 +3,27 @@
 {% extends 'base.html' %}
 
 {% block body %}
+<h1>Projects</h1>
+
+<table class="table">
+    <tr>
+        <th>Owner</th>
+        <th>Project</th>
+        <th>Course</th>
+        <th>Open</th>
+    </tr>
 
 {% for proj in projects %}
+    <tr>
+        <td>{{proj.owner.fname}} {{proj.owner.lname}}</td>
+        <td><a href="/project/{{proj.id}}">{{proj.name}}</a></td>
+        <td>{{proj.course}}</td>
+        <td>
+            {% if proj.open_to_contributors %} Yes {%endif%}
 
-{{proj.owner.fname}} {{proj.owner.lname}}: <a href="/project/{{proj.id}}">{{proj.name}}</a> <br>
-
+        </td>
+    </tr>
 {% endfor %}
+</table>
 
 {% endblock %}

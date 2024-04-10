@@ -12,6 +12,7 @@ def setTSRoles():
     users = User.objects()
     studentOBJ=Role.objects.get(name='student')
     teacherOBJ=Role.objects.get(name='teacher')
+
     t=len(users)
     
     for i,user in enumerate(users):
@@ -26,6 +27,23 @@ def setTSRoles():
                 user.save()
                 print(f't:{i}:{t}')
 
+    return render_template('index.html')
+
+@app.route('/setAdminRole/<email>')
+def setAdminRole(email):
+    adminOBJ=Role.objects.get(name='admin')
+    user = User.objects.get(oemail=email)
+    user.roles.append(adminOBJ)
+    user.save()
+
+    return render_template('index.html')
+
+@app.route('/removerole/<name>/<email>')
+def removeRole(name,email):
+    OBJ=Role.objects.get(name=name)
+    user = User.objects.get(oemail=email)
+    user.roles.remove(OBJ)
+    user.save()
     return render_template('index.html')
 
 

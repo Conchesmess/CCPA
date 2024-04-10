@@ -10,6 +10,8 @@ from app.classes.data import require_role, Project, Milestone, ProjPost
 from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
 from flask_login import login_required
 import datetime as dt
+from mongoengine import Q
+
 
 @app.route('/project/post/new/<pid>/<mid>', methods=['GET','POST'])
 @login_required
@@ -23,12 +25,15 @@ def projectPostNew(pid=None,mid=None):
             flash('That project does not exist.')
             return redirect(url_for('projectMy'))
         else:
+            if current_user not in project.contributors and current_user != project.owner:
+                flash("You are not the owner or a contributer to this porject.")
+                return redirect(url_for('projectMy'))
             try:
                 milestone = project.milestones.get(oid = mid)
             except:
                 flash("That Milestone doesn't exist")
                 return redirect(url_for('projectMy'))
-
+    
     else:
         try:
             project = Project.objects.get(owner = current_user,status='In Progress')
@@ -118,8 +123,15 @@ def projectPostDelete(postID):
     except:
         flash("That post doesn't exist.")
         return redirect(url_for('projectMy'))
+
+    if current_user != delPost.owner:
+        flash("You can't delete a post you didn't write.")
+        return redirect(url_for('projectMy'))
+
     project = delPost.project
+
     delPost.delete()
+
     flash("Post deleted")
     return redirect(url_for('project',pid=project.id))
 
@@ -143,9 +155,9 @@ def projectDelete(pid):
         flash("That project doesn't exist")
         return render_template('index.html')
 
-    if projDel.owner != current_user and not session['isadmin']:
+    if current_user not in projDel.contributors and projDel.owner != current_user and not session['isadmin']:
         flash("You can't delete that project." )
-        return render_template('index.html')
+        return redirect(url_for('projectMy'))
     
     if len(projDel.milestones) > 0:
         flash("You can't delete a project that has Milestones.")
@@ -159,38 +171,32 @@ def projectDelete(pid):
 @app.route('/project/my')
 @login_required
 def projectMy():
-    try:
-        proj = Project.objects.get(owner=current_user,status='In Progress')
-    except mongoengine.errors.DoesNotExist:
+
+    query = Q(status='In Progress') & (Q(owner=current_user) | Q(contributors__contains = current_user))
+
+    projects = Project.objects(query)
+
+    if len(projects)==0:
         flash("You don't have a project that is set to 'In Progress'. You should make one!")
         return render_template('index.html')
-    except mongoengine.errors.MultipleObjectsReturned:
-        flash("Hmmm, you have more than one project that is 'In Progress'.  That should not happen.")
-        return redirect(url_for('projectList'))
     else:
-        return redirect(url_for('project',pid=proj.id))
+        return render_template('projects/project_list.html',projects=projects)
 
 @app.route('/project/new', methods=['GET', 'POST'])
 @login_required
 def projectNew():
     form = ProjectForm()
 
-    try:
-        projMy = Project.objects.get(owner=current_user, status = "In Progress")
-    except mongoengine.errors.DoesNotExist:
-        pass
-    else:
-        flash('You have an active project.')
-        return redirect(url_for('projectMy'))
-
     if form.validate_on_submit():
 
         newProj = Project(
             owner = current_user,
+            course = form.course.data,
             name = form.name.data,
             status = "In Progress",
             product = form.product.data,
-            createDateTime = dt.datetime.utcnow()
+            createDateTime = dt.datetime.utcnow(),
+            open_to_contributors = form.open_to_contributors.data
         )
 
         newProj.save()
@@ -206,28 +212,57 @@ def projectEdit(pid):
     try:
         projEdit = Project.objects.get(pk=pid)
     except mongoengine.errors.DoesNotExist:
-        flash('That projject does not exist')
+        flash('That project does not exist')
         return render_template('index.html')
+
+    if current_user != projEdit.owner and not current_user.has_role('admin'):
+        flash("You can only edit the project if you own it")
+        return redirect(url_for('project',pid=pid))
 
     if form.validate_on_submit():
 
         projEdit.update(
             owner = current_user,
+            course = form.course.data,
             name = form.name.data,
             status = form.status.data,
-            #desc = form.desc.data,
             product = form.product.data,
-            createDateTime = dt.datetime.utcnow()
+            createDateTime = dt.datetime.utcnow(),
+            open_to_contributors = form.open_to_contributors.data
         )
 
         return redirect(url_for('project',pid=pid))
     
     form.name.data = projEdit.name
+    form.course.data = projEdit.course
     form.status.data = projEdit.status
     #form.desc.data = projEdit.desc
     form.product.process_data(projEdit.product)
+    form.open_to_contributors.data = projEdit.open_to_contributors
     
     return render_template('projects/project_form.html', form=form)
+
+@app.route('/project/join/<pid>')
+@login_required
+def project_join(pid):
+    proj = Project.objects.get(pk=pid)
+
+    if not proj.open_to_contributors:
+        flash('This project is not open to contributors.')
+        return redirect(url_for(pid=pid))
+
+    if current_user in proj.contributors or current_user == proj.owner:
+        flash("You are already a part of this project.")
+        return redirect(url_for('project',pid=pid))
+
+    proj.contributors.append(current_user)
+    proj.save()
+
+    flash('You are now a contributer to this project')
+
+    return redirect(url_for('project',pid=pid))
+
+
 
 @app.route('/project/<pid>', methods=['POST','GET'])
 @login_required
@@ -272,12 +307,13 @@ def project(pid):
 def projectMsDel(pid,mid):
 
     proj = Project.objects.get(pk=pid)
-    if proj.owner == current_user or session['isadmin']:
+    milestone = proj.milestones.get(oid=mid)
+    if milestone.owner == current_user or session['isadmin']:
         if proj.milestones[-1].status == 'Delete':
             proj.milestones.filter(oid=mid).delete()
             proj.save()
         else:
-            flash('you can only delete a milestone that has status marked as "Delete".')
+            flash('you can only delete a milestone that has status marked as "Delete" and that you own.')
     else:
         flash("You can't delete that milestone because you don't own.")
     
@@ -287,11 +323,14 @@ def projectMsDel(pid,mid):
 @login_required
 def projectMsEdit(pid,mid):
 
-    form = MilestoneForm()
-
     proj = Project.objects.get(pk=pid)
 
     ms = proj.milestones.get(oid=mid)
+    if ms.owner != current_user:
+        flash("You have to own the milestone to edit it.")
+        return redirect(url_for('project',pid=pid))
+    
+    form = MilestoneForm()
 
     if form.validate_on_submit():
         proj.milestones.filter(oid=mid).update(
@@ -316,6 +355,10 @@ def projectMsNew(pid):
     form = MilestoneForm()
 
     proj = Project.objects.get(pk=pid)
+
+    if current_user != proj.owner and current_user not in proj.contributors:
+        flash("You can't create a milstone in a project you don't own or are not a contributer to.")
+        return redirect(url_for('project',pid=projectEdit))
 
     if form.validate_on_submit():
         proj.milestones.create(

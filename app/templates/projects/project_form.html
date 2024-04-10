@@ -59,6 +59,8 @@ copy this one and then edit it. -->
 
         <form method=post>
             {{ form.hidden_tag() }}
+            <h3>What Course is this associated with?</h3>
+            {{ form.course(class='form-control') }}  <br>
 
             <h3>What do you want to make and why?</h3> 
             Describe in detail what you want to make. Include why you want to make it or how you want to use it. It should be clear to the reader what you intend to make. Use the image icon to add images from the Internet.
@@ -67,6 +69,8 @@ copy this one and then edit it. -->
             <h3>Give it a name.</h3>
             What do you want to call this project? It should be a descriptive name so any reader can know what you are trying to make even if the title is all they can see. <br>
             {{ form.name(class='form-control') }} <br>
+
+            <h3>Are you open to collaborators? {{ form.open_to_contributors()}} </h3>
 
             <H3>Status</H3>
             The initial status is always "In Progress" <br>
