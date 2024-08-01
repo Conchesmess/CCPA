@@ -1,7 +1,8 @@
 from app.classes.forms import ActiveClassesForm, SimpleForm, TokenForm
 from app import app
 from flask import render_template, redirect, session, flash, url_for, Markup
-from app.classes.data import GEnrollment, GoogleClassroom, User, Help, Token
+from app.classes.data import User, Help, Token
+from app.classes.gclassroom import GEnrollment, GoogleClassroom
 from app.classes.forms import ActiveClassesForm
 from datetime import datetime as dt
 #from datetime import timedelta

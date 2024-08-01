@@ -1,7 +1,8 @@
 from app import app
 from .users import credentials_to_dict
 from flask import render_template, redirect, url_for, session, flash, Markup
-from app.classes.data import GEnrollment, User
+from app.classes.gclassroom import GEnrollment
+from app.classes.data import User
 from app.classes.forms import NewStudentForm, StudentForm, SendemailForm, StudentNoteForm
 from mongoengine import Q
 from googleapiclient.discovery import build

@@ -1,6 +1,5 @@
 from .login import *
 from .users import *
-from .posts import *
 from .calendar import *
 from .feedback import *
 from .scopes import *

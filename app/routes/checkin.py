@@ -2,7 +2,8 @@ from app import app
 from app.routes.sbg import gclass
 from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, request, Markup
-from app.classes.data import GEnrollment, User, CheckIn, GoogleClassroom, Help, Token, Settings
+from app.classes.data import User, CheckIn, Help, Token, Settings
+from app.classes.gclassroom import GEnrollment, GoogleClassroom
 from app.classes.forms import BreakForm, CheckInForm, DateForm, StudentWasHereForm, BreakSettingsForm
 from .roster import getCourseWork
 from datetime import datetime as dt

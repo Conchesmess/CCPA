@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from app import app
 from .users import credentials_to_dict
 from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string, request
-from app.classes.data import GEnrollment, User, GoogleClassroom
+from app.classes.data import User
+from app.classes.gclassroom import GEnrollment, GoogleClassroom
 from app.classes.forms import AddToCohortForm, GClassForm
 import mongoengine.errors
 import google.oauth2.credentials

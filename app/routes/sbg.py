@@ -1,6 +1,7 @@
 from app import app
 from flask import render_template, redirect, session, flash, url_for, Markup, render_template_string, request
-from app.classes.data import User, GoogleClassroom, GEnrollment, CourseWork, Standard
+from app.classes.data import User
+from app.classes.gclassroom import GoogleClassroom, GEnrollment, CourseWork, Standard
 from app.classes.forms import AssignmentForm, StandardForm
 from bson.objectid import ObjectId
 import google.oauth2.credentials

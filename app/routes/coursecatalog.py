@@ -3,7 +3,8 @@ import mongoengine.errors
 from flask import render_template, flash, redirect, url_for, session
 from markupsafe import Markup
 from flask_login import current_user
-from app.classes.data import Courses, Comment, TeacherCourse, User, StudentReview, Role
+from app.classes.data import User, Role
+from app.classes.coursecatalog import Courses, Comment, TeacherCourse, StudentReview
 from app.classes.forms import StudentReviewForm, TeacherForm, CoursesForm, CommentForm, CourseFilterForm, TeacherCourseForm
 from flask_login import login_required
 import datetime as dt
