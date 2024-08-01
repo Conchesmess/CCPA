@@ -275,7 +275,14 @@ def ontimeperc(gclassid):
 
     subsDF = subsDF.drop(columns='id')
 
-    subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
+    try: 
+        subsDF['late']
+    except KeyError:
+        subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory']]
+        subsDF['late']="False"
+    else:
+        subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
+
 
     dictfordf = {}
     for row in enrollments:
@@ -333,7 +340,13 @@ def ontimeperc(gclassid):
     ### Assignment list with their state: Turned-in, Graded, etc
     assesDF = pd.DataFrame.from_dict(gClassroom.courseworkdict['courseWork'])    
     assesDF = assesDF.rename(columns={'id':'courseWorkId'})
-    assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
+    try:
+        assesDF['dueDate']
+    except:
+        flash("All Assignments must have Due Dates.")
+        return redirect(url_for('index'))
+    else:
+        assesDDDF = assesDF[['courseWorkId','dueDate']].copy()
     assesDDDF = assesDDDF.fillna('-')
     assesDF['alternateLink'] = assesDF.apply(lambda row: row['alternateLink'].replace('details','submissions/by-status/and-sort-name/all'),axis=1)
     assesDF['title'] = assesDF.apply(lambda row: row['title']+'<a href="'+row['alternateLink']+'" target="_blank" rel="noopener noreferrer">'+' (g)'+'</a>',axis=1)
