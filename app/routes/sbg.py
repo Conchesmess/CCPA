@@ -113,10 +113,10 @@ def gclass(gclassid):
 @app.route('/gclass/assignments/<gclassid>')
 def gClassAssignments(gclassid):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
-    asses = CourseWork.objects(gclassroom=gClassroom)
-    asses = sorted(asses, key = lambda i: (i.courseworkdict['title']))
+    assesDict = gClassroom.courseworkdict['courseWork']
+    assesDict = sorted(assesDict, key = lambda i: (i['title']))
 
-    return render_template('sbg/assignments.html', gClass=gClassroom, asses = asses)
+    return render_template('sbg/assignments.html', gClass=gClassroom, assesDict = assesDict)
 
 @app.route('/assignment/<assid>', methods=['GET', 'POST'])
 def gAss(assid):

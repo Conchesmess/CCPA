@@ -21,6 +21,9 @@ class College (Document):
     lat = FloatField()
     lon = FloatField()
     locale = StringField()
+    web = URLField()
+    pubpriv = StringField()
+    degree = StringField()
 
 class CollegeEnrollment(Document):
     college = ReferenceField('College')
