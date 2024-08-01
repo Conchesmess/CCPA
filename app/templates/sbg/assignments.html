@@ -22,7 +22,13 @@
                 <a target="_blank" href="{{ass.alternateLink}}"><img src="/static/google.png" width="10"></a>
             </td>
             <td>{{ass.workType}}</td>
-            <td>{{ass.dueDate.month}}/{{ass.dueDate.day}}/{{ass.dueDate.year}}</td>
+            <td>
+                {% if ass.dueDate %}
+                    {{ass.dueDate.month}}/{{ass.dueDate.day}}/{{ass.dueDate.year}}
+                {% else %}
+                    No Due Date
+                {% endif %}
+            </td>
             <td>{{ass.maxPoints}}</td>
         </tr>
         {% endfor %}

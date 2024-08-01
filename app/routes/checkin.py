@@ -5,7 +5,7 @@ from flask import render_template, redirect, session, flash, url_for, request, M
 from app.classes.data import User, CheckIn, Help, Token, Settings
 from app.classes.gclassroom import GEnrollment, GoogleClassroom
 from app.classes.forms import BreakForm, CheckInForm, DateForm, StudentWasHereForm, BreakSettingsForm
-from .roster import getCourseWork
+from .sbg import getCourseWork
 from datetime import datetime as dt
 from datetime import timedelta
 from zoneinfo import ZoneInfo

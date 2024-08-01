@@ -13,6 +13,99 @@ from .scopes import scopes_ousd
 from .users import credentials_to_dict
 from flask_login import current_user
 import pandas as pd
+from datetime import datetime as dt
+
+
+# This function retreives all the assignments from Google and stores them in a dictionary
+# field on the GoogleClassroom record in the database. 
+def getCourseWork(gclassid):
+    pageToken = None
+    assignmentsAll = {}
+    assignmentsAll['courseWork'] = []
+    if not "credentials" in session:
+        return redirect('/authorize')    
+    elif not google.oauth2.credentials.Credentials(**session['credentials']).valid:
+        return redirect('/authorize')
+    else:
+        credentials = google.oauth2.credentials.Credentials(**session['credentials'])  
+    
+    session['credentials'] = credentials_to_dict(credentials)
+    classroom_service = googleapiclient.discovery.build('classroom', 'v1', credentials=credentials)
+    try:
+        topics = classroom_service.courses().topics().list(
+            courseId=gclassid
+            ).execute()
+    except RefreshError:
+        return "refresh"
+    except Exception as error:
+        x, y = error.args     # unpack args
+        if isinstance(y, bytes):
+            y = y.decode("UTF-8")
+        errorDict = ast.literal_eval(y)
+        if errorDict['error'] == 'invalid_grant':
+            flash('Your login has expired. You need to re-login.')
+            return "refresh"
+        elif errorDict['error']['status'] == "PERMISSION_DENIED":
+            flash("You do not have permission to get assignments from Google for this class.")
+            return "refresh"
+        else:
+            flash(f"Got unknown Error: {errorDict}")
+            return False
+    try:
+        topics = topics['topic']
+    except:
+        topics = None
+
+    # Topic dictionary
+    # [{'courseId': '450501150888', 'topicId': '487477497511', 'name': 'Dual Enrollment', 'updateTime': '2022-05-20T20:55:41.926Z'}, {...}]
+
+    # TODO get all assignments and add as dict to gclassroom record
+    while True:
+        try:
+            assignments = classroom_service.courses().courseWork().list(
+                    courseId=gclassid,
+                    pageToken=pageToken,
+                    ).execute()
+        except RefreshError:
+            return "refresh"
+        except Exception as error:
+            x, y = error.args     # unpack args
+            if isinstance(y, bytes):
+                y = y.decode("UTF-8")
+            errorDict = ast.literal_eval(y)
+            if errorDict['error'] == 'invalid_grant':
+                flash('Your login has expired. You need to re-login.')
+                return "refresh"
+            elif errorDict['error']['status'] == "PERMISSION_DENIED":
+                return "refresh"
+            else:
+                flash(f"Got unknown Error: {errorDict}")
+                return False
+
+        try: 
+            assignmentsAll['courseWork'].extend(assignments['courseWork'])
+        except (KeyError,UnboundLocalError):
+            break
+        else:
+            pageToken = assignments.get('nextPageToken')
+            if pageToken == None:
+                break
+
+    for ass in assignmentsAll['courseWork']:
+        if topics:
+            for topic in topics:
+                try:
+                    ass['topicId']
+                except:
+                    ass['topicId'] = None
+                if topic['topicId'] == ass['topicId']:
+                    ass['topic'] = topic['name']
+                    break
+
+        
+    gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
+    gclassroom.update(courseworkdict = assignmentsAll, courseworkupdate = dt.utcnow())
+    return assignmentsAll
 
 # this function exists to update or create active google classrooms for the current user
 # Teacher or student

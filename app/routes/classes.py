@@ -13,7 +13,7 @@ import google.oauth2.credentials
 import googleapiclient.discovery
 from google.auth.exceptions import RefreshError
 import datetime as dt
-from .roster import getCourseWork
+from .sbg import getCourseWork
 import pandas as pd
 import numpy as np
 from bson.objectid import ObjectId
@@ -422,7 +422,7 @@ def ontimeperc(gclassid):
             pass
 
         return c
-
+    # TODO this should count grade history NOT submission history
     subsDF['iterations'] = subsDF['submissionHistory'].apply(lambda row: countIters(row))
     subsDF = subsDF.drop(['submissionHistory'], axis=1)
     subsDF = pd.pivot_table(data=subsDF,index='title',columns="iterations",values='id',aggfunc='count')
@@ -524,7 +524,13 @@ def getStudSubs(gclassid,courseWorkId="-"):
         flash('Had to reauthorize your Google credentials.')
         return "refresh"
     session['credentials'] = credentials_to_dict(credentials)
-    classroom_service = googleapiclient.discovery.build('classroom', 'v1', credentials=credentials)
+    classroom_service = googleapiclient.discovery.build(
+        'classroom', 
+        'v1', 
+        credentials=credentials,
+        discoveryServiceUrl='https://classroom.googleapis.com/$discovery/rest?labels=V1_20231110_PREVIEW&key=AIzaSyDz4K5HXeFqHzAFjhDNaXoogrSxo6x7ZHY'
+    )
+    #DEVELOPER_PREVIEW
     studSubsAll = []
     pageToken=None
     counter=1
@@ -576,7 +582,10 @@ def getstudsubs(gclassid,courseWorkId="-"):
     if studSubsAll == "refresh":
         return redirect(url_for('authorize'))
 
+    flash(studSubsAll['studsubs'])
+
     return redirect(url)
+
 
 ## Replicated in sbg.py as gclasslist
 # this function exists to update the stored values for one or more google classrooms
