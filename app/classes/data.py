@@ -657,10 +657,17 @@ class GEnrollment(Document):
     mysubmissions = DictField()
     myassignments = DictField()
 
+class StandardLevel(EmbeddedDocument):
+    level = IntField()
+    name = StringField()
+    desc = StringField()
+
 class Standard(Document):
     name = StringField(required=True)
     desc = StringField(required=True)
     gclass = ReferenceField('GoogleClassroom', required=True, unique_with='name')
+    levels = EmbeddedDocumentListField('StandardLevel')
+    courseWorkIDs = ListField()
     meta = {
         'ordering': ['+name']
     }

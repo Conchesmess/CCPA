@@ -8,9 +8,9 @@ Flask_Login~=0.6.2
 Flask_Security~=3.0.0
 Jinja2~=3.1.2
 google_api_python_client~=2.97.0
-google-auth~=2.22.0
-google-auth-httplib2~=0.1.0
-google-auth-oauthlib~=0.4.1
+google-auth~=2.32.0
+google-auth-httplib2~=0.2.0
+google-auth-oauthlib~=1.2.1
 # Only needed for running on Google Cloud Run. Does not need to be installed locally.
 gunicorn~=21.2.0 
 # Blows up on google Cloud sometimes
