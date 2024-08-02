@@ -279,7 +279,7 @@ def ontimeperc(gclassid):
         subsDF['late']
     except KeyError:
         subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory']]
-        subsDF['late']="False"
+        subsDF['late']=""
     else:
         subsDF = subsDF[['userId', 'courseId', 'courseWorkId', 'creationTime', 'updateTime', 'state', 'alternateLink', 'courseWorkType', 'assignmentSubmission', 'submissionHistory', 'late']]
 
@@ -427,7 +427,7 @@ def ontimeperc(gclassid):
         try:
             for item in row:
                 try:
-                    if item['stateHistory']['state'] == 'RETURNED':
+                    if item['gradeHistory']['gradeChangeType'] == "ASSIGNED_GRADE_POINTS_EARNED_CHANGE":
                         c = c+1
                 except:
                     pass
