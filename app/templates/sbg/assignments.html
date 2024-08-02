@@ -33,10 +33,17 @@
             <td>
                 {% if ass.rubric %}
                     {% for criteria in ass['rubric']['criteria'] %}
-                        <br><b>{{criteria['title']}}</b><br>
-                        {% for level in criteria.levels%}
-                            {{level.title}}({{level.points}}): {{level.description}}; 
-                        {% endfor %}
+                        {% if criteria['title'][:3] == "<s>" %}
+                            <b>Standard Assessed: {{criteria['title'][4:]}}</b><br>
+                            {% for level in criteria.levels%}
+                                 {{level.description}} <br>
+                            {% endfor %}
+                        {% else %}
+                            <b>Rubric Criteria: {{criteria['title']}}</b><br>
+                            {% for level in criteria.levels%}
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>{{level.title}}({{level['points']}}):</b> {{level.description}} <br>
+                            {% endfor %}
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             </td>

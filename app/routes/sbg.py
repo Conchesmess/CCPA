@@ -129,26 +129,26 @@ def getCourseWork(gclassid):
     gclassroom.update(courseworkdict = assignmentsAll, courseworkupdate = dt.utcnow())
     return assignmentsAll
 
-# TODO for a gClass, list all assignments with a rubrics that have standards
-# Done: added to assignment list
+# Standards
+# Standards come from rubrics in Google Classroom. A rubric criteria that begins with <S> is a standard. Yu have to add the <s> 
+# to the criteria in Google Classroom
 
-
-# TODO from the list of assignments with a rubric with standards click to see students with met standards for that assignment
-# create link on assignment list page
-@app.route('/standards/scores/<gclassid>/<courseworkid>')
-def standards_scores(gclassid,courseworkid):
-    pass
-
-# TODO standards met for a student in a class
+# TODO standards met for all students in a class
 # save in GEnrollment?
-@app.route('/rubrics/scores/student/')
-def standards_scores_student():
+@app.route('/rubrics/scores/students/<gclassid>')
+def standards_scores_students():
     pass
 
 # TODO for a gClass list all intended standards
 # do this one last
 @app.route('/standards/list/<gclassid>')
 def standards_list(gclassid):
+    pass
+
+# TODO from the list of assignments with a rubric with standards click to see all students with met standards for that assignment
+# create link on assignment list page
+@app.route('/standards/scores/<gclassid>/<courseworkid>')
+def standards_scores(gclassid,courseworkid):
     pass
 
 # this function exists to update or create active google classrooms for the current user

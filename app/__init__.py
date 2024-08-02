@@ -17,6 +17,8 @@ app.jinja_env.add_extension('jinja2.ext.do')
 app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") # or os.urandom(20)
 # you must change the next line to be link to your database at mongodb.com
 connect("ccpa", host=f"{os.environ.get('mongodb_host')}/ccpa?retryWrites=true&w=majority", tlsCAFile=ca)
+#connect("ccpa", host=f"{os.environ.get('mongodb_host')}/ccpa?retryWrites=true&w=majority", tls=True, tlsCertificateKeyFile="combined.pem")
+
 # Sandbox DB
 # connect("otdatasb", host=f"{os.environ.get('mongodb_host')}/otdatasb?retryWrites=true&w=majority")
 

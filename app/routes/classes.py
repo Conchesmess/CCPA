@@ -564,8 +564,13 @@ def getStudSubs(gclassid,courseWorkId="-"):
         except Exception as error:
             flash(f'Unknown error: {error}')
             return "Refresh"
-
-        studSubsAll.extend(studSubs['studentSubmissions'])
+        try:
+            studSubs['studentSubmissions']
+        except:
+            flash('This class has no graded assignments yet.')
+            return redirect(url_for('index'))
+        else:
+            studSubsAll.extend(studSubs['studentSubmissions'])
         pageToken = studSubs.get('nextPageToken')
         counter=counter+1
         if not pageToken:
