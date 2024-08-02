@@ -13,7 +13,7 @@
 
 
     <table class="table">
-        <tr><th>Topic</th><th>Assignment</th><th>Type</th><th>due date</th><th>points</th></tr>
+        <tr><th>Topic</th><th>Assignment</th><th>Type</th><th>due date</th><th>points</th><th>Standards</th></tr>
         {% for ass in assesDict %}
         <tr>
             <td>{{ass.topic}}</td>
@@ -30,6 +30,16 @@
                 {% endif %}
             </td>
             <td>{{ass.maxPoints}}</td>
+            <td>
+                {% if ass.rubric %}
+                    {% for criteria in ass['rubric']['criteria'] %}
+                        <br><b>{{criteria['title']}}</b><br>
+                        {% for level in criteria.levels%}
+                            {{level.title}}({{level.points}}): {{level.description}}; 
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>

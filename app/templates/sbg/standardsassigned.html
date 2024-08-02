@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<!-- Available variables: asses, gClass -->
+    <h1>Rubric for <a href="/gclass/{{gClass.gclassid}}">{{gClass.gclassdict.name}}</a></h1>
+    {% if current_user.role.lower() == "teacher" %}<a href="/getstudsubs/{{gClass.gclassid}}?{{request.environ.PATH_INFO}}">Update Assignments</a> <br>{% endif %}
+
+    {% for ass in gClass.courseworkdict['courseWork']%}
+        <h3>{{ass['title']}}</h3>
+        {% for criteria in ass['rubric']['criteria'] %}
+            <b>{{criteria['title']}}</b><br>
+            {% for level in criteria.levels%}
+                {{level.title}}({{level.points}}): {{level.description}} <br> <br>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+
+    <!-- # for ass in gclassroom.courseworkdict['courseWork']:
+    #     try:
+    #         gclassroom.courseworkdict['courseWork']
+    #     except KeyError:
+    #         pass
+    #     else:
+    #         flash(f"{ass['title']}")
+    #         for item in ass['rubric']['criteria']:
+    #             flash(item['title'])
+    #             for level in item['levels']:
+    #                 flash(level)
+     -->
+{% endblock %}

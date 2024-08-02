@@ -30,7 +30,12 @@ def getCourseWork(gclassid):
         credentials = google.oauth2.credentials.Credentials(**session['credentials'])  
     
     session['credentials'] = credentials_to_dict(credentials)
-    classroom_service = googleapiclient.discovery.build('classroom', 'v1', credentials=credentials)
+    classroom_service = googleapiclient.discovery.build(
+            'classroom', 
+            'v1', 
+            credentials=credentials, 
+            discoveryServiceUrl='https://classroom.googleapis.com/$discovery/rest?labels=DEVELOPER_PREVIEW&key=AIzaSyDz4K5HXeFqHzAFjhDNaXoogrSxo6x7ZHY'
+        )
     try:
         topics = classroom_service.courses().topics().list(
             courseId=gclassid
@@ -93,7 +98,7 @@ def getCourseWork(gclassid):
 
     for ass in assignmentsAll['courseWork']:
         if topics:
-            for topic in topics:
+            for i,topic in enumerate(topics):
                 try:
                     ass['topicId']
                 except:
@@ -101,11 +106,50 @@ def getCourseWork(gclassid):
                 if topic['topicId'] == ass['topicId']:
                     ass['topic'] = topic['name']
                     break
+        try:
+            # Using list because there is always only one rubric per assignment 
+            response = classroom_service.courses().courseWork().rubrics().list(
+                    courseId=gclassid, 
+                    courseWorkId=ass['id'],
+                    # Specify the preview version. Rubrics CRUD capabilities are
+                    # supported in V1_20231110_PREVIEW and later.
+                    previewVersion="V1_20231110_PREVIEW"
+                ).execute()
 
-        
+            rubrics = response.get("rubrics", [])
+            if not rubrics:
+                ass['rubric'] = None
+            else:
+                ass['rubric'] = rubrics[0]
+
+        except Exception as error:
+            flash(f"An error occurred: {error}")
+                            
     gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
     gclassroom.update(courseworkdict = assignmentsAll, courseworkupdate = dt.utcnow())
     return assignmentsAll
+
+# TODO for a gClass, list all assignments with a rubrics that have standards
+# Done: added to assignment list
+
+
+# TODO from the list of assignments with a rubric with standards click to see students with met standards for that assignment
+# create link on assignment list page
+@app.route('/standards/scores/<gclassid>/<courseworkid>')
+def standards_scores(gclassid,courseworkid):
+    pass
+
+# TODO standards met for a student in a class
+# save in GEnrollment?
+@app.route('/rubrics/scores/student/')
+def standards_scores_student():
+    pass
+
+# TODO for a gClass list all intended standards
+# do this one last
+@app.route('/standards/list/<gclassid>')
+def standards_list(gclassid):
+    pass
 
 # this function exists to update or create active google classrooms for the current user
 # Teacher or student

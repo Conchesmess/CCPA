@@ -537,13 +537,14 @@ def getStudSubs(gclassid,courseWorkId="-"):
         flash('Had to reauthorize your Google credentials.')
         return "refresh"
     session['credentials'] = credentials_to_dict(credentials)
+    # Rubric instructions with dev preview
+    # https://developers.google.com/classroom/rubrics/getting-started
     classroom_service = googleapiclient.discovery.build(
-        'classroom', 
-        'v1', 
-        credentials=credentials,
-        discoveryServiceUrl='https://classroom.googleapis.com/$discovery/rest?labels=V1_20231110_PREVIEW&key=AIzaSyDz4K5HXeFqHzAFjhDNaXoogrSxo6x7ZHY'
-    )
-    #DEVELOPER_PREVIEW
+            'classroom', 
+            'v1', 
+            credentials=credentials,
+            discoveryServiceUrl='https://classroom.googleapis.com/$discovery/rest?labels=DEVELOPER_PREVIEW&key=AIzaSyDz4K5HXeFqHzAFjhDNaXoogrSxo6x7ZHY'
+        )
     studSubsAll = []
     pageToken=None
     counter=1
@@ -553,7 +554,8 @@ def getStudSubs(gclassid,courseWorkId="-"):
                 courseId=gclassid,
                 #states=['TURNED_IN','RETURNED','RECLAIMED_BY_STUDENT'],
                 courseWorkId=courseWorkId,
-                pageToken=pageToken
+                pageToken=pageToken,
+                previewVersion="V1_20231110_PREVIEW"
                 ).execute()
         except RefreshError:
             flash('Had to reauthorize your Google credentials.')
@@ -594,8 +596,6 @@ def getstudsubs(gclassid,courseWorkId="-"):
     studSubsAll = getStudSubs(gclassid,courseWorkId)
     if studSubsAll == "refresh":
         return redirect(url_for('authorize'))
-
-    flash(studSubsAll['studsubs'])
 
     return redirect(url)
 
