@@ -11,4 +11,4 @@ gcloud projects list <br>
 gcloud config set project ccpa-394520 <br>
 gcloud config set run/region us-west1 <br>
 <!--Deploy current directory with settings set from above commands-->
-gcloud run deploy
+gcloud run deploy --source .
