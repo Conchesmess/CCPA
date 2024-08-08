@@ -81,7 +81,7 @@ def transcript(aid=None):
             aid = current_user.aeriesid
         else:
             flash("You don't have a transcript in the system.  You can make one!")
-            return redirect(url_for('transcriptnew'))
+            return redirect(url_for('transcriptNew'))
 
     try:
         student=User.objects.get(aeriesid=aid)
