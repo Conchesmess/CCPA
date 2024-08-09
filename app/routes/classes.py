@@ -309,7 +309,8 @@ def ontimeperc(gclassid):
                     how ='inner')
     gbDF.fillna('', inplace=True)
     gbDF['late'] = gbDF['late'].astype('bool')
-    gbDF = pd.pivot_table(data=gbDF,index=['email'],aggfunc={'late':np.sum,'email':len})
+    #gbDF = pd.pivot_table(data=gbDF,index=['email'],aggfunc={'late':np.sum,'email':len})
+    gbDF = pd.pivot_table(data=gbDF,index=['email'],aggfunc={'late':'sum','email':len})
     gbDF['On Time %'] = 100-(gbDF['late'] / gbDF['email'] * 100)
     gbDF.rename(columns={"email": "total"}, inplace=True)
     gbDF = gbDF.sort_values(by=['On Time %'], ascending=False)
@@ -510,7 +511,7 @@ def ontimeperc(gclassid):
         url = subsStuDF.pop("url")
         subsStuDF.insert(1, url.name, url)   
         subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
-        subsStuDF.fillna("-", inplace=True)
+        subsStuDF.fillna(0, inplace=True)
 
         subsStuDFHTML = subsStuDF.style\
             .format(precision=0)\
@@ -593,6 +594,7 @@ def getStudSubs(gclassid,courseWorkId="-"):
 @app.route('/getstudsubs/<gclassid>')
 def getstudsubs(gclassid,courseWorkId="-"):
     url = request.environ['QUERY_STRING']
+    print(url)
     courseWork = getCourseWork(gclassid)
     if courseWork == "refresh":
         return redirect(url_for('authorize'))

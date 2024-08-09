@@ -151,6 +151,22 @@ def standards_list(gclassid):
 def standards_scores(gclassid,courseworkid):
     pass
 
+# TODO find all astudsubs for a student in a class
+@app.route('/studsubs/student/<gclassid>/<studentid>')
+def studsubsstudent(gclassid,studentid):
+    stu = User.objects.get(gid=studentid)
+    gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
+    allstudsubs = gclassroom.studsubsdict['studsubs']
+    studsubs = []
+    for subid in allstudsubs:
+        sub = allstudsubs[subid]
+        if sub['userId'] == studentid:
+             studsubs.append(sub)
+    coursework=gclassroom.courseworkdict['courseWork']
+
+    return render_template('sbg/studentsubs.html',studsubs=studsubs,stu=stu)
+
+
 # this function exists to update or create active google classrooms for the current user
 # Teacher or student
 @app.route('/getgclasses')
