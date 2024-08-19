@@ -8,7 +8,7 @@ from app.classes.coursecatalog import Courses
 from app.classes.gclassroom import GoogleClassroom, GEnrollment, CourseWork
 from app.classes.forms import SimpleForm, SortOrderCohortForm
 from datetime import datetime as dt
-from mongoengine.errors import NotUniqueError
+from mongoengine.errors import NotUniqueError, DoesNotExist
 import google.oauth2.credentials
 import googleapiclient.discovery
 from google.auth.exceptions import RefreshError
@@ -111,7 +111,7 @@ def getroster(gclassid,index=0):
         try:
             # see if they are in OTData
             otdstu = User.objects.get(oemail=stu['profile']['emailAddress'])
-        except mongoengine.errors.DoesNotExist as error:
+        except DoesNotExist as error:
             # session['missingStus'].append(f"{stu['profile']['name']['fullName']}'s email is not in OTData.")
 
             newStu = User(
