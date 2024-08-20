@@ -286,7 +286,7 @@ def ontimeperc(gclassid):
 
     dictfordf = {}
     for row in enrollments:
-        newRow = {'userId':row['owner']['gid'],'fname':row['owner']['fname'],'lname':row['owner']['lname'],'email':row['owner']['oemail']}
+        newRow = {'sortCohort':row['sortCohort'],'userId':row['owner']['gid'],'fname':row['owner']['fname'],'lname':row['owner']['lname'],'email':row['owner']['oemail']}
         dictfordf[row['owner']['id']] = newRow
 
     stusDF = pd.DataFrame.from_dict(dictfordf, orient='index')
@@ -502,6 +502,11 @@ def ontimeperc(gclassid):
                 pass
         rosterDF['name'] = rosterDF['profile'].apply(lambda row: nameFromDict(row))
         rosterDF = rosterDF.drop(['profile','courseId'], axis=1)
+        sortCohortDF = stusDF[['userId','sortCohort']].copy()
+        rosterDF = pd.merge(rosterDF,
+                    sortCohortDF,
+                    on='userId',
+                    how='left')
         subsStuDF = pd.merge(subsStuDF, 
                     rosterDF, 
                     on ='userId', 
