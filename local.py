@@ -2,6 +2,7 @@
 from app import app
 import os
 import nltk
+from flask import session
 
 if __name__ == "__main__":
     
