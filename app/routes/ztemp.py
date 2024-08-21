@@ -104,6 +104,7 @@ def addadvisors():
 
 @app.route("/importusers")
 def importusers():
+    # Aeries Query: LIST STU FN LN ID NID GN GR CY ST ZC AD PG PEM FK TL FW MW 
     stusDF = pd.read_csv('./app/static/csv/CCPAAllStus.csv', quotechar='"')
     stusDict = stusDF.to_dict('index')
     num = len(stusDict)
@@ -131,7 +132,7 @@ def importusers():
                 azipcode = row['azipcode'],
                 agender = row['agender'],
                 afamkey = row['afamkey'],
-                grade = row['agrade']
+                grade = row['grade']
             )
             stu.save()
         else:
@@ -152,7 +153,7 @@ def importusers():
                 azipcode = row['azipcode'],
                 agender = row['agender'],
                 afamkey = row['afamkey'],
-                grade = row['agrade']
+                grade = row['grade']
             )
     
     return render_template("index.html")

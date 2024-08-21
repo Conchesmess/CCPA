@@ -267,8 +267,12 @@ def gclass(gclassid):
 @app.route('/gclass/assignments/<gclassid>')
 def gClassAssignments(gclassid):
     gClassroom = GoogleClassroom.objects.get(gclassid=gclassid)
-    assesDict = gClassroom.courseworkdict['courseWork']
-    assesDict = sorted(assesDict, key = lambda i: (i['title']))
+    try:
+        assesDict = gClassroom.courseworkdict['courseWork']
+    except:
+        assesDict={}
+    else:
+        assesDict = sorted(assesDict, key = lambda i: (i['title']))
 
     return render_template('sbg/assignments.html', gClass=gClassroom, assesDict = assesDict)
 

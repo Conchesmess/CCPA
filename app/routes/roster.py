@@ -31,10 +31,15 @@ def roster(gclassid, sort="cohort"):
 
     otdstus = []
     for enrollment in enrollments:
-        if enrollment.owner.role.lower() == 'student' and enrollment.owner.lname and enrollment.owner.fname:
-            otdstus.append(enrollment)
-        elif enrollment.owner.role.lower() == 'student':
-            flash(f"Something's wrong with this students record so they were not included in the roster.: {enrollment.owner.oemail}")
+        try:
+            enrollment.owner.role.lower()
+        except:
+            enrollment.delete()
+        else:
+            if enrollment.owner.role.lower() == 'student' and enrollment.owner.lname and enrollment.owner.fname:
+                otdstus.append(enrollment)
+            elif enrollment.owner.role.lower() == 'student':
+                flash(f"Something's wrong with this students record so they were not included in the roster.: {enrollment.owner.oemail}")
     if sort == "cohort":
         try:
             otdstus = sorted(otdstus, key = lambda i: (i.sortCohort,i.owner.lname,i.owner.fname))
