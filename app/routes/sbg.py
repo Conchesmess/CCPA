@@ -152,11 +152,14 @@ def standards_scores(gclassid,courseworkid):
     pass
 
 # TODO find all astudsubs for a student in a class
-@app.route('/studsubs/student/<gclassid>/<studentid>')
-def studsubsstudent(gclassid,studentid):
-    stu = User.objects.get(gid=studentid)
+@app.route('/studsubs/student/<gclassid>/<oemail>/<studentid>')
+def studsubsstudent(gclassid,oemail,studentid):
+    stu = User.objects.get(oemail=oemail)
     gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
-    allstudsubs = gclassroom.studsubsdict['studsubs']
+    try:
+        allstudsubs = gclassroom.studsubsdict['studsubs']
+    except:
+        allstudsubs = {}
     studsubs = []
     for subid in allstudsubs:
         sub = allstudsubs[subid]

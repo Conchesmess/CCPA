@@ -116,6 +116,10 @@ def getroster(gclassid,index=0):
         try:
             # see if they are in OTData
             otdstu = User.objects.get(oemail=stu['profile']['emailAddress'])
+            
+            if not otdstu.gid:
+                otdstu.update(gid=stu['profile']['id'])
+                
         except DoesNotExist as error:
             # session['missingStus'].append(f"{stu['profile']['name']['fullName']}'s email is not in OTData.")
 

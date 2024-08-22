@@ -502,15 +502,19 @@ def ontimeperc(gclassid):
                 pass
         rosterDF['name'] = rosterDF['profile'].apply(lambda row: nameFromDict(row))
         rosterDF = rosterDF.drop(['profile','courseId'], axis=1)
+
         sortCohortDF = stusDF[['userId','sortCohort']].copy()
+
         rosterDF = pd.merge(rosterDF,
                     sortCohortDF,
                     on='userId',
                     how='left')
+
         subsStuDF = pd.merge(subsStuDF, 
                     rosterDF, 
                     on ='userId', 
                     how ='left')
+
         subsStuDF['userId'] = subsStuDF['name']
         subsStuDF.drop(['name'],axis=1,inplace=True)
         url = subsStuDF.pop("url")
@@ -598,9 +602,11 @@ def getStudSubs(gclassid,courseWorkId="-"):
 @app.route('/getstudsubs/<gclassid>/<courseWorkId>')
 @app.route('/getstudsubs/<gclassid>')
 def getstudsubs(gclassid,courseWorkId="-"):
+
     url = request.environ['QUERY_STRING']
-    print(url)
+    
     courseWork = getCourseWork(gclassid)
+
     if courseWork == "refresh":
         return redirect(url_for('authorize'))
     elif courseWork == False:
