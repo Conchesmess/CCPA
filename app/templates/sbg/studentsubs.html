@@ -4,10 +4,8 @@
 
 {{stu.fname}} {{stu.lname}}<br><br>
 
-{% for sub in studsubs %}
-    {% for item in sub %}
-        {{item}}: {{sub[item]}} <br><br>
-    {% endfor %}
-{% endfor %}
+{{coursework}}
+
+{{studsubs}}
 
 {% endblock %}

@@ -165,9 +165,43 @@ def studsubsstudent(gclassid,oemail,studentid):
         sub = allstudsubs[subid]
         if sub['userId'] == studentid:
              studsubs.append(sub)
-    coursework=gclassroom.courseworkdict['courseWork']
 
-    return render_template('sbg/studentsubs.html',studsubs=studsubs,stu=stu)
+    studSubsDF = pd.DataFrame(studsubs)
+    studSubsDFHTML = studSubsDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:100px'},\
+            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    studSubsDFHTML = Markup(studSubsDFHTML)
+
+
+    coursework=gclassroom.courseworkdict['courseWork']
+    cworkDF = pd.DataFrame(coursework)
+    def link_to_title(row):
+        return '<a href="'+row["alternateLink"]+'">'+row["title"]+'</a>'
+
+    cworkDF['title'] = cworkDF.apply(link_to_title, axis=1)
+
+    cworkDF.drop(['courseId','dueTime','assigneeMode','alternateLink','materials','creationTime','updateTime','workType','submissionModificationMode','assignment','creatorUserId','topicId'],axis=1,inplace=True)
+    cworkDFHTML = cworkDF.style\
+        .format(precision=0)\
+        .set_table_styles([
+            {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
+            {'selector': 'thead','props': 'height:100px'},\
+            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
+        .set_table_attributes('class="table table-sm"')  \
+        .set_sticky(axis="columns",levels=0)\
+        .hide(axis='index')\
+        .to_html()
+    #cworkDFHTML = cworkDF.to_html()
+    cworkDFHTML = Markup(cworkDFHTML)
+
+    return render_template('sbg/studentsubs.html',studsubs=studSubsDFHTML,stu=stu,coursework=cworkDFHTML)
 
 
 # this function exists to update or create active google classrooms for the current user
