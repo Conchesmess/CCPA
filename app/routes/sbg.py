@@ -204,6 +204,7 @@ def studsubsstudent(gclassid,oemail,studentid):
     studSubsDF['gradeCategory'] = studSubsDF.apply(grade_category, axis=1)
 
     def submission_history(row):
+        format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
         gradeHistories=""
         for sub in row['submissionHistory']:
             try:
@@ -212,7 +213,12 @@ def studsubsstudent(gclassid,oemail,studentid):
                 pass
             else:
                 if sub['gradeHistory']['gradeChangeType'] == 'ASSIGNED_GRADE_POINTS_EARNED_CHANGE':
-                    gradeHistories=f"{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']}</br>"
+                    timestamp_string = sub['gradeHistory']['gradeTimestamp']
+                    datetime_object = dt.strptime(timestamp_string, format_string)
+                    try:
+                        gradeHistories=f"<small>{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</small></br>"
+                    except:
+                        gradeHistories=f"{gradeHistories}-/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</br>"
         return gradeHistories
     studSubsDF['submissionHistory'] = studSubsDF.apply(submission_history,axis=1)
     
