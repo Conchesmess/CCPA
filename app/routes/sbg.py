@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 import google.oauth2.credentials
 import googleapiclient.discovery
 from google.auth.exceptions import RefreshError
-import google_auth_oauthlib.flow   
+import google_auth_oauthlib.flow
 from .credentials import GOOGLE_CLIENT_CONFIG
 from .scopes import scopes_ousd
 from .users import credentials_to_dict
@@ -17,23 +17,23 @@ from datetime import datetime as dt
 
 
 # This function retreives all the assignments from Google and stores them in a dictionary
-# field on the GoogleClassroom record in the database. 
+# field on the GoogleClassroom record in the database.
 def getCourseWork(gclassid):
     pageToken = None
     assignmentsAll = {}
     assignmentsAll['courseWork'] = []
     if not "credentials" in session:
-        return redirect('/authorize')    
+        return redirect('/authorize')
     elif not google.oauth2.credentials.Credentials(**session['credentials']).valid:
         return redirect('/authorize')
     else:
-        credentials = google.oauth2.credentials.Credentials(**session['credentials'])  
-    
+        credentials = google.oauth2.credentials.Credentials(**session['credentials'])
+
     session['credentials'] = credentials_to_dict(credentials)
     classroom_service = googleapiclient.discovery.build(
-            'classroom', 
-            'v1', 
-            credentials=credentials, 
+            'classroom',
+            'v1',
+            credentials=credentials,
             discoveryServiceUrl='https://classroom.googleapis.com/$discovery/rest?labels=DEVELOPER_PREVIEW&key=AIzaSyDz4K5HXeFqHzAFjhDNaXoogrSxo6x7ZHY'
         )
     try:
@@ -87,7 +87,7 @@ def getCourseWork(gclassid):
                 flash(f"Got unknown Error: {errorDict}")
                 return False
 
-        try: 
+        try:
             assignmentsAll['courseWork'].extend(assignments['courseWork'])
         except (KeyError,UnboundLocalError):
             break
@@ -107,9 +107,9 @@ def getCourseWork(gclassid):
                     ass['topic'] = topic['name']
                     break
         try:
-            # Using list because there is always only one rubric per assignment 
+            # Using list because there is always only one rubric per assignment
             response = classroom_service.courses().courseWork().rubrics().list(
-                    courseId=gclassid, 
+                    courseId=gclassid,
                     courseWorkId=ass['id'],
                     # Specify the preview version. Rubrics CRUD capabilities are
                     # supported in V1_20231110_PREVIEW and later.
@@ -124,13 +124,13 @@ def getCourseWork(gclassid):
 
         except Exception as error:
             flash(f"An error occurred: {error}")
-                            
+
     gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
     gclassroom.update(courseworkdict = assignmentsAll, courseworkupdate = dt.utcnow())
     return assignmentsAll
 
 # Standards
-# Standards come from rubrics in Google Classroom. A rubric criteria that begins with <S> is a standard. Yu have to add the <s> 
+# Standards come from rubrics in Google Classroom. A rubric criteria that begins with <S> is a standard. Yu have to add the <s>
 # to the criteria in Google Classroom
 
 # TODO standards met for all students in a class
@@ -166,7 +166,58 @@ def studsubsstudent(gclassid,oemail,studentid):
         if sub['userId'] == studentid:
              studsubs.append(sub)
 
+    coursework=gclassroom.courseworkdict['courseWork']
+    cworkDF = pd.DataFrame(coursework)
+    def link_to_title(row):
+        return '<a href="'+row["alternateLink"]+'">'+row["title"]+'</a>'
+
+    cworkDF['title'] = cworkDF.apply(link_to_title, axis=1)
+
+    cworkDF.rename(columns={"id": "courseWorkId"}, inplace=True)
+
     studSubsDF = pd.DataFrame(studsubs)
+    studSubsDF.drop(['courseId','id','userId','creationTime','updateTime','courseWorkType','previewVersion','draftGrade'],axis=1,inplace=True)
+
+    studSubsDF = pd.merge(cworkDF,
+                studSubsDF,
+                on ='courseWorkId',
+                how ='inner')
+
+    studSubsDF.drop(['courseId','assignment','state_x','assignmentSubmission','alternateLink_x','submissionModificationMode','courseWorkId','creationTime','updateTime','dueTime','workType','assigneeMode','creatorUserId','topicId','materials'],axis=1,inplace=True)
+    studSubsDF.rename(columns={'state_y':'state','alternateLink_y':'altLink'},inplace=True)
+
+    def link_to_state(row):
+        try:
+            return '<a href="'+row["altLink"]+'">'+row["state"]+'</a>'
+        except:
+            return row['state']
+    studSubsDF['state'] = studSubsDF.apply(link_to_state, axis=1)
+
+    studSubsDF.drop(['altLink'],axis=1,inplace=True)
+
+    def due_date(row):
+        return f"{row['dueDate']['month']}/{row['dueDate']['day']}/{row['dueDate']['year']}"
+    studSubsDF['dueDate'] = studSubsDF.apply(due_date, axis=1)
+
+    def grade_category(row):
+        return f"{row['gradeCategory']['name']}"
+    studSubsDF['gradeCategory'] = studSubsDF.apply(grade_category, axis=1)
+
+    def submission_history(row):
+        gradeHistories=""
+        for sub in row['submissionHistory']:
+            try:
+                sub['gradeHistory']
+            except:
+                pass
+            else:
+                if sub['gradeHistory']['gradeChangeType'] == 'ASSIGNED_GRADE_POINTS_EARNED_CHANGE':
+                    gradeHistories=f"{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']}</br>"
+        return gradeHistories
+    studSubsDF['submissionHistory'] = studSubsDF.apply(submission_history,axis=1)
+    
+
+
     studSubsDFHTML = studSubsDF.style\
         .format(precision=0)\
         .set_table_styles([
@@ -179,29 +230,7 @@ def studsubsstudent(gclassid,oemail,studentid):
         .to_html()
     studSubsDFHTML = Markup(studSubsDFHTML)
 
-
-    coursework=gclassroom.courseworkdict['courseWork']
-    cworkDF = pd.DataFrame(coursework)
-    def link_to_title(row):
-        return '<a href="'+row["alternateLink"]+'">'+row["title"]+'</a>'
-
-    cworkDF['title'] = cworkDF.apply(link_to_title, axis=1)
-
-    cworkDF.drop(['courseId','dueTime','assigneeMode','alternateLink','materials','creationTime','updateTime','workType','submissionModificationMode','assignment','creatorUserId','topicId'],axis=1,inplace=True)
-    cworkDFHTML = cworkDF.style\
-        .format(precision=0)\
-        .set_table_styles([
-            {'selector': 'tr:hover','props': 'background-color: #cccccc; font-size: 1em;'},\
-            {'selector': 'thead','props': 'height:100px'},\
-            {'selector': 'th','props': 'background-color: #CCCCCC !important'}], overwrite=False)\
-        .set_table_attributes('class="table table-sm"')  \
-        .set_sticky(axis="columns",levels=0)\
-        .hide(axis='index')\
-        .to_html()
-    #cworkDFHTML = cworkDF.to_html()
-    cworkDFHTML = Markup(cworkDFHTML)
-
-    return render_template('sbg/studentsubs.html',studsubs=studSubsDFHTML,stu=stu,coursework=cworkDFHTML)
+    return render_template('sbg/studentsubs.html',studsubs=studSubsDFHTML,stu=stu)
 
 
 # this function exists to update or create active google classrooms for the current user
@@ -288,7 +317,7 @@ def getgclasses():
             userEnrollment = GEnrollment.objects.get(owner = current_user, gclassroom = otdataGCourse)
         except:
             userEnrollment = GEnrollment(
-                owner = current_user, 
+                owner = current_user,
                 gclassroom = otdataGCourse)
             userEnrollment.save()
 

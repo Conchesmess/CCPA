@@ -388,6 +388,7 @@ def ontimeperc(gclassid):
     subsDF['courseWorkId'] = subsDF['title']
 
     subsDF.drop('title',axis=1,inplace=True)
+    
     subsDF = subsDF.rename(columns={'courseWorkId':'Title'})
     subsDF = subsDF.sort_values(by=['Title'])
     subsDFHTML = subsDF.style\
