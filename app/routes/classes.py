@@ -356,6 +356,7 @@ def ontimeperc(gclassid):
 
     subsDF = pd.DataFrame.from_dict(gClassroom.studsubsdict['studsubs'], orient='index')
     subsDF['state'] = subsDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+
     assesDDDF = assesDDDF[['courseWorkId','dueDate']]
 
     subsDF = pd.merge(subsDF, 
@@ -367,10 +368,14 @@ def ontimeperc(gclassid):
         if cell == "-":
             return "NOT DUE"
         else:
-            dateString = f"{cell['month']}/{cell['day']}/{cell['year']}"
-            dateObj = dt.strptime(dateString, '%m/%d/%Y')
-            if dt.today() < dateObj:
-                return "NOT DUE"
+            try:
+                dateString = f"{cell['month']}/{cell['day']}/{cell['year']}"
+            except:
+                dateString = None
+            else:
+                dateObj = dt.strptime(dateString, '%m/%d/%Y')
+                if dt.today() < dateObj:
+                    return "NOT DUE"
 
     subsDF['state'] = subsDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
     subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
@@ -478,9 +483,10 @@ def ontimeperc(gclassid):
                     assesDDDF, 
                     on ='courseWorkId', 
                     how ='left')
+        def print_state(row):
+            print(row['state'])
 
-        subsStuDF['state'] = subsStuDF.apply(lambda row: 'UNATTEMPTED' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
-
+        subsStuDF['state'] = subsStuDF.apply(lambda row: 'Unattempted <br> or Excused' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
         subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
         subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
         subsStuDF.reset_index(inplace=True)

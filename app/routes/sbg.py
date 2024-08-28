@@ -156,6 +156,7 @@ def standards_scores(gclassid,courseworkid):
 def studsubsstudent(gclassid,oemail,studentid):
     stu = User.objects.get(oemail=oemail)
     gclassroom = GoogleClassroom.objects.get(gclassid=gclassid)
+    class_name = gclassroom.gclassdict['name']
     try:
         allstudsubs = gclassroom.studsubsdict['studsubs']
     except:
@@ -174,6 +175,7 @@ def studsubsstudent(gclassid,oemail,studentid):
     cworkDF['title'] = cworkDF.apply(link_to_title, axis=1)
 
     cworkDF.rename(columns={"id": "courseWorkId"}, inplace=True)
+    cworkDF.drop(['description'],axis=1,inplace=True)
 
     studSubsDF = pd.DataFrame(studsubs)
     studSubsDF.drop(['courseId','id','userId','creationTime','updateTime','courseWorkType','previewVersion','draftGrade'],axis=1,inplace=True)
@@ -194,6 +196,38 @@ def studsubsstudent(gclassid,oemail,studentid):
     studSubsDF['state'] = studSubsDF.apply(link_to_state, axis=1)
 
     studSubsDF.drop(['altLink'],axis=1,inplace=True)
+
+    try:
+        studSubsDF['rubricId']
+    except KeyError:
+        pass
+    else:
+        studSubsDF.drop(['rubricId'],axis=1,inplace=True)
+        def rubric(row):
+            crits = ""
+            try:
+                row['rubric']['criteria']
+            except TypeError:
+                return "---"
+            else:
+                for crit in row['rubric']['criteria']:
+                    crits = crits + crit['title']
+                return crits
+        studSubsDF['rubric'] = studSubsDF.apply(rubric,axis=1)
+
+    try:
+        studSubsDF['assignedRubricGrades']
+    except KeyError:
+        pass
+    else:
+        studSubsDF.drop(['assignedRubricGrades'],axis=1,inplace=True)
+
+    try:
+        studSubsDF['draftRubricGrades']
+    except KeyError:
+        pass
+    else:
+        studSubsDF.drop(['draftRubricGrades'],axis=1,inplace=True)
 
     def due_date(row):
         return f"{row['dueDate']['month']}/{row['dueDate']['day']}/{row['dueDate']['year']}"
@@ -219,10 +253,35 @@ def studsubsstudent(gclassid,oemail,studentid):
                         gradeHistories=f"<small>{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</small></br>"
                     except:
                         gradeHistories=f"{gradeHistories}-/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</br>"
-        return gradeHistories
-    studSubsDF['submissionHistory'] = studSubsDF.apply(submission_history,axis=1)
-    
+        return (gradeHistories)
+    studSubsDF['gradeHistory'] = studSubsDF.apply(submission_history,axis=1)
 
+
+    def state_history(row):
+        format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+        for sub in row['submissionHistory']:
+            sub_date = "---"
+            try:
+                if sub['stateHistory']['state'] == 'TURNED_IN':
+                    timestamp_string = sub['stateHistory']['stateTimestamp']
+                    sub_date = dt.strptime(timestamp_string, format_string)
+                    sub_date = dt.date(sub_date)
+                    print(sub_date)
+                    break
+            except KeyError:
+                pass
+        return (sub_date)
+    studSubsDF['TurnedIn'] = studSubsDF.apply(state_history,axis=1)
+
+    
+    def assigned_grade(row):
+        if row['assignedGrade']>0:
+            return f"{row['assignedGrade']/row['maxPoints']:.0%}"
+        else:
+            return "---"
+    studSubsDF['grade'] = studSubsDF.apply(assigned_grade,axis=1)
+
+    studSubsDF.drop(['submissionHistory'],axis=1,inplace=True)
 
     studSubsDFHTML = studSubsDF.style\
         .format(precision=0)\
@@ -236,7 +295,7 @@ def studsubsstudent(gclassid,oemail,studentid):
         .to_html()
     studSubsDFHTML = Markup(studSubsDFHTML)
 
-    return render_template('sbg/studentsubs.html',studsubs=studSubsDFHTML,stu=stu)
+    return render_template('sbg/studentsubs.html',studsubs=studSubsDFHTML,stu=stu, class_name=class_name)
 
 
 # this function exists to update or create active google classrooms for the current user

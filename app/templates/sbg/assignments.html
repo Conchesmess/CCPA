@@ -10,10 +10,10 @@
     <!--
     {'courseId': '618635911405', 'id': '650090905047', 'title': 'Final Exam', 'materials': [{'driveFile': {'driveFile': {'id': '1s17W5JP5EbT42T89f7vSEadcGzuPj9qs', 'title': 'CIS6_Final.ipynb', 'alternateLink': 'https://colab.research.google.com/drive/1s17W5JP5EbT42T89f7vSEadcGzuPj9qs?ouid=118043475517321263044'}, 'shareMode': 'VIEW'}}], 'state': 'PUBLISHED', 'alternateLink': 'https://classroom.google.com/c/NjE4NjM1OTExNDA1/a/NjUwMDkwOTA1MDQ3/details', 'creationTime': '2023-12-19T21:30:47.247Z', 'updateTime': '2024-01-04T18:15:40.422Z', 'dueDate': {'year': 2023, 'month': 12, 'day': 20}, 'dueTime': {'hours': 7, 'minutes': 59}, 'maxPoints': 4, 'workType': 'ASSIGNMENT', 'submissionModificationMode': 'MODIFIABLE_UNTIL_TURNED_IN', 'assignment': {'studentWorkFolder': {'id': '1ls_SQP743XfL8z9NHFMPnPcT_tQxk_eIP2bWXj16Lgz87NvCHca8r68_iteHdrxJXG6BnTtO', 'title': 'Final Exam', 'alternateLink': 'https://drive.google.com/drive/folders/1ls_SQP743XfL8z9NHFMPnPcT_tQxk_eIP2bWXj16Lgz87NvCHca8r68_iteHdrxJXG6BnTtO'}}, 'assigneeMode': 'ALL_STUDENTS', 'creatorUserId': '118043475517321263044', 'topicId': '646272910575', 'gradeCategory': {'id': '619247960649', 'name': 'Apply', 'defaultGradeDenominator': 4}, 'topic': 'Final Exam'},
     -->
-
+    {# {{assesDict}} #}
 
     <table class="table">
-        <tr><th>Topic</th><th>Assignment</th><th>Type</th><th>due date</th><th>points</th><th>Standards</th></tr>
+        <tr><th>Topic</th><th>Assignment</th><th>Category</th><th>due date</th><th>Rubric Criteria</th><th>Standards</th></tr>
         {% for ass in assesDict %}
         <tr>
             <td>{{ass.topic}}</td>
@@ -21,7 +21,7 @@
                 {{ass.title}}
                 <a target="_blank" href="{{ass.alternateLink}}"><img src="/static/google.png" width="10"></a>
             </td>
-            <td>{{ass.workType}}</td>
+            <td>{{ass.gradeCategory['name']}}</td>
             <td>
                 {% if ass.dueDate %}
                     {{ass.dueDate.month}}/{{ass.dueDate.day}}/{{ass.dueDate.year}}
@@ -29,23 +29,26 @@
                     No Due Date
                 {% endif %}
             </td>
-            <td>{{ass.maxPoints}}</td>
             <td>
                 {% if ass.rubric %}
                     {% for criteria in ass['rubric']['criteria'] %}
-                        {% if criteria['title'][:3] == "<s>" %}
-                            <b>Standard Assessed: {{criteria['title'][4:]}}</b><br>
-                            {% for level in criteria.levels%}
-                                 {{level.description}} <br>
-                            {% endfor %}
-                        {% else %}
-                            <b>Rubric Criteria: {{criteria['title']}}</b><br>
-                            {% for level in criteria.levels%}
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>{{level.title}}({{level['points']}}):</b> {{level.description}} <br>
-                            {% endfor %}
+                        {% if criteria['title'][:3] != "<s>" %}
+                            <b>{{criteria['title']}}</b>,
                         {% endif %}
                     {% endfor %}
                 {% endif %}
+            </td>
+            <td>
+            {% if ass.rubric %}
+                {% for criteria in ass['rubric']['criteria'] %}
+                    {% if criteria['title'][:3] == "<s>" %}
+                        <b>Standard Assessed: {{criteria['title'][4:]}}</b><br>
+                        {% for level in criteria.levels%}
+                             {{level.description}} <br>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
             </td>
         </tr>
         {% endfor %}
