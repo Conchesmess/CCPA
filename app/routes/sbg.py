@@ -14,6 +14,7 @@ from .users import credentials_to_dict
 from flask_login import current_user
 import pandas as pd
 from datetime import datetime as dt
+import numpy as np
 
 
 # This function retreives all the assignments from Google and stores them in a dictionary
@@ -237,51 +238,81 @@ def studsubsstudent(gclassid,oemail,studentid):
         return f"{row['gradeCategory']['name']}"
     studSubsDF['gradeCategory'] = studSubsDF.apply(grade_category, axis=1)
 
+    studSubsDF['submissionHistory'] = studSubsDF['submissionHistory'].replace(np.nan, "")
+
     def submission_history(row):
         format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
         gradeHistories=""
-        for sub in row['submissionHistory']:
-            try:
-                sub['gradeHistory']
-            except:
-                pass
-            else:
-                if sub['gradeHistory']['gradeChangeType'] == 'ASSIGNED_GRADE_POINTS_EARNED_CHANGE':
-                    timestamp_string = sub['gradeHistory']['gradeTimestamp']
-                    datetime_object = dt.strptime(timestamp_string, format_string)
-                    try:
-                        gradeHistories=f"<small>{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</small></br>"
-                    except:
-                        gradeHistories=f"{gradeHistories}-/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</br>"
-        return (gradeHistories)
+        try:
+            row['submissionHistory']
+        except:
+            pass
+        else:
+            print(row['submissionHistory'])
+            for sub in row['submissionHistory']:
+                try:
+                    sub['gradeHistory']
+                except:
+                    pass
+                else:
+                    if sub['gradeHistory']['gradeChangeType'] == 'ASSIGNED_GRADE_POINTS_EARNED_CHANGE':
+                        timestamp_string = sub['gradeHistory']['gradeTimestamp']
+                        datetime_object = dt.strptime(timestamp_string, format_string)
+                        try:
+                            gradeHistories=f"<small>{gradeHistories}{sub['gradeHistory']['pointsEarned']}/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</small></br>"
+                        except:
+                            gradeHistories=f"{gradeHistories}-/{sub['gradeHistory']['maxPoints']} {dt.date(datetime_object)}</br>"
+            return (gradeHistories)
     studSubsDF['gradeHistory'] = studSubsDF.apply(submission_history,axis=1)
 
 
     def state_history(row):
         format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+        sub_date = "---"
+
         for sub in row['submissionHistory']:
-            sub_date = "---"
             try:
                 if sub['stateHistory']['state'] == 'TURNED_IN':
                     timestamp_string = sub['stateHistory']['stateTimestamp']
                     sub_date = dt.strptime(timestamp_string, format_string)
                     sub_date = dt.date(sub_date)
-                    print(sub_date)
                     break
             except KeyError:
-                pass
-        return (sub_date)
+                sub_date="---"
+        return sub_date
+
     studSubsDF['TurnedIn'] = studSubsDF.apply(state_history,axis=1)
 
+    def ontime(row):
+        try:
+            row['late']
+        except:
+            return '---'
+        else:
+            if row['late'] != True:
+                return '---'
+            else:
+                return 'Late'
+
+    studSubsDF['late'] = studSubsDF.apply(ontime,axis=1)
     
-    def assigned_grade(row):
+    def perc_grade(row):
         if row['assignedGrade']>0:
             return f"{row['assignedGrade']/row['maxPoints']:.0%}"
         else:
             return "---"
-    studSubsDF['grade'] = studSubsDF.apply(assigned_grade,axis=1)
+    studSubsDF['%'] = studSubsDF.apply(perc_grade,axis=1)
+
+    def assigned_grade(row):
+        if row['assignedGrade']>0:
+            return row['assignedGrade']
+        else:
+            return "---"
+    studSubsDF['assignedGrade'] = studSubsDF.apply(assigned_grade,axis=1)
 
     studSubsDF.drop(['submissionHistory'],axis=1,inplace=True)
+
+
 
     studSubsDFHTML = studSubsDF.style\
         .format(precision=0)\
