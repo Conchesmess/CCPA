@@ -6,7 +6,7 @@ from app import app
 import mongoengine.errors
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user
-from app.classes.data import require_role, Project, Milestone, ProjPost
+from app.classes.data import require_role, Project, Milestone, ProjPost, User
 from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
 from flask_login import login_required
 import datetime as dt
@@ -149,13 +149,15 @@ def projectList():
 @app.route('/project/delete/<pid>')
 @login_required
 def projectDelete(pid):
+
+
     try:
         projDel = Project.objects.get(pk=pid)
     except mongoengine.errors.DoesNotExist:
         flash("That project doesn't exist")
         return render_template('index.html')
 
-    if current_user not in projDel.contributors and projDel.owner != current_user and not session['isadmin']:
+    if current_user not in projDel.contributors and projDel.owner != current_user and not current_user.has_role('admin'):
         flash("You can't delete that project." )
         return redirect(url_for('projectMy'))
     
@@ -308,7 +310,7 @@ def projectMsDel(pid,mid):
 
     proj = Project.objects.get(pk=pid)
     milestone = proj.milestones.get(oid=mid)
-    if milestone.owner == current_user or session['isadmin']:
+    if milestone.owner == current_user or current_user.has_role('admin'):
         if proj.milestones[-1].status == 'Delete':
             proj.milestones.filter(oid=mid).delete()
             proj.save()
@@ -326,7 +328,7 @@ def projectMsEdit(pid,mid):
     proj = Project.objects.get(pk=pid)
 
     ms = proj.milestones.get(oid=mid)
-    if ms.owner != current_user:
+    if ms.owner != current_user and not current_user.has_role('admin'):
         flash("You have to own the milestone to edit it.")
         return redirect(url_for('project',pid=pid))
     

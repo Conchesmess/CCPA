@@ -46,7 +46,7 @@
 <br>
 
     {% for m in proj.milestones %}
-        {% if current_user == proj.owner %}
+        {% if current_user == proj.owner or current_user.has_role('admin') %}
             <a data-toggle="tooltip" data-placement="top" title="Edit Milestone" href="/project/milestone/edit/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/edit.png"></a>
             <a data-toggle="tooltip" data-placement="top" title="Delete Milestone" href="/project/milestone/delete/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/delete.png"></a>
             <a data-toggle="tooltip" data-placement="top" title="Mark Milestone as Complete" href="/project/milestone/reflection/{{proj.id}}/{{m.oid}}"><img width="30" src="/static/finish.png"></a>
@@ -98,27 +98,27 @@
     No Milestones yet. <br>
 {% endif %}
 
-{% if proj.owner == current_user %}
-{% if proj.milestones|length == 0 or proj.milestones[-1].status == 'Done' or edit %}
-    {% if edit %}
-        <h3>Edit Milestone </h3>
-    {% else %}
-        <h3>New Milestone</h3>
-    {% endif %}
+{% if proj.owner == current_user or current_user.has_role('admin') %}
+    {% if proj.milestones|length == 0 or proj.milestones[-1].status == 'Done' or edit %}
+        {% if edit %}
+            <h3>Edit Milestone </h3>
+        {% else %}
+            <h3>New Milestone</h3>
+        {% endif %}
 
-    <form method=post>
-        {{ form.hidden_tag() }}
-        Describe what work you will have done when this milestone is complete. Include images or links to any resources (online tutorials, tools, similar project milestones) if you have them.: <br>
-        {{ form.desc(class='tmce-editor') }} <br>
-        <h3>Name:</h3>
-        Give it a descriptive name. Not "Milestone 1" but "Getting started" or "Design the final product" or "Practice" or "Finish the tutorial"
-        {{ form.name(class='form-control') }} <br>
-        <h3>Status:</h3>
-        The initial status will always be "In Progress" <br>
-        {{ form.status(class="form-control") }} <br>
-        {{ form.submit(class="form-control btn-primary") }}
-    </form> 
-{% endif %}
+        <form method=post>
+            {{ form.hidden_tag() }}
+            Describe what work you will have done when this milestone is complete. Include images or links to any resources (online tutorials, tools, similar project milestones) if you have them.: <br>
+            {{ form.desc(class='tmce-editor') }} <br>
+            <h3>Name:</h3>
+            Give it a descriptive name. Not "Milestone 1" but "Getting started" or "Design the final product" or "Practice" or "Finish the tutorial"
+            {{ form.name(class='form-control') }} <br>
+            <h3>Status:</h3>
+            The initial status will always be "In Progress" <br>
+            {{ form.status(class="form-control") }} <br>
+            {{ form.submit(class="form-control btn-primary") }}
+        </form> 
+    {% endif %}
 {% endif %}
 
 {% block javascript %}

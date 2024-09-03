@@ -2,7 +2,7 @@
 
 {% extends 'base.html' %}
 {% block body %}
-{% if current_user.id == teacher.id or session['isadmin'] %}
+{% if current_user.id == teacher.id or current_user.isadmin %}
 <a href="/teacher/edit/{{teacher.id}}"><img width="50" src="/static/edit.png"></a>
 {% endif %}
 

@@ -1,5 +1,6 @@
 from app import app
 from flask import render_template, redirect, url_for, flash, session, Markup, request
+from flask_login import current_user
 from app.classes.data import Plan, User, PlanSettings, PlanCheckin
 from app.classes.forms import PlanThemeForm, PlanIdealOutcomeForm, PlanSettingsForm, PlanCheckinForm
 from bson.objectid import ObjectId
@@ -8,7 +9,7 @@ import datetime as d
 
 @app.route('/plansettings', methods=["GET","POST"])
 def plansettings():
-    if session['isadmin'] != True:
+    if current_user.isadmin != True:
         flash('You must be an administrator to access Success Plan Settings.')
         return redirect(url_for('index'))
 
@@ -95,7 +96,7 @@ def plannew(gid=None):
     if not gid:
         gid = session['gid']
 
-    if session['gid'] != gid and not session['isadmin']:
+    if session['gid'] != gid and not current_user.isadmin:
         flash("You can only create Plans for yourself.")
         return redirect(url_for("profile"))
 
@@ -115,7 +116,7 @@ def plannew(gid=None):
     return redirect(url_for('plan',gid=gid))
 
 def checkPlanEditPriv(gid):
-    if gid != session['gid'] and not session['isadmin']:
+    if gid != session['gid'] and not current_user.isadmin:
         flash("You can only create, edit or delete Plans for yourself.")
         return False
     else:
@@ -362,7 +363,7 @@ def plancheckindelete(plancheckinid,gid=None):
     if not gid:
         gid = session['gid']
     plancheckin = PlanCheckin.objects.get(id = plancheckinid)
-    if plancheckin.createdate.date() < d.datetime.utcnow().date() and not session['isadmin']:
+    if plancheckin.createdate.date() < d.datetime.utcnow().date() and not current_user.has_role('admin'):
         flash('You can only delete checkins from today')
         return redirect(url_for('plan',gid=gid))
     plancheckin.delete()
@@ -374,7 +375,7 @@ def plancheckinedit(plancheckinid,gid=None):
         gid = session['gid']
 
     plancheckin = PlanCheckin.objects.get(id = plancheckinid)
-    if plancheckin.createdate.date() < d.datetime.utcnow().date() and not session['isadmin']:
+    if plancheckin.createdate.date() < d.datetime.utcnow().date() and not current_user.has_role('admin'):
         flash('You can only edit checkins from today.')
         return redirect(url_for('plan',gid=gid))
 

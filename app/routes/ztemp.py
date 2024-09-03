@@ -29,7 +29,7 @@ def setTSRoles():
 
     return render_template('index.html')
 
-@app.route('/setAdminRole/<email>')
+@app.route('/setadminrole/<email>')
 def setAdminRole(email):
     adminOBJ=Role.objects.get(name='admin')
     user = User.objects.get(oemail=email)

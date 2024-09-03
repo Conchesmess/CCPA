@@ -13,7 +13,7 @@
 
 <h1>
     Courses
-    {% if session['courseCatAdmin'] or session['isadmin'] %}
+    {% if session['courseCatAdmin'] or current_user.isadmin %}
     <a href="/cccoursenew"><img width="20"src="/static/new.png"></a>
     {% endif %}
 </h1>

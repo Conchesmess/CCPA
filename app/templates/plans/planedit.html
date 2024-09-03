@@ -22,7 +22,7 @@
         <div class="col-4 border">
             <h6>
                 Timeframe: {{settings.timeframe}}
-                {% if session['isadmin'] %}
+                {% if current_user.sadmin %}
                     <a href="/plansettings"><img width="20" src="/static/edit.png"></a>
                 {% endif %}
             </h6>

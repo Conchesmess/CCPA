@@ -347,7 +347,7 @@ def teacher(teacherID):
 @login_required
 def teacherEdit(teacherID):
 
-    if teacherID != str(current_user.id) and not session['isadmin']:
+    if teacherID != str(current_user.id) and not current_user.has_role('admin'):
         flash("You don't have the privleges to edit this record.")
         return redirect(url_for('teacher',teacherID=teacherID))
 

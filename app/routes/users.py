@@ -99,7 +99,7 @@ def phstr2int(phstr):
 # def before_request():
 
 #     try:
-#         if session['isadmin']:
+#         if current_user.has_role('admin'):
 #             db = get_db()
 #             session['db'] = db.name
 #     except:
