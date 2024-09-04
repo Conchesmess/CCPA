@@ -90,7 +90,7 @@ class Obstacle(EmbeddedDocument):
     desc = StringField()
 
 class Milestone(EmbeddedDocument):
-    oid = ObjectIdField(default=ObjectId(), sparse=True, required=True, unique=True, primary_key=True)  
+    oid = ObjectIdField(default=ObjectId(),sparse=True, required=True, unique=True, primary_key=True)  
     owner = ReferenceField('User')  
     status = StringField(default="In Progress")
     name = StringField()

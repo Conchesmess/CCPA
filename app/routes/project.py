@@ -11,6 +11,7 @@ from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
 from flask_login import login_required
 import datetime as dt
 from mongoengine import Q
+from bson import ObjectId
 
 
 @app.route('/project/post/new/<pid>/<mid>', methods=['GET','POST'])
@@ -282,6 +283,7 @@ def project(pid):
         if len(proj.milestones) == 0 or proj.milestones[-1].status == "Done":
             num = len(proj.milestones)+1
             proj.milestones.create(
+                oid = ObjectId(),
                 number = num,
                 name = form.name.data,
                 desc = form.desc.data,
