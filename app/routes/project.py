@@ -281,7 +281,7 @@ def project(pid):
     
     if form.validate_on_submit():
         if len(proj.milestones) == 0 or proj.milestones[-1].status == "Done":
-            num = len(proj.milestones)+1
+            num = proj.milestones[-1].num + 1
             proj.milestones.create(
                 oid = ObjectId(),
                 number = num,

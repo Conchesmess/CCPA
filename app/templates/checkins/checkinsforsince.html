@@ -30,20 +30,24 @@
                     <th>Total Checkins</th>
                     <th>Ave Status</th>
                 </tr>
-            {% for stu in usersdict %}
+            {% for email in usersdict %}
                 <tr>
                     <td>
                         <a data-bs-toggle="collapse" href="#collapseCheckins{{loop.index}}" aria-expanded="false" aria-controls="collapseRoster">
                             <img src="/static/collapse.png" width="20">
                         </a>
-                        {{stu[0].fname}} {{stu[0].lname}}
+                        {{email}}
                     </td>
-                    <td>{{stu[1][0][0]}}</td>
-                    <td>{{stu[1][0][1]}}</td>
+                    <td>{{usersdict[email] | length}}</td>
+                    <td>
+                        {% for checkin in usersdict[email] %}
+                            {{checkin.status}}, 
+                        {% endfor %}
+                    </td>
                     <tr>
                         <td colspan="3">
                         <div class="collapse" id="collapseCheckins{{loop.index}}">
-                        {% for checkin in stu[1] %}
+                        {% for checkin in usersdict[stu] %}
                             {% if not loop.first %}
                                 <b>{{moment(checkin.createdate).calendar()}}</b> <br>
                                 <u>Since last time:</u> {{checkin.status}} {{checkin.desc}} <br>

@@ -359,18 +359,15 @@ def checkinssince(gclassid):
             usersdict[checkin.student] = [checkin]
         else:
             usersdict[checkin.student].append(checkin)
-    tempList = list(usersdict.keys())
-    usersDictCoalated = {}
-    for item in tempList:
-        usersDictCoalated[item.oemail] = []
+    
     for user in usersdict:
+        total = 0
+        length = len(usersdict[user])
         for checkin in usersdict[user]:
-            usersDictCoalated[user.oemail].append(checkin)
-    dict(sorted(usersDictCoalated.items()))
-            
-    #     usersdict[user].insert(0,[length,round(total/length,2)])
-    # usersdict = sorted(list(usersdict.items()), key=lambda e: e[1][0][1])
+            total = total + int(checkin.status)
+        usersdict[user].insert(0,[length,round(total/length,2)])
+    usersdict = sorted(list(usersdict.items()), key=lambda e: e[1][0][1])
 
 
 
-    return render_template('checkins/checkinsforsince.html', querydate= dateForm.querydate.data, checkins=checkins, dateForm=dateForm, gclassid=gclassid, searchdatetime=searchdatetime, usersdict=usersDictCoalated, gclassname=gclassname)
+    return render_template('checkins/checkinsforsince.html', querydate= dateForm.querydate.data, checkins=checkins, dateForm=dateForm, gclassid=gclassid, searchdatetime=searchdatetime, usersdict=usersdict, gclassname=gclassname)

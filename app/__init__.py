@@ -10,6 +10,8 @@ import base64
 import re
 import certifi
 import ssl
+import jinja2
+
 
 # because secretvars is not sent to git this will cause an error for any git clone
 try:
@@ -58,6 +60,21 @@ def formatphonenums(phstr):
 
     return (phstr)
 
-app.jinja_env.globals.update(base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums)
+
+
+
+def typeerror(input):
+    """Custom filter"""
+    print("bob")
+    return input.upper()
+
+loader = jinja2.FileSystemLoader('/tmp')
+env = jinja2.Environment(autoescape=True, loader=loader)
+env.filters['typeerror'] = typeerror
+# temp = env.get_template('template.html')
+# temp.render(name="testing")
+
+app.jinja_env.globals.update(base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums, typeerror=typeerror)
+
 
 from .routes import *
