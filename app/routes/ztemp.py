@@ -63,7 +63,6 @@ def advlist():
 
     return render_template("index.html")
 
-
 @app.route('/setrole')
 def setrole():
     users = User.objects()
@@ -105,7 +104,7 @@ def addadvisors():
 @app.route("/importusers")
 def importusers():
     # Aeries Query: LIST STU FN LN ID NID GN GR CY ST ZC AD PG PEM FK TL FW MW 
-    stusDF = pd.read_csv('./app/static/csv/CCPAAllStus.csv', quotechar='"')
+    stusDF = pd.read_csv('./app/static/csv/D3Stus2024-25.csv', quotechar='"')
     stusDict = stusDF.to_dict('index')
     num = len(stusDict)
     for i,row in enumerate(stusDict):

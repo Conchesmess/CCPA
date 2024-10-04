@@ -340,7 +340,7 @@ def checkinssince(gclassid):
         # turn the date in to a datetime 
         searchdatetime = dt(searchdate.year, searchdate.month, searchdate.day)
         session['searchdatetime'] = searchdatetime
-    
+    # change the date to utc because all datetime fields stored in mongodb are auto-converted to utc
     utcsearchdatetime = searchdatetime.astimezone(ZoneInfo("UTC")).date()
 
     query = (Q(gclassid = gclassid) & (Q(createdate__gt = utcsearchdatetime)))
