@@ -251,12 +251,13 @@ def profile(uid=None):
 @app.route('/editprofile/<uid>', methods=['GET', 'POST'])
 def editprofile(uid=None):
 
-    if uid and uid != current_user.id:
+    if not uid:
+        uid = current_user.id
+
+    if uid and uid != current_user.id and not current_user.has_role("teacher"):
         flash("You can only edit your own profile.")
         return redirect(url_for('profile'))
 
-
-    uid = current_user.id
 
     editUser = User.objects.get(pk = uid)
 
@@ -339,7 +340,7 @@ def editprofile(uid=None):
             )
 
         # after the profile is updated, send the user to the profile page
-        return redirect(url_for('profile'))
+        return redirect(url_for('profile', uid=uid))
 
     #if their is an expressed preferred value prefill the form with that otherwise use the one from aeries
     if editUser.ufname:

@@ -69,7 +69,7 @@
 {% for user in users | sort(attribute="lname,fname") %}
     <tr>
         <td>{{user.aeriesid}}</td>
-        <td><a href="/profile/{{user.aeriesid}}">{{user.fname}} {{user.lname}}</a></td>
+        <td><a href="/profile/{{user.id}}">{{user.fname}} {{user.lname}}</a></td>
 
         <td>{{user.grade}}</td>
         <td>

@@ -20,9 +20,12 @@
     {% for r in currUser.roles %}
         {{r.name}},
     {% endfor %} </h3>
+    {#
     {% if current_user.has_role("teacher") %}
         <a href="/createstudentfolder/{{currUser.oemail}}">Create a portfolio folder</a>
     {% endif %}
+
+#}
     <div class="col-md-4">
         {% if currUser.image %}
             <img class="img-thumbnail" width = "200" src="data:image;base64,{{base64encode(currUser.image.read())}}">
@@ -42,12 +45,14 @@
                 <h5 class="card-title">   
                 </h5>
                 <p class="card-text">
+                    <a href="/editprofile/{{currUser.id}}"><img width="20" src="/static/edit.png"></a> <br>
                     {% if currUser.pronouns %} <b>Pronouns:</b> {{currUser.pronouns}} <br>{% endif %} 
                     {% if currUser.linkedin %}<b>LinkedIn:</b> {{currUser.linkedin}} <br> {% endif %}
 
                     {% if currUser == current_user or current_user.role.lower() == "teacher" %}
                         Aeries ID:{{currUser.aeriesid}} <br>
-                        School Email: {{currUser.oemail}} <br
+                        School Email: {{currUser.oemail}} <br>
+                        Grade: {{currUser.grade}} <br>
 
                         {% if currUser.uethnicity %}
                             <b>Ethnicity:</b> 
@@ -78,6 +83,8 @@
                         <b>Address:</b> <br>
                         <span class="ms-2">
                             {% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
+                        </span>
+                        <span class="ms-2">
                             {% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
                         </span>
                         <span class="ms-2">
@@ -85,6 +92,7 @@
                             {% if currUser.ustate %}{{currUser.ustate}}{% endif %}  
                             {% if currUser.uzipcode %}{{currUser.uzipcode}}{% endif %} <br>
                         </span>
+                        <span class="ms-2">{{currUser.lat}}/{{currUser.lon}}</span>
                         {% endif %}
                     {% endif %}
                 </p>
