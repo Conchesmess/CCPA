@@ -11,6 +11,7 @@ import re
 import certifi
 import ssl
 import jinja2
+from urllib.parse import quote_plus
 
 
 # because secretvars is not sent to git this will cause an error for any git clone
@@ -41,6 +42,8 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 moment = Moment(app)
+
+app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
 
 def base64encode(img):
 
