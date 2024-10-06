@@ -13,19 +13,16 @@
         </a>
         {% endif %}
     </h1>
-    <h3>
-        Depricated --> Role: {{currUser.role}}
-    </h3>
+
     <h3>Roles: 
     {% for r in currUser.roles %}
-        {{r.name}},
+        {{r.name}} 
     {% endfor %} </h3>
     {#
     {% if current_user.has_role("teacher") %}
         <a href="/createstudentfolder/{{currUser.oemail}}">Create a portfolio folder</a>
     {% endif %}
-
-#}
+    #}
     <div class="col-md-4">
         {% if currUser.image %}
             <img class="img-thumbnail" width = "200" src="data:image;base64,{{base64encode(currUser.image.read())}}">
@@ -79,21 +76,47 @@
                             <b>Gender:</b> {% if currUser.ugender %}{{currUser.ugender}} {% endif %}<br>
                         {% endif %}
 
-                        {% if currUser.ustreet %}
                         <b>Address:</b> <br>
                         <span class="ms-2">
-                            {% if currUser.ustreet %}{{currUser.ustreet}}{% endif %} <br>
+                            {% if currUser.ustreet %}
+                            {% set street = currUser.ustreet %}
+                            {{currUser.ustreet}}
+                            {% elif currUser.astreet %}
+                            {{currUser.astreet}}
+                            {% set street = currUser.astreet %}
+                            {% endif %} <br>
+                        </span>
+                        {% if currUser.ustreet2 %}
+                        <span class="ms-2">
+                            {{currUser.ustreet2}}<br>
+                        </span>
+                        {% endif %} 
+                        <span class="ms-2">
+                            {% if currUser.ucity %}
+                            {{currUser.ucity}}
+                            {% set city = currUser.ucity %}
+                            {% elif currUser.acity %}
+                            {{currUser.acity}}
+                            {% set city = currUser.acity %}
+                            {% endif %} 
+                            {% if currUser.ustate %}
+                            {{currUser.ustate}}
+                            {% elif currUser.astate %}
+                            {{currUser.astate}}
+                            {% endif %}  
+                            {% if currUser.uzipcode %}
+                            {{currUser.uzipcode}}
+                            {% set zip = currUser.uzipcode %}
+                            {% elif currUser.azipcode %}
+                            {{currUser.azipcode}}
+                            {% set zip = currUser.azipcode %}
+                            {% endif %} <br>
                         </span>
                         <span class="ms-2">
-                            {% if currUser.ustreet2 %}{{currUser.ustreet2}}{% endif %} <br>
+                            {% if street %}
+                                <a href="https://www.google.com/maps/search/?api=1&query={{city}}+CA+{{street}}+{{zip}}">Map</a>
+                            {% endif %}
                         </span>
-                        <span class="ms-2">
-                            {% if currUser.ucity %}{{currUser.ucity}}{% endif %} 
-                            {% if currUser.ustate %}{{currUser.ustate}}{% endif %}  
-                            {% if currUser.uzipcode %}{{currUser.uzipcode}}{% endif %} <br>
-                        </span>
-                        <span class="ms-2">{{currUser.lat}}/{{currUser.lon}}</span>
-                        {% endif %}
                     {% endif %}
                 </p>
             </div>

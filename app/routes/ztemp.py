@@ -161,7 +161,7 @@ def importusers():
 @app.route('/addlatlon')
 def addlatlon():
 
-    query = Q(astreet__exists=True) & Q(acity__exists=True) & Q(astate__exists=True) & Q(azipcode__exists=True) & Q(lat__exists=False) & Q(lon__exists=False)
+    query = Q(astreet__exists=True) & Q(acity__exists=True) & Q(astate__exists=True) & Q(azipcode__exists=True)
 
     users = User.objects(query)
     total = len(users)
@@ -193,11 +193,16 @@ def addlatlon():
             r = r.json()
         except:
             print(f"{i}/{total}: failed for {user.fname} {user.lname}")
-            pass
         else:
             if len(r) != 0:
                 user.lat = float(r[0]['lat'])
                 user.lon = float(r[0]['lon'])
+                user.save()
+                print(f"{i}/{total}: {user.lat} {user.lon}")
+                time.sleep(2)
+            else:
+                user.lat = 0
+                user.lon = 0
                 user.save()
                 print(f"{i}/{total}: {user.lat} {user.lon}")
                 time.sleep(2)
