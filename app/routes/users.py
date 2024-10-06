@@ -16,6 +16,7 @@ import datetime as dt
 import re
 import time
 from flask_login import current_user
+from .address import updateLatLon
 
 # Do not edit anything in this function.  This is just for google authentication
 def credentials_to_dict(credentials):
@@ -292,6 +293,48 @@ def editprofile(uid=None):
             form.altphone.data = None
 
     if form.validate_on_submit() and not False in phvalid:
+        url = f"https://nominatim.openstreetmap.org/search?street={form.ustreet.data}&city={form.ucity.data}&state={form.ustate.data,}&postalcode={form.uzipcode.data}&format=json&addressdetails=1&email=stephen.wright@ousd.org"
+        r = requests.get(url)
+        try:
+            r = r.json()
+        except:
+            flash(f"lat/lon failed for {editUser.fname} {editUser.lname}")
+            if form.lat.data and form.lon.data:
+                flash("Using Lat / Lon input in the form.")
+                editUser.update(
+                    lat = form.lat.data,
+                    lon = form.lon.data
+                )
+            else:
+                url = f"https://www.google.com/maps/search/?api=1&query={form.ucity.data}+CA+{form.ustreet.data}+{form.uzipcode.data}"
+                r = requests.get(url, timeout=5)
+                try:
+                    r = r.json()
+                except:
+                    flash("failed to get lat/lon again")
+                print(r)
+
+        else:
+            if len(r) != 0:
+                editUser.lat = float(r[0]['lat'])
+                editUser.lon = float(r[0]['lon'])
+                editUser.save()
+            else:
+                flash(f"lat/lon failed for {editUser.fname} {editUser.lname}: {r}")
+                if form.lat.data and form.lon.data:
+                    flash("using lat/lon you entered in the form.")
+                    editUser.update(
+                        lat = form.lat.data,
+                        lon = form.lon.data
+                    )
+                else:
+                    url = f"https://www.google.com/maps/search/?api=1&query={form.ucity.data}+CA+{form.ustreet.data}+{form.uzipcode.data}"
+                    r = requests.get(url, timeout=5)
+                    try:
+                        r = r.json()
+                    except:
+                        flash("failed to get lat/lon again")
+                    print(r)
 
         editUser.update(
             ufname = form.fname.data,
@@ -376,6 +419,8 @@ def editprofile(uid=None):
     else:
         form.ucity.data = editUser.acity
 
+    form.lat.data = editUser.lat
+    form.lon.data = editUser.lon
     form.pronouns.data = editUser.pronouns
     form.image.data = editUser.image
     form.personalemail.data = editUser.personalemail

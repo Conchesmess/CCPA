@@ -337,8 +337,8 @@ class User(UserMixin, Document):
     roles = ListField(ReferenceField("Role"))
 
     # Data that can be edited
-    lat = FloatField()
-    lon = FloatField()
+    lat = FloatField(sparse=True, required=False)
+    lon = FloatField(sparse=True, required=False)
     fname = StringField(default=afname)
     lname = StringField(default=alname)
     isadmin = BooleanField(default=False)

@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms_components import TimeField
 from wtforms.validators import Length, URL, NumberRange, Email, Optional, InputRequired, ValidationError, DataRequired
 from wtforms import IntegerRangeField, ColorField, URLField, DateField, DateTimeField, EmailField, widgets, SelectMultipleField, StringField, SubmitField, validators
-from wtforms import TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField
+from wtforms import TextAreaField, HiddenField, IntegerField, SelectField, FileField, BooleanField, FloatField
 import datetime as d
 from zoneinfo import ZoneInfo
 import phonenumbers
@@ -355,6 +355,8 @@ class UserForm(FlaskForm):
     uethnicityother = TextAreaField()
     shirtsize = SelectField("Unisex Shirt Size", choices=[('','---'),('xs','xs'),('sm','sm'),('med','med'),('lg','lg'),('xl','xl'),('xxl','xxl'),('3xl','3xl'),('4xl','4xl')],validators=[(validators.Optional())])
     linkedin = URLField()
+    lat = FloatField(validators=[Optional()])
+    lon = FloatField(validators=[Optional()])
     submit = SubmitField("Submit")
 
 class AdultForm(FlaskForm):

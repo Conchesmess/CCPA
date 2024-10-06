@@ -64,11 +64,11 @@
                         <tr><td colspan ="2">Street Address Line 2:<br>{{ form.ustreet2(size="100") }}</td></tr>
                         <tr><td>City</td><td>State &nbsp;  &nbsp;  &nbsp; Zip</td></tr>
                         <tr><td>{{form.ucity()}}</td><td>{{form.ustate(value="CA", size="2")}} {{form.uzipcode(size="5")}}</td></tr>
+                        <tr><td>lat: {{form.lat()}}</td><td>lon: {{form.lon}}</td></tr>
                         <tr><td colspan="2">{{form.submit()}}</td></tr>
                     </table>
                 </div>
                 <div class="col-5">
-
                 </div>
             </div>
         </form>

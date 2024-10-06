@@ -114,8 +114,13 @@
                         </span>
                         <span class="ms-2">
                             {% if street %}
-                                <a href="https://www.google.com/maps/search/?api=1&query={{city}}+CA+{{street}}+{{zip}}">Map</a>
+                                <a href="https://www.google.com/maps/search/?api=1&query={{city}}+CA+{{street}}+{{zip}}" target='_blank'>Map</a> <br>
                             {% endif %}
+                        </span>
+                        <span class="ms-2">
+                            
+                                {{currUser.lat}}, {{currUser.lon}} <br>
+                            
                         </span>
                     {% endif %}
                 </p>

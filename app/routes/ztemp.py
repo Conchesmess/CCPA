@@ -101,6 +101,22 @@ def addadvisors():
     return render_template("index.html")
 
 
+@app.route("/updateNewAlum")
+def updateNewAlum():
+    stus = User.objects(grade = 12)
+    stuIDsDF = pd.read_csv("./app/static/csv/CCPAAllStus2023-24AeriesIDOnly.csv")
+    stusDict = stuIDsDF.to_dict('index')
+    currStusAeriesIDs = list(stusDict.values())
+    currSrsList = []
+    for item in currStusAeriesIDs:
+        currSrsList.append(list(item.values())[0])
+    for stu in stus:
+        if not stu.aeriesid in currSrsList:
+            stu.update(grade = 13)
+
+    return render_template("index.html")
+
+
 @app.route("/importusers")
 def importusers():
     # Aeries Query: LIST STU FN LN ID NID GN GR CY ST ZC AD PG PEM FK TL FW MW 

@@ -30,6 +30,7 @@ def updateLatLon(address,user):
     # get the response from the API
     r = requests.get(url)
     # Find the lat/lon in the response
+    flash("latlon")
     try:
         r = r.json()
     except:
@@ -168,6 +169,24 @@ def address_delete(aid,uid=None):
     user.save()
     
     return redirect(url_for('profile'))
+
+# @app.route('/address/edit/<aid>/<uid>')
+# @app.route('/address/edit/<aid>')
+# def address_delete(aid,uid=None):
+#     if not uid:
+#         user = current_user
+#     elif current_user.has_role('admin'):
+#         user = User.objects.get(pk=uid)
+#     else:
+#         flash("You don't have the right role to delete another user's address.")
+#         return redirect(url_for('profile'))
+
+#     user.addresses.filter(oid=aid).update(
+
+#     )
+#     user.save()
+    
+#     return redirect(url_for('profile'))
 
 
 # @app.route("/importcolleges")
