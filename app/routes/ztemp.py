@@ -1,11 +1,13 @@
 from flask.helpers import url_for
 from app import app
 from flask import render_template, redirect, flash, session
-from app.classes.data import CheckIn, User,Help,Role
+from app.classes.data import CheckIn, User,Help,Role,College
 from mongoengine import Q
 import requests
 import time
 import pandas as pd
+from mongoengine.errors import NotUniqueError, DoesNotExist
+
 
 @app.route('/setTSRolesAll')
 def setTSRoles():
@@ -223,6 +225,58 @@ def addlatlon():
                 print(f"{i}/{total}: {user.lat} {user.lon}")
                 time.sleep(2)
     return render_template("index.html")
+
+@app.route('/importcolleges')
+def importcolleges():
+    colsDF = pd.read_csv('./app/static/csv/uc-cs.csv', quotechar='"')
+    colsDict = colsDF.to_dict('index')
+
+    num = len(colsDict)
+    for i,row in enumerate(colsDict):
+        row = colsDict[row]
+        print(f"{i}/{num}: {row['name']}")
+        newColl = College(
+            unitid = row['unitid'],
+            coltype = row['coltype'],
+            name = row['name'],
+            street = row['street'],
+            city = row['city'],
+            state = "CA",
+            zipcode = row['zipcode'],
+            lat = row['lat'],
+            lon = row['lon'],
+            web = row['web'],
+            pubpriv = "public",
+            degree = row['degree']   
+        )
+        try:
+            newColl.save()
+        except NotUniqueError:
+            flash(f"{row['name']} already exists.")
+        except Exception as error:
+            print(f"There was an error: {error}")
+
+    return render_template('index.html')
+
+@app.route('/coltypes')
+def coltypes():
+    cols = College.objects()
+    types = []
+    for col in cols:
+        types.append(col.coltype)
+    types = set(types)
+    print(types)
+    return render_template('index.html')
+
+@app.route('/toCCC')
+def toCCC():
+    cols = College.objects(coltype = "ccc")
+    for col in cols:
+        col.update(coltype = "CCC")
+    return render_template('index.html')
+
+
+
 
 # @app.route('/deleteopenhelps')
 # def deleteopenhelps():

@@ -66,13 +66,13 @@ def alumniMap():
     teachers = User.objects(roles__contains=teacherObj)
     teacherEnrollments = CollegeEnrollment.objects(student__in=teachers)
     
-    ccc = College.objects(coltype="ccc")
-    cc = College.objects(coltype="cc & Trade")
-    csu = College.objects(coltype="csu")
-    uc = College.objects(coltype="uc")
-    other = College.objects(coltype="nan")
+    ccc = College.objects(coltype="CCC")
+    #cc = College.objects(coltype="cc & Trade")
+    csu = College.objects(coltype="CSU")
+    uc = College.objects(coltype="UC")
+    other = College.objects(coltype="other4yr")
 
-    return render_template('addresses/college_map.html',studentEnrollments=studentEnrollments,teacherEnrollments=teacherEnrollments,ccc=ccc,csu=csu,uc=uc,other=other,cc=cc)
+    return render_template('addresses/college_map.html',studentEnrollments=studentEnrollments,teacherEnrollments=teacherEnrollments,ccc=ccc,csu=csu,uc=uc,other=other)
 
 
 @app.route('/college/new/<uid>',methods=['GET','POST'])

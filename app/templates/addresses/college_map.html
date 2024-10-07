@@ -45,6 +45,8 @@
     // Now add the layer onto the map
     // map.addLayer(base);
 
+
+    // create icons
     var blueIcon = new L.Icon({
       iconUrl:
         "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
@@ -80,14 +82,16 @@
 
     var ucIcon = new L.Icon({
       iconUrl:
-        "{{ url_for('static', filename='uc.png') }}",
+        "https://brand.universityofcalifornia.edu/assets/images/guidelines/uc-wordmark-blue-official.png",
+        //"{{ url_for('static', filename='uc.jpg') }}",
       shadowUrl:
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-      iconSize: [30, 30],
+      iconSize: [40, 20],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       shadowSize: [30,30]
     });
+
     var cccIcon = new L.Icon({
       iconUrl:
         "https://3.files.edl.io/b9f3/21/12/14/224436-cffea7b1-3a7d-4398-ba41-fe2fb3143b5c.png",
@@ -101,7 +105,8 @@
 
     var csuIcon = new L.Icon({
       iconUrl:
-        "{{ url_for('static', filename='csu.png') }}",
+        "https://www.calstate.edu/csu-system/csu-branding-standards/PublishingImages/csu-seal.png",
+        //"{{ url_for('static', filename='cs.jpg') }}",
       shadowUrl:
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
       iconSize: [30, 30],
@@ -143,10 +148,10 @@
 
     var schoolIcon = new L.Icon({
       iconUrl:
-        "{{ url_for('static', filename='school.png') }}",
+        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
       shadowUrl:
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
-      iconSize: [35, 41],
+      iconSize: [25,41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
       shadowSize: [35,41]
@@ -163,6 +168,8 @@
       shadowSize: [20,25]
     });
 
+
+    // create layer groups from data sent to the template from mongodb
     var cccLayerGroup = L.layerGroup([])
     {% for c in ccc %}
       {% if c.lat and c.lon %}
@@ -207,7 +214,6 @@
         {% endif %}
     {% endfor %}
 
-
     var staffLayerGroup = L.layerGroup([])
     {% for e in teacherEnrollments %}
       {% if e.college.lat and e.college.lon %}
@@ -215,16 +221,18 @@
       {% endif %}
     {% endfor %}
 
+    // CCPA's marker
     L.marker([37.7614926,-122.1929292], { title: 'CCPA' ,icon:ccpaIcon,forceZIndex: 10000}).addTo(staffLayerGroup).bindPopup("<stron>CCPA</strong>"); 
 
     var alumniLayerGroup = L.layerGroup([])
     {% for e in studentEnrollments %}
-    {% if e.college.lat and e.college.lon %}
+      {% if e.college.lat and e.college.lon %}
           L.marker(['{{e.college.lat}}', '{{e.college.lon}}'],{title:'{{e.student.fname}} {{e.student.lname}} ({{e.college.name}})',icon:alumniIcon,forceZIndex:6000}).addTo(alumniLayerGroup).bindPopup("<strong>'{{e.student.fname}} {{e.student.lname}} {{e.grad_year}} ({{e.college.name}})'<br>{{e.college.city}},{{e.college.state}}<br><a href='https://nces.ed.gov/ipeds/datacenter/InstitutionProfile.aspx?unitId={{e.college.unitid}}'>link</a></strong>")
       {% endif %}
     {% endfor %}
 
 
+    // Define the map that will contain the layers
     var map = L.map('map', {
         center: [37.7614926, -122.1929292],
         zoom: 12,
@@ -233,11 +241,11 @@
         layers: [base,otherLayerGroup,cccLayerGroup,ccLayerGroup,ucLayerGroup,csuLayerGroup,alumniLayerGroup,staffLayerGroup]
     });
 
-
     var baseMaps = {
       'base' : base
     }
 
+    // This defines the map in the map picker
     var overlayMaps = {
       'CA Community Colleges' : cccLayerGroup,
       'University of CA' : ucLayerGroup,
@@ -247,8 +255,6 @@
       'Alumni':alumniLayerGroup,
       'Staff':staffLayerGroup,
     }
-
-  
 
 
 map.addLayer(markersOtherColls);
@@ -261,7 +267,7 @@ map.on('zoomend', function() {
 
         var csuIcon = new L.Icon({
           iconUrl:
-            "{{ url_for('static', filename='csu.png') }}",
+            "https://www.calstate.edu/csu-system/csu-branding-standards/PublishingImages/csu-seal.png",
           shadowUrl:
             "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
           iconSize: [30, 30],
@@ -272,7 +278,7 @@ map.on('zoomend', function() {
 
         var ucIcon = new L.Icon({
           iconUrl:
-            "{{ url_for('static', filename='uc.png') }}",
+            "https://brand.universityofcalifornia.edu/assets/images/guidelines/uc-wordmark-blue-official.png",
           shadowUrl:
             "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
           iconSize: [30, 30],
@@ -308,7 +314,7 @@ map.on('zoomend', function() {
 
           var csuIcon = new L.Icon({
             iconUrl:
-              "{{ url_for('static', filename='csu.png') }}",
+              "https://www.calstate.edu/csu-system/csu-branding-standards/PublishingImages/csu-seal.png",
             shadowUrl:
               "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
             iconSize: [15,15],
@@ -319,7 +325,7 @@ map.on('zoomend', function() {
 
           var ucIcon = new L.Icon({
             iconUrl:
-              "{{ url_for('static', filename='uc.png') }}",
+              "https://brand.universityofcalifornia.edu/assets/images/guidelines/uc-wordmark-blue-official.png",
             shadowUrl:
               "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
             iconSize: [15,15],
@@ -350,7 +356,6 @@ map.on('zoomend', function() {
         csuLayerGroup.eachLayer(function(layer) {
           layer.setIcon(csuIcon);
         });
-
     }
 });
 

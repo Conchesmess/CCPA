@@ -11,7 +11,7 @@ import datetime as d
 import phonenumbers
 
 class College (Document):
-    unitid = IntField()
+    unitid = IntField(required=True, unique=True)
     coltype = StringField()
     name = StringField()
     street = StringField()
