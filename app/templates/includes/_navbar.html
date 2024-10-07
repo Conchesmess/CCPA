@@ -47,7 +47,6 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/wordcloud">World Cloud</a></li>
             <li><a class="dropdown-item" href="/qr">QR Code</a></li>
-            <li><a class="dropdown-item" href="/college/map">Map</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -90,6 +89,9 @@
         </li> -->
         <li class="nav-item">
           <a class="nav-link" href="/my/transcript">My Transcript</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/college/map">College Map</a>
         </li>
         {% if current_user.role.lower() == "student" %}
         <li class="nav-item">
