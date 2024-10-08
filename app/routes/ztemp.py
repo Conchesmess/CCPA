@@ -226,6 +226,21 @@ def addlatlon():
                 time.sleep(2)
     return render_template("index.html")
 
+@app.route('/importadvisors')
+def importadvisors():
+    advsDF = pd.read_csv('./app/static/csv/stu-aeriesid-advisor-names-2024-25.csv', quotechar='"')
+    advsDict = advsDF.to_dict('index')
+    num = len(advsDict)
+    for i,row in enumerate(advsDict):
+        stu = User.objects.get(aeriesid = row['aeriesid'])
+        stu.update(
+            advisor = row['tname']
+        )
+        print(f"{i}/{num}: {stu.fname} {stu.lname} {row['tname']}")
+
+    return render_template('undex.html')
+
+
 @app.route('/importcolleges')
 def importcolleges():
     colsDF = pd.read_csv('./app/static/csv/uc-cs.csv', quotechar='"')
