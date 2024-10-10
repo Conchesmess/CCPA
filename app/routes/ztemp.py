@@ -231,15 +231,45 @@ def importadvisors():
     advsDF = pd.read_csv('./app/static/csv/stu-aeriesid-advisor-names-2024-25.csv', quotechar='"')
     advsDict = advsDF.to_dict('index')
     num = len(advsDict)
-    for i,row in enumerate(advsDict):
-        stu = User.objects.get(aeriesid = row['aeriesid'])
-        stu.update(
-            advisor = row['tname']
-        )
-        print(f"{i}/{num}: {stu.fname} {stu.lname} {row['tname']}")
+    for i in range(num):
+        row = advsDict[i]
+        try:
+            stu = User.objects.get(aeriesid = row['aeriesid'])
+        except DoesNotExist:
+            flash(f"{row['aeriesid']} does not exist")
+        else:
+            stu.update(
+                advisor = row['tname']
+            )
+            print(f"{i}/{num}: {stu.fname} {stu.lname} {row['tname']}")
 
-    return render_template('undex.html')
+    return render_template('index.html')
 
+@app.route('/removeadvisors')
+def removeadvisors():
+    advsDF = pd.read_csv('./app/static/csv/stu-aeriesid-advisor-names-2024-25.csv', quotechar='"')
+    advsDict = advsDF.to_dict('index')
+    num = len(advsDict)
+    stus = User.objects()
+    idsList = []
+    for i in range(num):
+        row = advsDict[i]
+        idsList.append(row['aeriesid'])
+    idsSet = set(idsList)
+    for stu in stus:
+        if stu.aeriesid not in idsSet:
+            stu.advisor = ""
+            try:
+                if stu.grade < 13:
+                    stu.grade = 0
+            except:
+                print(f"{stu.fname} {stu.lname} no grade.")
+            else:
+                stu.save()
+                stu.reload()
+                print(f"{stu.fname} {stu.lname}{stu.grade}")
+
+    return render_template('index.html')
 
 @app.route('/importcolleges')
 def importcolleges():
