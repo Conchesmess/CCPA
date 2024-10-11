@@ -7,6 +7,7 @@ import requests
 import time
 import pandas as pd
 from mongoengine.errors import NotUniqueError, DoesNotExist
+from mongoengine import Q
 
 
 @app.route('/setTSRolesAll')
@@ -320,7 +321,13 @@ def toCCC():
         col.update(coltype = "CCC")
     return render_template('index.html')
 
-
+@app.route('/withdrawls')
+def withdrawls():
+    wds = User.objects(grade = 0)
+    for stu in wds:
+        if stu.has_role('student'):
+            print(stu.fname)
+    return render_template('index.html')
 
 
 # @app.route('/deleteopenhelps')

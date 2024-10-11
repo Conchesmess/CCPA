@@ -55,8 +55,8 @@ Red Icons have siblings
             else {
                 thisIcon = blueIcon
             }
-            L.marker(['{{user.lat}}', '{{user.lon}}'],{icon: thisIcon}).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%}{{user.astreet}}{%endif%}, {{user.azipcode}}{% if user.siblings|length > 1 %}<br>Siblings:{% for sib in user.siblings%}{%if sib!=user%}<br> {{sib.fname}} {{sib.lname}} {% if sib.advisor %}(advisor: {{sib.advisor}}){% endif %}{%endif%}{%endfor%}{% endif %}{% if sib.grade > 12 %}Alumni{% elif sib.grade > 5 %}grade: {{sib.grade}}{% endif %}'</strong>");
-        {% endif %}
+            L.marker(['{{user.lat}}', '{{user.lon}}'],{icon: thisIcon}).addTo(map).bindPopup("<strong>'<a href='/profile/{{user.aeriesid}}'>{{user.fname}} {{user.lname}}</a> {{user.grade}}th <br> {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%}{{user.astreet}}{%endif%}, {{user.azipcode}}{% if user.siblings|length > 1 %}<br>Siblings:{% for sib in user.siblings%}{%if sib != user%}<br> {{sib.fname}} {{sib.lname}} {% if sib.advisor %} (advisor: {{sib.advisor}}){% endif %}{% if sib.grade > 12 %} Alumni {% elif sib.grade > 5 %} Grade: {{sib.grade}} {% endif %} {% endif %}{% endfor %}{% endif %}'</strong>");
+            {% endif %}
     {% endfor %}
     L.marker([37.7614735,-122.1942649]).addTo(map).bindPopup("<strong>CCPA</strong>").openPopup();
 
