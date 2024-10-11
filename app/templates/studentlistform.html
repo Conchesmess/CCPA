@@ -82,7 +82,9 @@
         <td>
             {% for sib in user.siblings %}
             {% if sib != user %}
-                {{sib.advisor}}: {{sib.fname}} {{sib.lname}} {{sib.grade}} <br>
+                {% if sib.advisor %} {{sib.advisor}}: {% endif %}
+                {{sib.fname}} {{sib.lname}}  
+                {% if sib.grade >12 %} Alumni {% elif sib.grade > 5 %} {{sib.grade}} {% endif %} <br>
             {% endif %}
             {% endfor %}
         </td>
