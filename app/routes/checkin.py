@@ -279,7 +279,13 @@ def checkinsfor(gclassid,sndrmdr=0):
     checkingids = [checkin.student.gid for checkin in checkins]
 
     # This is a list of gids for the students in the Google Classroom
-    rostergids = [enrollment.owner.gid for enrollment in enrollments]
+    # rostergids = [enrollment.owner.gid for enrollment in enrollments]
+    rostergids = []
+    for enrollment in enrollments:
+        try:
+            rostergids.append(enrollment.owner.gid)
+        except DoesNotExist:
+            pass
 
     # This is a list of gids for of students on the google roster but not in the checked in
     notcheckedingids = [rostergid for rostergid in rostergids if str(rostergid) not in checkingids]
@@ -291,18 +297,20 @@ def checkinsfor(gclassid,sndrmdr=0):
     notcheckedstuschoices = []
 
     for enrollment in enrollments:
-        if enrollment.owner.gid in notcheckedingids:
-            try:
-                notcheckedstus.append(enrollment.owner)
-            except:
-                flash(f"{enrollment} may not have an account in OTData or you may need to update the roster for this class.")
-            else:
-                if enrollment.sortCohort == "~":
-                    sortCohort = ""
+        try:
+            if enrollment.owner.gid in notcheckedingids:
+                try:
+                    notcheckedstus.append(enrollment.owner)
+                except:
+                    flash(f"{enrollment} may not have an account in OTData or you may need to update the roster for this class.")
                 else:
-                    sortCohort = enrollment.sortCohort + ':'
-                notcheckedstuschoices.append((enrollment.owner.aeriesid,Markup(f"{sortCohort} {enrollment.owner.lname}, {enrollment.owner.fname} <a href='/profile/{enrollment.owner.aeriesid}'>&#128279;</a>")))
-
+                    if enrollment.sortCohort == "~":
+                        sortCohort = ""
+                    else:
+                        sortCohort = enrollment.sortCohort + ':'
+                    notcheckedstuschoices.append((enrollment.owner.aeriesid,Markup(f"{sortCohort} {enrollment.owner.lname}, {enrollment.owner.fname} <a href='/profile/{enrollment.owner.aeriesid}'>&#128279;</a>")))
+        except DoesNotExist:
+            pass
     # If there are students who did not checkin get a list of all their user objects
 
     # sort the list of tuples by its second item which is student's name
