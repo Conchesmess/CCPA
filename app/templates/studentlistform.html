@@ -63,7 +63,7 @@
 <h1>Total students {{total}}</h1>
 <table class="table">
     <tr>
-        <th>Aeries ID</th><th>name</th><th>grade</th><th>Address</th><th>lat/lon</th><th>Siblings</th>
+        <th>Aeries ID</th><th>name</th><th>grade</th><th>Address</th><th>Siblings</th>
     </tr>
 {% if users %}
 {% for user in users | sort(attribute="lname,fname") %}
@@ -74,15 +74,14 @@
         <td>{{user.grade}}</td>
         <td>
             {%if user.ustreet%}{{user.ustreet}}<br>{{user.ustreet2}}{%else%} {{user.astreet}}{%endif%} <br>
-            {{user.acity}}, {{user.astate}}  {{user.azipcode}}
-        </td>
-        <td>
+            {{user.acity}}, {{user.astate}}  {{user.azipcode}}<br>
             {{user.lat}}/{{user.lon}}
         </td>
         <td>
             {% for sib in user.siblings %}
             {% if sib != user %}
-                {% if sib.advisor %} {{sib.advisor}}: {% endif %}
+            {% if loop.index>1 %}<hr>{% endif %}
+                {% if sib.advisor %} Advisor: {{sib.advisor}}: {% endif %} <br>
                 {{sib.fname}} {{sib.lname}}  
                 {% if sib.grade >12 %} Alumni {% elif sib.grade > 5 %} {{sib.grade}} {% endif %} <br>
             {% endif %}
