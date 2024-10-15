@@ -23,7 +23,7 @@
     {% endfor %}
 
     {% if usersdict%}
-
+    
             <table class="table">
                 <tr>
                     <th>Student</th>
@@ -47,7 +47,7 @@
                     <tr>
                         <td colspan="3">
                         <div class="collapse" id="collapseCheckins{{loop.index}}">
-                        {% for checkin in usersdict[stu] %}
+                        {% for checkin in usersdict[email] %}
                             {% if not loop.first %}
                                 <b>{{moment(checkin.createdate).calendar()}}</b> <br>
                                 <u>Since last time:</u> {{checkin.status}} {{checkin.desc}} <br>
