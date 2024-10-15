@@ -436,6 +436,12 @@ def gClassAssignments(gclassid):
     else:
         assesDict = sorted(assesDict, key = lambda i: (i['title']))
 
+    for ass in assesDict:
+        try:
+            ass.gradeCategory
+        except:
+            ass.gradeCategory = None
+
     return render_template('sbg/assignments.html', gClass=gClassroom, assesDict = assesDict)
 
 @app.route('/assignment/<assid>', methods=['GET', 'POST'])

@@ -21,7 +21,7 @@
                 {{ass.title}}
                 <a target="_blank" href="{{ass.alternateLink}}"><img src="/static/google.png" width="10"></a>
             </td>
-            <td>{{ass.gradeCategory['name'] }}</td>
+            <td>{{ass['gradeCategory']['name']}}</td>
             <td>
                 {% if ass.dueDate %}
                     {{ass.dueDate.month}}/{{ass.dueDate.day}}/{{ass.dueDate.year}}

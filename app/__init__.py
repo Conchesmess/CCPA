@@ -60,24 +60,9 @@ def formatphone(phnum):
 # Function to format phone numbers to ints
 def formatphonenums(phstr):
     phstr = re.sub("[^0-9]", "", phstr)
-
     return (phstr)
 
-
-
-
-def typeerror(input):
-    """Custom filter"""
-    print("bob")
-    return input.upper()
-
-loader = jinja2.FileSystemLoader('/tmp')
-env = jinja2.Environment(autoescape=True, loader=loader)
-env.filters['typeerror'] = typeerror
-# temp = env.get_template('template.html')
-# temp.render(name="testing")
-
-app.jinja_env.globals.update(base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums, typeerror=typeerror)
+app.jinja_env.globals.update(base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums)
 
 
 from .routes import *
