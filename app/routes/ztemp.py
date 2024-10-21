@@ -87,7 +87,7 @@ def setrole():
 
 @app.route("/addadvisors")
 def addadvisors():
-    advsDF = pd.read_csv('./app/static/csv/advisors.csv', quotechar='"')
+    advsDF = pd.read_csv('./app/static/csv/stu-aeriesid-advisor-names-2024-25.csv', quotechar='"')
     advsDict = advsDF.to_dict('index')
     num = len(advsDict)
     for i,adv in enumerate(advsDict):
