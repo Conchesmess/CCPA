@@ -374,7 +374,7 @@ def checkinssince(gclassid):
     for user in usersdict:
         for checkin in usersdict[user]:
             usersDictCoalated[user.oemail].append(checkin)
-        usersDictCoalated[user.oemail].sort()
+        usersDictCoalated[user.oemail].sort(key=lambda x: x.createdate, reverse=True)
     usersDictCoalated = dict(sorted(usersDictCoalated.items()))
 
     return render_template('checkins/checkinsforsince.html', querydate= dateForm.querydate.data, checkins=checkins, dateForm=dateForm, gclassid=gclassid, searchdatetime=searchdatetime, usersdict=usersDictCoalated, gclassname=gclassname)
