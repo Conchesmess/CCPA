@@ -20,7 +20,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow                
 import googleapiclient.discovery   
 from oauthlib.oauth2 import WebApplicationClient
-from .portfolio import deletegfiles, createStudentFoldersFromReq
+#from .portfolio import deletegfiles, createStudentFoldersFromReq
 
 
 #get all the credentials for google
@@ -174,13 +174,13 @@ def callback():
         if current_user.role != "Teacher":
             current_user.update(role = "Teacher")
 
-    if current_user.oemail == 'stephen.wright@ousd.org':
-        response = deletegfiles()
-        if response:
-            flash(f'deleted: {response}')
-        response = createStudentFoldersFromReq()
-        if response:
-            flash(f"folders created: {response}")
+    # if current_user.oemail == 'stephen.wright@ousd.org':
+    #     response = deletegfiles()
+    #     if response:
+    #         flash(f'deleted: {response}')
+    #     response = createStudentFoldersFromReq()
+    #     if response:
+    #         flash(f"folders created: {response}")
         
     # Send user back to homepage
     return redirect(session['return_URL'])
