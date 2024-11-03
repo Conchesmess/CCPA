@@ -8,7 +8,7 @@ import datetime as d
 # a join table between GoogleClassroom and User
 class GEnrollment(Document):
     gclassroom = ReferenceField('GoogleClassroom', required=True, sparse=True)
-    owner = ReferenceField('User', unique_with='gclassroom', sparse=True, required=True)
+    owner = ReferenceField('User', unique_with='gclassroom', sparse=True, required=True, reverse_delete_rule=CASCADE)
     createdate = DateTimeField(default=d.datetime.utcnow)
     status = StringField(default='~~~') # Created by student active, inacative, ignore
     classnameByUser = StringField() # created by user for sorting

@@ -286,8 +286,13 @@ def ontimeperc(gclassid):
 
     dictfordf = {}
     for row in enrollments:
-        newRow = {'sortCohort':row['sortCohort'],'userId':row['owner']['gid'],'fname':row['owner']['fname'],'lname':row['owner']['lname'],'email':row['owner']['oemail']}
-        dictfordf[row['owner']['id']] = newRow
+        try:
+            row['owner']
+        except:
+            print(row)
+        else:
+            newRow = {'sortCohort':row['sortCohort'],'userId':row['owner']['gid'],'fname':row['owner']['fname'],'lname':row['owner']['lname'],'email':row['owner']['oemail']}
+            dictfordf[row['owner']['id']] = newRow
 
     stusDF = pd.DataFrame.from_dict(dictfordf, orient='index')
     
