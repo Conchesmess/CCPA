@@ -110,6 +110,7 @@ def getroster(gclassid,index=0):
     numIterations = 3
     # The iterator starts at zero and is incremented until it matches the # of iterations
     iterator = 0
+    errors = []
     
     for stu in gstudents[index:]:
 
@@ -121,7 +122,6 @@ def getroster(gclassid,index=0):
                 otdstu.update(gid=stu['profile']['id'])
                 
         except DoesNotExist as error:
-            # session['missingStus'].append(f"{stu['profile']['name']['fullName']}'s email is not in OTData.")
 
             newStu = User(
                 gid=stu['profile']['id'], 
@@ -131,18 +131,22 @@ def getroster(gclassid,index=0):
                 lname = stu['profile']['name']['familyName'],
                 role = "Student"
             )
-            newStu.save()
-            flash(f"NEW--> {newStu.fname} {newStu.lname}")
-            enrollment=GEnrollment(
-                owner=newStu,
-                gclassroom=currGClass
-                )
             try:
-                enrollment.save()
-            except NotUniqueError:
-                pass
+                newStu.save()
+            except NotUniqueError as error:
+                errors.append(f"duplicate--> {newStu.fname} {newStu.lname} {error}")
+            else:
+                flash(f"NEW--> {newStu.fname} {newStu.lname}")
+                enrollment=GEnrollment(
+                    owner=newStu,
+                    gclassroom=currGClass
+                    )
+                try:
+                    enrollment.save()
+                except NotUniqueError:
+                    pass
                 
-            otdstu = newStu
+                otdstu = newStu
         except Exception as error:
             session['missingStus'].append(f"{stu['profile']['name']['fullName']} had error: {error}")
         else:
@@ -156,12 +160,14 @@ def getroster(gclassid,index=0):
                     )
                 enrollment.save()
             else:
-                flash(f"Skipping --> {index+1}/{numStus}: {stu['profile']['name']['fullName']}")
+                flash(f"Existing --> {index+1}/{numStus}: {stu['profile']['name']['fullName']}")
 
         index = index + 1
         iterator = iterator + 1
         if iterator == numIterations:
             break
+
+    flash(errors)
     
     if numStus > (index):
         # save the progress
