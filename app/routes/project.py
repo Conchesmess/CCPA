@@ -281,14 +281,19 @@ def project(pid):
     
     if form.validate_on_submit():
         if len(proj.milestones) == 0 or proj.milestones[-1].status == "Done":
-            num = proj.milestones[-1].num + 1
-            proj.milestones.create(
-                oid = ObjectId(),
-                number = num,
-                name = form.name.data,
-                desc = form.desc.data,
-                status = "In Progress"
-            )
+            try:
+                project.milestones[-1].num
+            except:
+                num = 1
+            else:
+                num = proj.milestones[-1].num + 1
+                proj.milestones.create(
+                    oid = ObjectId(),
+                    number = num,
+                    name = form.name.data,
+                    desc = form.desc.data,
+                    status = "In Progress"
+                )
             
             proj.save()
 

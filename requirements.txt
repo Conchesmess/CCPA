@@ -14,13 +14,10 @@ google-auth-httplib2~=0.2.0
 google-auth-oauthlib~=1.2.1
 # Only needed for running on Google Cloud Run. Does not need to be installed locally.
 gunicorn~=21.2.0 
-# Blows up on google Cloud sometimes
-#matplotlib~=3.3.4
 mongoengine~=0.27.0
 nltk~=3.8.1
 numpy~=1.26.4
 oauthlib~=3.2.2
-pandas~=2.1.0
 phonenumbers~=8.13.22
 protobuf~=4.24.2
 pymongo~=4.5.0
@@ -33,3 +30,6 @@ Werkzeug~=2.3.7
 wordcloud~=1.9.2
 WTForms~=3.1.2
 WTForms_Components~=0.10.5
+# Blows up on google Cloud sometimes
+matplotlib~=3.10.0
+pandas~=2.2.3
