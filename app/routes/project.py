@@ -280,25 +280,22 @@ def project(pid):
         return redirect(url_for('project', pid=pid))
     
     if form.validate_on_submit():
-        if len(proj.milestones) == 0 or proj.milestones[-1].status == "Done":
-            try:
-                project.milestones[-1].num
-            except:
-                num = 1
-            else:
-                num = proj.milestones[-1].num + 1
-                proj.milestones.create(
-                    oid = ObjectId(),
-                    number = num,
-                    name = form.name.data,
-                    desc = form.desc.data,
-                    status = "In Progress"
-                )
-            
-            proj.save()
-
+        if len(proj.milestones) == 0:
+            num = 1
         else:
-            flash("You can't create a new milestone until the previous one is marked done.")
+            num = proj.milestones[-1].number + 1
+        proj.milestones.create(
+            oid = ObjectId(),
+            number = num,
+            name = form.name.data,
+            desc = form.desc.data,
+            status = "In Progress"
+        )
+        
+        proj.save()
+
+        #else:
+        #    flash("You can't create a new milestone until the previous one is marked done.")
     
     posts = ProjPost.objects(project = proj)
     for ms in proj.milestones:

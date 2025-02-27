@@ -49,7 +49,7 @@
         {% if current_user == proj.owner or current_user.has_role('admin') %}
             <a data-toggle="tooltip" data-placement="top" title="Edit Milestone" href="/project/milestone/edit/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/edit.png"></a>
             <a data-toggle="tooltip" data-placement="top" title="Delete Milestone" href="/project/milestone/delete/{{proj.id}}/{{m.oid}}"><img width='20' src="/static/delete.png"></a>
-            <a data-toggle="tooltip" data-placement="top" title="Mark Milestone as Complete" href="/project/milestone/reflection/{{proj.id}}/{{m.oid}}"><img width="30" src="/static/finish.png"></a>
+            <a data-toggle="tooltip" data-placement="top" title="Mark Milestone as Complete" href="/project/milestone/reflection/{{proj.id}}/{{m.oid}}"><img width="30" src="/static/task.png"></a>
         {% endif %}
             <br>
             <h4>#{{m.number}}: {{m.name}}</h4>
@@ -105,6 +105,15 @@
         {% else %}
             <h3>New Milestone</h3>
         {% endif %}
+
+        <!--List all errors in a group at the top-->
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-error">
+                    <strong>Error!</strong>{{field}}: {{error}}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
         <form method=post>
             {{ form.hidden_tag() }}
