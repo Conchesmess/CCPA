@@ -175,7 +175,8 @@ def projectDelete(pid):
 @login_required
 def projectMy():
 
-    query = Q(status='In Progress') & (Q(owner=current_user) | Q(contributors__contains = current_user))
+    #query = Q(status='In Progress') & (Q(owner=current_user) | Q(contributors__contains = current_user))
+    query = (Q(owner=current_user) | Q(contributors__contains = current_user))
 
     projects = Project.objects(query)
 
@@ -199,7 +200,7 @@ def projectNew():
             status = "In Progress",
             product = form.product.data,
             createDateTime = dt.datetime.utcnow(),
-            open_to_contributors = form.open_to_contributors.data
+            open_to_contributors = False
         )
 
         newProj.save()
