@@ -117,7 +117,7 @@ def projectPostNew(pid=None,mid=None):
 
         newPost.save()
 
-        return redirect(url_for("projectMy"))
+        return redirect(url_for("project", pid=pid))
 
     return render_template("projects/project_post_form.html", form=form, project=project)
 
