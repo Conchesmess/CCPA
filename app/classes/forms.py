@@ -564,11 +564,12 @@ class MilestoneForm(FlaskForm):
     submit = SubmitField('Save')
 
 class ProjPostForm(FlaskForm):
-    post_type = SelectField("Type", choices=[('','---'),('Intention','Intention'),('Reflection','Reflection')], validators=[DataRequired()])
+    post_type = SelectField("Type", choices=[('','---'),('Intention','Intention'),('Reflection','Reflection'),('Discussion','Discussion')], validators=[DataRequired()])
     confidence = SelectField("Confidence",choices=[(0,'---'),(3,"Very"),(2,'Sorta'),(1,'Not')])
     satisfaction = SelectField("Satisfaction",choices=[(0,'---'),(3,"Very"),(2,'Sorta'),(1,'Not')])
     reflection = TextAreaField("Reflection")
     intention = TextAreaField("Intention")
+    discussion = TextAreaField("Discussion")
     milestone = SelectField("Milestone",choices=[],validate_choice=False)
     image_reflection = FileField("Image")
     image_reflection_src = StringField()

@@ -3,10 +3,9 @@ from app.utils.secrets import getSecrets
 import requests
 from flask import render_template, flash, redirect, url_for
 import requests
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.classes.data import User, Role, require_role, College, CollegeEnrollment
 from app.classes.forms import AddressForm, CollegeForm
-from flask_login import login_required
 from mongoengine import Q
 import datetime as dt
 from bson import ObjectId

@@ -26,8 +26,8 @@ def projectPostNew(pid=None,mid=None):
             flash('That project does not exist.')
             return redirect(url_for('projectMy'))
         else:
-            if current_user not in project.contributors and current_user != project.owner:
-                flash("You are not the owner or a contributer to this porject.")
+            if current_user not in project.contributors and (current_user != project.owner and not current_user.has_role('admin')):
+                flash("You are not the owner or a contributer to this project.")
                 return redirect(url_for('projectMy'))
             try:
                 milestone = project.milestones.get(oid = mid)
@@ -69,7 +69,7 @@ def projectPostNew(pid=None,mid=None):
             return redirect(url_for('projectMy'))
 
         if form.post_type.data.lower() == "reflection":
-            print("intention check if reflection")
+            #check for intention if post type is reflection
             try:
                 post = ProjPost.objects.get(project=project,post_type__iexact='intention',createDateTime__gt = nowdate)
             except mongoengine.errors.DoesNotExist:
@@ -90,6 +90,10 @@ def projectPostNew(pid=None,mid=None):
             if len(form.reflection.data) == 0:
                 form.reflection.errors.append("Reflection is required if your post type is Reflection.")
                 fail=1
+        elif form.post_type.data.lower() == "discussion":
+            if len(form.discussion.data) == 0:
+                form.discussion.errors.append("This field is required.")
+                fail=1
         if fail == 1:
             return render_template("projects/project_post_form.html", form=form, project=project)
 
@@ -97,6 +101,7 @@ def projectPostNew(pid=None,mid=None):
             post_type = form.post_type.data,
             confidence = form.confidence.data,
             intention = form.intention.data,
+            discussion = form.discussion.data,
             satisfaction = form.satisfaction.data,
             reflection = form.reflection.data,
             owner = current_user,

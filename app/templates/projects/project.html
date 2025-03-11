@@ -61,17 +61,22 @@
                 {{m.reflection|safe}} <br>
             {% endif %}
             <hr>
-                <h5>Posts <a href="/project/post/new/{{proj.id}}/{{m.oid}}"><img src="/static/new.png" width="20"></a> </h5>
+                <h5>Intention/Reflection/Discussion <a href="/project/post/new/{{proj.id}}/{{m.oid}}"><img src="/static/new.png" width="20"></a> </h5>
                 {% if m.posts %}
                     {% for post in m.posts %}
                         {% if post.post_type.lower() == 'intention' %}
                             <div class="bg-primary text-light px-3 py-1">
+                        {% elif post.post_type.lower() == 'discussion' %}
+                            <div class="bg-warning px-3 py-1">
                         {% else %}
                             <div class="bg-success text-light px-3 py-1">
                         {% endif %}
                         {{post.post_type}} {{moment(post.createDateTime).calendar()}} 
                         <a href="/project/post/delete/{{post.id}}"><img src="/static/delete.png" width="20"></a>
                         <br>
+                        {% if post.post_type.lower() == "discussion" %}
+                            {{post.discussion | safe}}
+                        {% endif %}
                         {% if post.post_type.lower() == "intention" %}
                             Confidence: {{post.confidence}} <br>
                             Intention: {{post.intention | safe}}

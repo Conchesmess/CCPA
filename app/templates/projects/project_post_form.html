@@ -69,6 +69,15 @@ copy this one and then edit it. -->
                     {% endfor %}
                 </p> 
             </div>
+            <div class="discussion">
+                <h3>Discussion</h3>
+                {{ form.discussion(class='tmce-editor') }}</b>  
+                <p class="text-danger">
+                    {% for error in form.discussion.errors %}
+                        {{error}}
+                    {% endfor %}
+                </p> 
+            </div>
             <div class="reflection pb-3">
                 <h3>Are you satisfied with your work today?</h3>
                 {{ form.satisfaction(class='form-control') }}</b>              
@@ -85,7 +94,7 @@ copy this one and then edit it. -->
                         {{error}}
                     {% endfor %}
                 </p> 
-
+{#
                 <h3>Want to include an image?</h3>
                 this doesn't work yet... <br>
                 {{ form.image_reflection(id="image-input") }}</b>  
@@ -102,6 +111,7 @@ copy this one and then edit it. -->
                         {{error}}
                     {% endfor %}
                 </p> 
+#}
 
                 <br><br><br>
             </div>
@@ -128,13 +138,20 @@ copy this one and then edit it. -->
                 if (postTypeValue == 'Reflection') {
                     $('.intention').hide();
                     $('.reflection').show(); 
+                    $('.discussion').hide();
                 } else if (postTypeValue == 'Intention') {
                     $('.intention').show();
-                    $('.reflection').hide();       
+                    $('.reflection').hide();    
+                    $('.discussion').hide();   
+                } else if (postTypeValue == 'Discussion') {
+                    $('.intention').hide();
+                    $('.reflection').hide();  
+                    $('.discussion').show(); 
                 }
             } else {
                 $('.intention').hide();
                 $('.reflection').hide();
+                $('.discussion').hide();
             }
 
             function int_ref() {
@@ -143,9 +160,15 @@ copy this one and then edit it. -->
                 if (postTypeValue == 'Reflection') {
                     $('.intention').hide();
                     $('.reflection').show(); 
+                    $('.discussion').hide();
                 } else if (postTypeValue == 'Intention') {
                     $('.intention').show();
-                    $('.reflection').hide();       
+                    $('.reflection').hide();     
+                    $('.discussion').hide();  
+                } else if (postTypeValue == 'Discussion') {
+                    $('.intention').hide();
+                    $('.reflection').hide();
+                    $('.discussion').show();       
                 }
             };
         </script>

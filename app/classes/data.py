@@ -124,6 +124,7 @@ class ProjPost(Document):
     confidence = IntField()
     reflection = StringField()
     intention = StringField()
+    discussion = StringField()
     image_reflection_src = StringField()
 
     meta = {
