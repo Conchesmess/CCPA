@@ -1,7 +1,7 @@
 from flask.helpers import url_for
 from app import app
 from flask import render_template, redirect, flash, session
-from app.classes.data import CheckIn, User,Help,Role,College
+from app.classes.data import CheckIn, User,Help,Role,College, Project
 from mongoengine import Q
 import requests
 import time
@@ -9,6 +9,14 @@ import pandas as pd
 from mongoengine.errors import NotUniqueError, DoesNotExist
 from mongoengine import Q
 
+
+@app.route('/projToRobotics')
+def projToRobotics():
+    projs = Project.objects()
+    for proj in projs:
+        proj.course = "Robotics DE"
+        proj.save()
+    return render_template('index.html')
 
 @app.route('/setTSRolesAll')
 def setTSRoles():

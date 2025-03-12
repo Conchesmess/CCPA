@@ -204,6 +204,7 @@ def projectNew():
             name = form.name.data,
             status = "In Progress",
             product = form.product.data,
+            learning_materials = form.learning_materials.data,
             createDateTime = dt.datetime.utcnow(),
             open_to_contributors = False
         )
@@ -236,6 +237,7 @@ def projectEdit(pid):
             name = form.name.data,
             status = form.status.data,
             product = form.product.data,
+            learning_materials = form.learning_materials.data,
             createDateTime = dt.datetime.utcnow(),
             open_to_contributors = form.open_to_contributors.data
         )
@@ -247,6 +249,7 @@ def projectEdit(pid):
     form.status.data = projEdit.status
     #form.desc.data = projEdit.desc
     form.product.process_data(projEdit.product)
+    form.learning_materials.process_data(projEdit.learning_materials)
     form.open_to_contributors.data = projEdit.open_to_contributors
     
     return render_template('projects/project_form.html', form=form)

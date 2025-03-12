@@ -9,7 +9,7 @@
     <tr>
         <th>Owner</th>
         <th>Project</th>
-        <th>Course</th>
+        <th>Learning <br> Materials</th>
         <th>Milestones</th>
     </tr>
 
@@ -17,7 +17,7 @@
     <tr>
         <td>{{proj.owner.fname}} {{proj.owner.lname}}</td>
         <td><a href="/project/{{proj.id}}">{{proj.name}}</a></td>
-        <td>{{proj.course}}</td>
+        <td>{% if proj.learning_materials and proj.learning_materials | length > 40 %} Yes {% endif %}</td>
         <td>
             {% for m in proj.milestones %}
             {{m.name}} <br>

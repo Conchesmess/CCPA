@@ -34,7 +34,7 @@
         No Collaborators yet. <br>
     {% endif %}
 {% endif %}
-
+<b>Learning Materials:</b> <br> {{proj.learning_materials|safe}} <br>
 <b>Product:</b> <br> {{proj.product|safe}} <br>
 
 {% if proj.milestones|length != 0 and not edit %}

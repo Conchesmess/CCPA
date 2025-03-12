@@ -109,6 +109,7 @@ class Project(Document):
     name = StringField()
     desc = StringField()
     product = StringField()
+    learning_materials = StringField()
     obstacles = EmbeddedDocumentListField('Obstacle')
     milestones = EmbeddedDocumentListField('Milestone')
 
