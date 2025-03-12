@@ -130,7 +130,7 @@ def projectPostDelete(postID):
         flash("That post doesn't exist.")
         return redirect(url_for('projectMy'))
 
-    if current_user != delPost.owner:
+    if current_user != delPost.owner and not current_user.has_role('admin'):
         flash("You can't delete a post you didn't write.")
         return redirect(url_for('projectMy'))
 
@@ -270,8 +270,6 @@ def project_join(pid):
     flash('You are now a contributer to this project')
 
     return redirect(url_for('project',pid=pid))
-
-
 
 @app.route('/project/<pid>', methods=['POST','GET'])
 @login_required

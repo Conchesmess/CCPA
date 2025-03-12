@@ -10,7 +10,7 @@
         <th>Owner</th>
         <th>Project</th>
         <th>Course</th>
-        <th>Open</th>
+        <th>Milestones</th>
     </tr>
 
 {% for proj in projects %}
@@ -19,8 +19,9 @@
         <td><a href="/project/{{proj.id}}">{{proj.name}}</a></td>
         <td>{{proj.course}}</td>
         <td>
-            {% if proj.open_to_contributors %} Yes {%endif%}
-
+            {% for m in proj.milestones %}
+            {{m.name}} <br>
+            {% endfor %}
         </td>
     </tr>
 {% endfor %}
