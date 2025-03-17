@@ -56,10 +56,10 @@
             <b>Description:</b><br>
             <b>Status:</b> {{m.status}} <br>
             {{m.desc|safe}}
-            {% if m.reflection %}
+            {# {% if m.reflection %}
                 <b>Reflection:</b> <br>
                 {{m.reflection|safe}} <br>
-            {% endif %}
+            {% endif %} #}
             <hr>
                 <h5>Intention/Reflection/Discussion <a href="/project/post/new/{{proj.id}}/{{m.oid}}"><img src="/static/new.png" width="20"></a> </h5>
                 {% if m.posts %}

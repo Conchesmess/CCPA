@@ -10,17 +10,19 @@
         <th>Owner</th>
         <th>Project</th>
         <th>Learning <br> Materials</th>
-        <th>Milestones</th>
+        <th>Milestones (posts)</th>
     </tr>
 
-{% for proj in projects %}
+{% for proj in projects | sort(attribute="createDateTime") | sort(attribute="owner.lname") | sort(attribute="owner.fname")%}
     <tr>
         <td>{{proj.owner.fname}} {{proj.owner.lname}}</td>
         <td><a href="/project/{{proj.id}}">{{proj.name}}</a></td>
         <td>{% if proj.learning_materials and proj.learning_materials | length > 40 %} Yes {% endif %}</td>
         <td>
             {% for m in proj.milestones %}
-            {{m.name}} <br>
+            {% if m.name | length > 0 %}
+            {{m.name}} ({{m.posts | length}}) <br>
+            {% endif %}
             {% endfor %}
         </td>
     </tr>

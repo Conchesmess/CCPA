@@ -141,7 +141,6 @@ def projectPostDelete(postID):
     flash("Post deleted")
     return redirect(url_for('project',pid=project.id))
 
-
 @app.route('/project/definition')
 def projectDef():
     return render_template('projects/project_def.html')
@@ -150,6 +149,15 @@ def projectDef():
 @login_required
 def projectList():
     projects = Project.objects()
+    for proj in projects:
+        posts = ProjPost.objects()
+        if proj.milestones:
+            for ms in proj.milestones:
+                ms.posts = []
+                for post in posts:
+                    if post.milestoneOID == str(ms.oid):
+                        ms.posts.append(post)
+
     return render_template('projects/project_list.html',projects=projects)
 
 @app.route('/project/delete/<pid>')
