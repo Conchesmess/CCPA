@@ -7,11 +7,28 @@ import mongoengine.errors
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user
 from app.classes.data import require_role, Project, Milestone, ProjPost, User
-from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
+from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm, SearchDatesForm
 from flask_login import login_required
 import datetime as dt
 from mongoengine import Q
 from bson import ObjectId
+
+@app.route('/project/post/list', methods=['GET','POST'])
+@login_required
+def project_post_list():
+    form = SearchDatesForm()
+    if form.validate_on_submit():
+        # get the date from the form
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+        # turn the date in to a datetime 
+        startDateTime = dt.datetime(start_date.year, start_date.month, start_date.day)
+        endDateTime = dt.datetime(end_date.year,end_date.month,end_date.day)
+        query = Q(createDateTime__lte = endDateTime) & Q(createDateTime__gte= startDateTime)
+        posts = ProjPost.objects(query)
+    else:
+        posts=""
+    return render_template("projects/projpostlist.html",posts=posts,form=form)
 
 
 @app.route('/project/post/new/<pid>/<mid>', methods=['GET','POST'])

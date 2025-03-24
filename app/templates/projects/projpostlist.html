@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="container">
+    <h1>Project Posts List</h1>
+    {% for field in form.errors %}
+        {% for error in form.errors[field] %}
+            <div class="alert alert-error">
+                <strong>Error!</strong>{{field}}: {{error}}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    <form method=post>
+        {{ form.hidden_tag() }}
+        <table class="table">
+        <tr><th>Start Date</th><th>End Date</th></tr>
+        <tr><td>{{form.start_date()}}</td><td>{{form.end_date()}}</td></tr>
+        <tr><td></td><td>{{form.submit()}}</td></tr>
+        </table>
+    </form>
+</div>
+
+
+
+
+{% set proj = {'id':""} %}
+{% set counter = {'count':0} %}
+{% set collapse_num = {'index':0}%}
+
+{% for post in posts | sort(attribute="createDateTime",reverse=true) | sort(attribute="project.owner.lname") | sort(attribute="project.owner.fname") %}
+{% if proj['id'] != post.project.id %}
+<div class="row">
+    <div class="col">
+        {% if counter['count'] > 0 %}
+            <b>Total Count: {{counter['count']}}</b>
+        {% endif %} 
+    </div>
+</div>
+<div class="row">
+    <div class="col bg-secondary text-light">
+        <a href="/project/{{post.project.id}}" class="text-light" target="_blank">
+        <h3>{{post.project.owner.fname}} {{post.project.owner.lname}}</h3>
+        {{post.project.name}}
+        </a> <br>
+        {% do counter.update({'count':0}) %}
+        {% do proj.update({'id':post.project.id}) %}
+        {% do collapse_num.update({'index':loop.index}) %}
+        <a data-bs-toggle="collapse" href="#postList{{collapse_num['index']}}" role="button" aria-expanded="false" aria-controls="postList">
+            collapse
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+<div class="collapse" id="postList{{collapse_num['index']}}">
+
+    {% if post.post_type.lower() == 'intention' %}
+        <div class="col bg-primary text-light border p-3">
+    {% elif post.post_type.lower() == 'discussion' %}
+        <div class="col bg-warning border p-3">
+    {% else %}
+        <div class="col bg-success text-light border p-3">
+    {% endif %}
+
+    {% if post.post_type != "Discussion" %}
+        {% do counter.update({'count':counter['count']+1}) %}
+    {% endif %}
+
+    {{post.post_type}} {{moment(post.createDateTime).calendar()}} <br>
+    {{post.reflection | safe}}{{post.intention | safe}}{{post.discussion | safe}}
+        </div>
+</div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

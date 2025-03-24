@@ -55,9 +55,12 @@
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/project/definition">What is a Project?</a></li>
-            <li><a class="dropdown-item" href="/project/new">New Project</a>
-            <li><a class="dropdown-item" href="/project/my">My Projects</a>
-            <li><a class="dropdown-item" href="/project/list">All Projects</a>
+            <li><a class="dropdown-item" href="/project/new">New Project</a></li>
+            <li><a class="dropdown-item" href="/project/my">My Projects</a></li>
+            <li><a class="dropdown-item" href="/project/list">All Projects</a></li>
+            {% if current_user.has_role('admin') %}
+              <li><a class="dropdown-item" href="/project/post/list">Posts List</a></li>
+            {% endif %}
           </ul>
         </li>
         <li class="nav-item dropdown">

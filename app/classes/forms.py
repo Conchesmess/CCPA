@@ -259,6 +259,11 @@ class DateForm(FlaskForm):
     querydate = DateField("Date", id="queryDate")
     submitDateForm = SubmitField("Submit", id="submitDateForm")
 
+class SearchDatesForm(FlaskForm):
+    start_date = DateField("Start Date", id="start_date")
+    end_date = DateField("End Date", id="end_date")
+    submit = SubmitField("Search")
+
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
