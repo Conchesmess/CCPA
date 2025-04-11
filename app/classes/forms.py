@@ -12,6 +12,17 @@ import phonenumbers
 
 departments = [("",""),("Mathmatics","Mathmatics"),("Science", "Science"),("English", "English"),("Visual and Performing Arts", "Visual and Performing Arts"),("Humanities", "Humanities"),("PE", "Physical Education (PE)"), ("World Languages", "World Languages"), ("CompSci", "Computer Science"),("Other Elective","Other Elective")]
 onetoten = [(0,"---"),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10)]
+
+class ComputerCartForm(FlaskForm):
+    name = StringField('Cart Name', validators=[DataRequired()])
+    room = StringField('Room', validators=[DataRequired()])
+
+class ComputerForm(FlaskForm):
+    #cart = ReferenceField()
+    number = StringField()
+    serial = StringField(unique=True)
+    os = StringField()
+
 class TeacherForm(FlaskForm):
     pronouns = StringField('Pronouns')
     fname = StringField('First Name', validators=[DataRequired()])

@@ -13,7 +13,7 @@
         <th>Milestones (posts)</th>
     </tr>
 
-{% for proj in projects | sort(attribute="createDateTime") | sort(attribute="owner.lname") | sort(attribute="owner.fname")%}
+{% for proj in projects|sort(attribute='owner.fname,owner.lname') %}
     <tr>
         <td>{{proj.owner.fname}} {{proj.owner.lname}}</td>
         <td><a href="/project/{{proj.id}}">{{proj.name}}</a></td>

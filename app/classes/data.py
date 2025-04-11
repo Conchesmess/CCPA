@@ -10,6 +10,16 @@ from bson.objectid import ObjectId
 import datetime as d
 import phonenumbers
 
+class ComputerCart(Document):
+    name = StringField(inique=True, required=True)
+    room = StringField()
+
+class Computer(Document):
+    cart = ReferenceField("ComputerCart",required=True)
+    number = StringField()
+    serial = StringField(unique=True)
+    os = StringField()
+
 class College (Document):
     unitid = IntField(required=True, unique=True)
     coltype = StringField()

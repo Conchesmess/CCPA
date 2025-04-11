@@ -6,8 +6,8 @@ from app import app
 import mongoengine.errors
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user
-from app.classes.data import require_role, Project, Milestone, ProjPost, User
-from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm, SearchDatesForm
+from app.classes.data import require_role, Project, Milestone, ProjPost, User, Role
+from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
 from flask_login import login_required
 import datetime as dt
 from mongoengine import Q
@@ -257,7 +257,6 @@ def projectEdit(pid):
     if form.validate_on_submit():
 
         projEdit.update(
-            owner = current_user,
             course = form.course.data,
             name = form.name.data,
             status = form.status.data,
@@ -272,7 +271,6 @@ def projectEdit(pid):
     form.name.data = projEdit.name
     form.course.data = projEdit.course
     form.status.data = projEdit.status
-    #form.desc.data = projEdit.desc
     form.product.process_data(projEdit.product)
     form.learning_materials.process_data(projEdit.learning_materials)
     form.open_to_contributors.data = projEdit.open_to_contributors
@@ -386,27 +384,28 @@ def projectMsEdit(pid,mid):
 
     return render_template('projects/project.html',proj=proj,form=form,edit=True)
 
-@app.route('/project/milestone/new/<pid>', methods=['GET','POST'])
-@login_required
-def projectMsNew(pid):
+# This happens in the project route
+# @app.route('/project/milestone/new/<pid>', methods=['GET','POST'])
+# @login_required
+# def projectMsNew(pid):
 
-    form = MilestoneForm()
+#     form = MilestoneForm()
 
-    proj = Project.objects.get(pk=pid)
+#     proj = Project.objects.get(pk=pid)
 
-    if current_user != proj.owner and current_user not in proj.contributors:
-        flash("You can't create a milstone in a project you don't own or are not a contributer to.")
-        return redirect(url_for('project',pid=projectEdit))
+#     if current_user != proj.owner and current_user not in proj.contributors:
+#         flash("You can't create a milstone in a project you don't own or are not a contributer to.")
+#         return redirect(url_for('project',pid=projectEdit))
 
-    if form.validate_on_submit():
-        proj.milestones.create(
-            name = form.name.data,
-            desc = form.desc.data,
-            status = form.status.data
-        )
-        proj.save()
+#     if form.validate_on_submit():
+#         proj.milestones.create(
+#             name = form.name.data,
+#             desc = form.desc.data,
+#             status = form.status.data
+#         )
+#         proj.save()
 
-        return redirect(url_for('project', pid=pid))
+#         return redirect(url_for('project', pid=pid))
 
-    return render_template('projects/project.html',proj=proj,form=form,edit=True)
+#     return render_template('projects/project.html',proj=proj,form=form,edit=True)
 

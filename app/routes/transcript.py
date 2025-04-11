@@ -173,7 +173,7 @@ def transcriptNew():
             }
 
         # strip extra whitespace from ends and center of string
-        stuID = soup.find('span',attrs={"data-tcfc":"STU.ID"})
+        stuID = soup.find('div',attrs={"data-tcfc":"STU.ID"})
         stuID = int(stuID.text)
 
             
@@ -267,7 +267,7 @@ def transcriptNew():
                             on ='mark', 
                             how ='left')
 
-        ag = {'E':'English','Q':'Science','M':'Math','S':'Social Studies','Y':'Elective','Z':'Z?', 'G':'World Language','P':'Physical Education','R':'R?','B':'Art'}
+        ag = {'E':'English','Q':'Science','M':'Math','S':'Social Studies','Y':'Elective','Z':'Z?', 'G':'World Language','P':'Physical Education','R':'R?','B':'Art','C':'C?'}
 
         transcriptDF['a-g'] = transcriptDF.apply(lambda row: ag[row['crsid'][:1]],axis=1)
         col = transcriptDF.pop('a-g')
