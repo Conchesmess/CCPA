@@ -7,7 +7,7 @@ import mongoengine.errors
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user
 from app.classes.data import require_role, Project, Milestone, ProjPost, User, Role
-from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm
+from app.classes.forms import ProjectForm, MilestoneForm, ProjPostForm, SearchDatesForm
 from flask_login import login_required
 import datetime as dt
 from mongoengine import Q
