@@ -78,12 +78,51 @@ def newstudent():
             newStudent.save()
         except Exception as error:
             flash(f"There was an error when we tried to save: {error}")
-            return render_template('newstudent.html', form=form)
+            return render_template('aeriesdataform.html', form=form)
 
         return redirect(url_for('profile',aeriesid=form.aeriesid.data))
 
-    return render_template('newstudent.html', form=form)
+    return render_template('aeriesdataform.html', form=form)
 
+@app.route('/editaeriesinfo/<uid>', methods=['GET','POST'])
+def editaeriesinfo(uid):
+    form = NewStudentForm()
+    thisStudent=User.objects.get(pk=uid)
+
+    if form.validate_on_submit():
+        if not isinstance(form.grade.data, int):
+            try:
+                grade = int(form.grade.data)
+            except:
+                flash(f"You must select a grade.")
+                return render_template('newstudent.html', form=form)
+
+        thisStudent.update(
+            afname = form.afname.data,
+            alname = form.alname.data,
+            fname = form.afname.data,
+            lname = form.alname.data,
+            aeriesid = form.aeriesid.data,
+            grade = grade,
+            oemail = form.oemail.data,
+            role = 'student',
+            gpa = 0
+        )
+        try:
+            thisStudent.save()
+        except Exception as error:
+            flash(f"There was an error when we tried to save: {error}")
+            return render_template('aeriesdataform.html', form=form)
+
+        return redirect(url_for('profile',aeriesid=form.aeriesid.data))
+
+    form.afname.data = thisStudent.fname
+    form.alname.data = thisStudent.lname
+    form.aeriesid.data = thisStudent.aeriesid
+    form.grade.data = thisStudent.grade
+    form.oemail.data = thisStudent.oemail
+
+    return render_template('aeriesdataform.html', form=form)
 
 @app.route('/sendstudentemail/<aeriesid>', methods=['GET','POST'])
 def sendstudentemail(aeriesid):

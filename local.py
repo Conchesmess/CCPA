@@ -10,9 +10,6 @@ if __name__ == "__main__":
 
     root = os.path.dirname(os.path.abspath(__file__))
     download_dir = os.path.join(root, 'nltk_data')
-    #os.chdir(download_dir)
-    #download_dir = '/nltk_data'
-    #os.chdir(download_dir)
     nltk.data.path.append(download_dir)
     # app.run(debug="True", ssl_context='adhoc')
     # app.run(debug="True",use_reloader=False, ssl_context=('cert.pem', 'key.pem'))

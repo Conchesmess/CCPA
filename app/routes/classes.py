@@ -630,7 +630,6 @@ def getstudsubs(gclassid,courseWorkId="-"):
     return redirect(url)
 
 
-## Replicated in sbg.py as gclasslist
 # this function exists to update the stored values for one or more google classrooms
 @app.route('/gclasses')
 def gclasses(gclassid=None):

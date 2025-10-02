@@ -51,7 +51,7 @@
                     </td>
                     <td nowrap>
                         <!-- <a href="/studsubs/student/{{gclassid}}/{{stu.owner.gid}}">{{stu.owner.fname}} {{stu.owner.lname}}</a> -->
-                        <a href="/studsubs/student/{{gclassid}}/{{stu.owner.oemail}}/{{stu.owner.gid}}">{{stu.owner.fname}} {{stu.owner.lname}}</a>
+                        <a href="/profile/{{stu.owner.id}}">{{stu.owner.fname}} {{stu.owner.lname}}</a>
                         {% if not stu.owner.adults %}
                         (a)
                         {% endif %}
@@ -59,6 +59,28 @@
                         (m)
                         {% endif %}
 
+                        {% if file_exists(stu.owner.aeriesid|string+'.jpg')%}
+                            <img width=20 src="{{ url_for('static', filename='students/'+file_exists(stu.owner.aeriesid|string+'.jpg')) }}">
+                        {% endif %}
+
+                        <!-- ...existing code... -->
+                        <a href="#" id="openUrls{{loop.index}}" class="btn btn-secondary btn-sm" role="button">pic</a>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            document.getElementById('openUrls{{loop.index}}').addEventListener('click', function(e) {
+                                e.preventDefault();
+                                // Open the first URL in a new tab and keep a reference to it
+                                var newTab = window.open('https://aeries.ousd.org/Helpers/SetStudentAndRedirect.aspx?ID={{stu.owner.aeriesid}}&DU=StudentProfile.aspx', '_blank');
+                                // Wait 5 seconds, then change the location of the new tab to the second URL
+                                setTimeout(function() {
+                                    if (newTab) {
+                                        newTab.location.href = 'https://aeries.ousd.org/StuPic.ashx?ID={{stu.owner.aeriesid}}&BM=&SC=232&SZ=XLarge';
+                                    }
+                                }, 5000);
+                            });
+                        });
+                        </script>
+                        <!-- ...existing code... -->
                         <br> 
                         {% if stu.owner.cohort %}
                         {% if stu.owner.cohort[:7] == "Oakland" and stu.owner.cohort[13:16] == "Eng" %}
@@ -198,5 +220,7 @@
         </div>
     </div>
 </div>
+
+
 
 {% endblock %}

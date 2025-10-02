@@ -3,7 +3,7 @@
 
 from mongoengine import connect
 from flask_login import LoginManager
-from flask import Flask, session, request
+from flask import Flask, session, request, current_app
 import os
 from flask_moment import Moment
 import base64
@@ -45,8 +45,16 @@ moment = Moment(app)
 
 app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
 
-def base64encode(img):
+# Function so that Jinja can check for a file in the static folder, ignoring case
+def file_exists(filename):
+    static_folder = os.path.join(current_app.root_path, 'static/students')
+    for f in os.listdir(static_folder):
+        if f.lower() == filename.lower():
+            return f  # Return the actual filename found
+    return False  # Return False if not found
 
+# function so that Jinja can decode base64 image string that are stored in the DB
+def base64encode(img):
     image = base64.b64encode(img)
     image = image.decode('utf-8')
     return image
@@ -62,7 +70,7 @@ def formatphonenums(phstr):
     phstr = re.sub("[^0-9]", "", phstr)
     return (phstr)
 
-app.jinja_env.globals.update(base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums)
+app.jinja_env.globals.update(file_exists=file_exists, base64encode=base64encode, formatphone=formatphone, formatphonenums=formatphonenums)
 
 
 from .routes import *

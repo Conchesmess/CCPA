@@ -1,0 +1,3 @@
+Aeries link to get student picture using student ID
+
+https://teacher.ousd.org/StuPic.ashx?ID=408285&BM=&SC=232&SZ=XLarge

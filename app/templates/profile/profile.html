@@ -24,11 +24,15 @@
     {% endif %}
     #}
     <div class="col-md-4">
+        {% if file_exists(currUser.aeriesid|string+'.jpg') != false %}
+            <img width=151 src="{{ url_for('static', filename='students/'+file_exists(currUser.aeriesid|string+'.jpg')) }}">
+        {% endif %}
         {% if currUser.image %}
             <img class="img-thumbnail" width = "200" src="data:image;base64,{{base64encode(currUser.image.read())}}">
-        {% else %}
+        {% elif not file_exists(currUser.aeriesid|string+'.jpg') %}
             <img class="img-thumbnail" width = "100" src="/static/lion.png">
         {% endif %}
+
         </div>
 
 </div><!--ProfileHead-->
@@ -50,7 +54,7 @@
                         Aeries ID:{{currUser.aeriesid}} <br>
                         School Email: {{currUser.oemail}} <br>
                         Grade: {{currUser.grade}} <br>
-
+                        <a target='_blank' href='https://aeries.ousd.org/Helpers/SetStudentAndRedirect.aspx?ID={{currUser.aeriesid}}&DU=StudentProfile.aspx'>Aeries Profile Page</a>
                         {% if currUser.uethnicity %}
                             <b>Ethnicity:</b> 
                             {% for ethnicity in currUser.uethnicity %}
