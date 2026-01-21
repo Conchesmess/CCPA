@@ -494,7 +494,7 @@ def ontimeperc(gclassid):
         def print_state(row):
             print(row['state'])
 
-        subsStuDF['state'] = subsStuDF.apply(lambda row: 'Unattempted <br> or Excused' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
+        subsStuDF['state'] = subsStuDF.apply(lambda row: 'Unattempted-Exc' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
         subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
         try:
             subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
@@ -538,8 +538,10 @@ def ontimeperc(gclassid):
         subsStuDF.drop(['name'],axis=1,inplace=True)
         url = subsStuDF.pop("url")
         subsStuDF.insert(1, url.name, url)   
+        print(subsStuDF.columns)
         try:
-            subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
+            #subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
+            subsStuDF=subsStuDF.sort_values(by=['TURNED_IN','userId'],ascending=True, na_position = 'first')
         except:
             subsStuDF=subsStuDF.sort_values(by=['userId'],ascending=True, na_position = 'first')
         subsStuDF.fillna(0, inplace=True)
