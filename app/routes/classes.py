@@ -73,7 +73,8 @@ def addtocohort():
         return redirect(url_for('roster',gclassid=gClass.gclassid))
 
     currUser = current_user
-    activeEnrollments = GEnrollment.objects(owner=currUser,status="Active")
+    activeEnrollments = GEnrollment.objects(owner=currUser)
+    print(f"activeEnrollments: {activeEnrollments}")
     for enrollment in activeEnrollments:
         form.gclassmongoid.choices.append((enrollment.gclassroom.gclassdict['id'],enrollment.gclassroom.gclassdict['name']))
     return render_template('classes/addtocohortform.html', form=form)
