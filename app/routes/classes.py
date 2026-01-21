@@ -541,7 +541,7 @@ def ontimeperc(gclassid):
         print(subsStuDF.columns)
         try:
             #subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
-            subsStuDF=subsStuDF.sort_values(by=['TURNED_IN','userId'],ascending=True, na_position = 'first')
+            subsStuDF=subsStuDF.sort_values(by=['Unattempted-Exc','userId'],ascending=True, na_position = 'first')
         except:
             subsStuDF=subsStuDF.sort_values(by=['userId'],ascending=True, na_position = 'first')
         subsStuDF.fillna(0, inplace=True)
