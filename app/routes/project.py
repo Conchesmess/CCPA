@@ -75,15 +75,16 @@ def projectPostNew(pid=None,mid=None):
     if form.validate_on_submit():
         now = dt.datetime.utcnow()
         nowdate=now.replace(hour=0, minute=0).strftime('%Y-%m-%d %H:%M')
-        try:
-            posts = ProjPost.objects.get(project=project,post_type=form.post_type.data,createDateTime__gt = nowdate)
-        except mongoengine.errors.MultipleObjectsReturned:
-            flash(f'You have more than one post for this day, this project and {form.post_type.data}. This should not happen. Please delete one' )
-        except mongoengine.errors.DoesNotExist:
-            pass
-        else:
-            flash(f"You already have a post for this day, this project and {form.post_type.data}. Delete or edit that post.")
-            return redirect(url_for('projectMy'))
+        if form.post_type != "Discussion":
+            try:
+                posts = ProjPost.objects.get(project=project,post_type=form.post_type.data,createDateTime__gt = nowdate)
+            except mongoengine.errors.MultipleObjectsReturned:
+                flash(f'You have more than one post for this day, this project and {form.post_type.data}. This should not happen. Please delete one' )
+            except mongoengine.errors.DoesNotExist:
+                pass
+            else:
+                flash(f"You already have a post for this day, this project and {form.post_type.data}. Delete or edit that post.")
+                return redirect(url_for('projectMy'))
 
         if form.post_type.data.lower() == "reflection":
             #check for intention if post type is reflection

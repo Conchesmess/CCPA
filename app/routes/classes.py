@@ -383,8 +383,11 @@ def ontimeperc(gclassid):
                     return "NOT DUE"
 
     subsDF['state'] = subsDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
-    subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
-
+    #TODO makesure this is the right fix
+    try:
+        subsDF['state'] = subsDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+    except:
+        pass
 
     subsDF.reset_index(inplace=True)
     subsDF = pd.pivot_table(data=subsDF,index='courseWorkId',columns="state",values='id',aggfunc='count')
@@ -493,7 +496,11 @@ def ontimeperc(gclassid):
 
         subsStuDF['state'] = subsStuDF.apply(lambda row: 'Unattempted <br> or Excused' if row['state'] in ["NEW","CREATED"] else row['state'], axis=1)
         subsStuDF['state'] = subsStuDF.apply(lambda row: "NOT DUE" if checkDueDate(row['dueDate']) == "NOT DUE" else row['state'], axis=1)
-        subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+        try:
+            subsStuDF['state'] = subsStuDF.apply(lambda row: 'GRADED' if row['assignedGrade'] > 0 else row['state'], axis=1)
+        except:
+            pass
+
         subsStuDF.reset_index(inplace=True)
 
         subsStuDF = pd.pivot_table(data=subsStuDF,index='userId',columns="state",values='id',aggfunc='count')
@@ -531,7 +538,10 @@ def ontimeperc(gclassid):
         subsStuDF.drop(['name'],axis=1,inplace=True)
         url = subsStuDF.pop("url")
         subsStuDF.insert(1, url.name, url)   
-        subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
+        try:
+            subsStuDF=subsStuDF.sort_values(by=['GRADED','userId'],ascending=True, na_position = 'first')
+        except:
+            subsStuDF=subsStuDF.sort_values(by=['userId'],ascending=True, na_position = 'first')
         subsStuDF.fillna(0, inplace=True)
 
         subsStuDFHTML = subsStuDF.style\
