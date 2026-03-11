@@ -39,7 +39,7 @@ def userModified(editUser):
     currUser = current_user
     editUser.lastedited.append([dt.datetime.utcnow(),currUser]) 
     if len(editUser.lastedited) > 20:
-        editUser.lastedited.pop(0)
+        editUser.lastedited.pop(0)a
 
     if editUser.ustreet:
         street = editUser.ustreet

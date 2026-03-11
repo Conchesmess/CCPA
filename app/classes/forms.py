@@ -566,7 +566,7 @@ class AssignmentForm(FlaskForm):
 
 class ProjectForm(FlaskForm):
     name = StringField('Name')
-    course = SelectField('Course',choices=[('Robotics DE','Robotics DE'),('Computer Science Priniciples','Computer Science Priniciples'),('Other','Other'),('None','None',)])
+    course = SelectField('Course',choices=[('Robotics DE 2026','Robotics DE 2026'),('Computer Science Priniciples','Computer Science Priniciples'),('Other','Other'),('None','None',)])
     open_to_contributors = BooleanField()
     #desc = TextAreaField('Description')
     product = TextAreaField('What do you think you will make?')
